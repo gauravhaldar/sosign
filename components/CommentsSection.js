@@ -25,20 +25,21 @@ const CommentsSection = ({ petitionId }) => {
   const fetchComments = async (pageNum = 1, append = false) => {
     try {
       setLoading(true);
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
       const response = await fetch(
-        `/api/comments/petition/${petitionId}?page=${pageNum}&limit=10`
+        `${apiUrl}/api/comments/petition/${petitionId}?page=${pageNum}&limit=10`
       );
       const data = await response.json();
 
       if (data.success) {
         if (append) {
-          setComments((prev) => [...prev, ...data.comments]);
+          setComments((prev) => [...prev, ...(data.comments || [])]);
         } else {
-          setComments(data.comments);
+          setComments(data.comments || []);
         }
-        setHasMore(data.hasNextPage);
+        setHasMore(data.hasNextPage || false);
       } else {
-        setError(data.message);
+        setError(data.message || "Failed to fetch comments");
       }
     } catch (err) {
       setError("Failed to fetch comments");
@@ -66,8 +67,23 @@ const CommentsSection = ({ petitionId }) => {
 
     try {
       setSubmitting(true);
-      const userInfo = JSON.parse(localStorage.getItem("user"));
-      const response = await fetch("/api/comments", {
+      let userInfo = null;
+      try {
+        const stored = localStorage.getItem("user");
+        userInfo = stored ? JSON.parse(stored) : null;
+      } catch (err) {
+        console.error("Error parsing user data from localStorage:", err);
+        setError("Authentication error. Please log in again.");
+        return;
+      }
+
+      if (!userInfo?.token) {
+        setError("Authentication error. Please log in again.");
+        return;
+      }
+
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+      const response = await fetch(`${apiUrl}/api/comments`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -84,7 +100,7 @@ const CommentsSection = ({ petitionId }) => {
         setNewComment("");
         fetchComments(); // Refresh comments
       } else {
-        setError(data.message);
+        setError(data.message || "Failed to submit comment");
       }
     } catch (err) {
       setError("Failed to submit comment");
@@ -99,8 +115,23 @@ const CommentsSection = ({ petitionId }) => {
     if (!editContent.trim()) return;
 
     try {
-      const userInfo = JSON.parse(localStorage.getItem("user"));
-      const response = await fetch(`/api/comments/${commentId}`, {
+      let userInfo = null;
+      try {
+        const stored = localStorage.getItem("user");
+        userInfo = stored ? JSON.parse(stored) : null;
+      } catch (err) {
+        console.error("Error parsing user data from localStorage:", err);
+        setError("Authentication error. Please log in again.");
+        return;
+      }
+
+      if (!userInfo?.token) {
+        setError("Authentication error. Please log in again.");
+        return;
+      }
+
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+      const response = await fetch(`${apiUrl}/api/comments/${commentId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -117,7 +148,7 @@ const CommentsSection = ({ petitionId }) => {
         setEditContent("");
         fetchComments(); // Refresh comments
       } else {
-        setError(data.message);
+        setError(data.message || "Failed to update comment");
       }
     } catch (err) {
       setError("Failed to update comment");
@@ -130,8 +161,23 @@ const CommentsSection = ({ petitionId }) => {
     if (!confirm("Are you sure you want to delete this comment?")) return;
 
     try {
-      const userInfo = JSON.parse(localStorage.getItem("user"));
-      const response = await fetch(`/api/comments/${commentId}`, {
+      let userInfo = null;
+      try {
+        const stored = localStorage.getItem("user");
+        userInfo = stored ? JSON.parse(stored) : null;
+      } catch (err) {
+        console.error("Error parsing user data from localStorage:", err);
+        setError("Authentication error. Please log in again.");
+        return;
+      }
+
+      if (!userInfo?.token) {
+        setError("Authentication error. Please log in again.");
+        return;
+      }
+
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+      const response = await fetch(`${apiUrl}/api/comments/${commentId}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${userInfo.token}`,
@@ -142,7 +188,7 @@ const CommentsSection = ({ petitionId }) => {
       if (data.success) {
         fetchComments(); // Refresh comments
       } else {
-        setError(data.message);
+        setError(data.message || "Failed to delete comment");
       }
     } catch (err) {
       setError("Failed to delete comment");
@@ -158,8 +204,23 @@ const CommentsSection = ({ petitionId }) => {
     }
 
     try {
-      const userInfo = JSON.parse(localStorage.getItem("user"));
-      const response = await fetch(`/api/comments/${commentId}/like`, {
+      let userInfo = null;
+      try {
+        const stored = localStorage.getItem("user");
+        userInfo = stored ? JSON.parse(stored) : null;
+      } catch (err) {
+        console.error("Error parsing user data from localStorage:", err);
+        setError("Authentication error. Please log in again.");
+        return;
+      }
+
+      if (!userInfo?.token) {
+        setError("Authentication error. Please log in again.");
+        return;
+      }
+
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+      const response = await fetch(`${apiUrl}/api/comments/${commentId}/like`, {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${userInfo.token}`,
@@ -176,18 +237,18 @@ const CommentsSection = ({ petitionId }) => {
                   ...comment,
                   likes: data.isLiked
                     ? [
-                        ...comment.likes,
+                        ...(comment.likes || []),
                         { user: { _id: user._id, name: user.name } },
                       ]
-                    : comment.likes.filter(
-                        (like) => like.user._id !== user._id
+                    : (comment.likes || []).filter(
+                        (like) => like?.user?._id !== user._id
                       ),
                 }
               : comment
           )
         );
       } else {
-        setError(data.message);
+        setError(data.message || "Failed to toggle like");
       }
     } catch (err) {
       setError("Failed to toggle like");
@@ -205,17 +266,35 @@ const CommentsSection = ({ petitionId }) => {
     if (!replyContent.trim()) return;
 
     try {
-      const userInfo = JSON.parse(localStorage.getItem("user"));
-      const response = await fetch(`/api/comments/${commentId}/reply`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${userInfo.token}`,
-        },
-        body: JSON.stringify({
-          content: replyContent.trim(),
-        }),
-      });
+      let userInfo = null;
+      try {
+        const stored = localStorage.getItem("user");
+        userInfo = stored ? JSON.parse(stored) : null;
+      } catch (err) {
+        console.error("Error parsing user data from localStorage:", err);
+        setError("Authentication error. Please log in again.");
+        return;
+      }
+
+      if (!userInfo?.token) {
+        setError("Authentication error. Please log in again.");
+        return;
+      }
+
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+      const response = await fetch(
+        `${apiUrl}/api/comments/${commentId}/reply`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${userInfo.token}`,
+          },
+          body: JSON.stringify({
+            content: replyContent.trim(),
+          }),
+        }
+      );
 
       const data = await response.json();
       if (data.success) {
@@ -223,7 +302,7 @@ const CommentsSection = ({ petitionId }) => {
         setReplyContent("");
         fetchComments(); // Refresh comments
       } else {
-        setError(data.message);
+        setError(data.message || "Failed to submit reply");
       }
     } catch (err) {
       setError("Failed to submit reply");
@@ -252,8 +331,8 @@ const CommentsSection = ({ petitionId }) => {
   };
 
   const isLikedByUser = (comment) => {
-    if (!user) return false;
-    return comment.likes.some((like) => like.user._id === user._id);
+    if (!user || !comment?.likes) return false;
+    return comment.likes.some((like) => like?.user?._id === user._id);
   };
 
   return (
@@ -301,7 +380,9 @@ const CommentsSection = ({ petitionId }) => {
           </div>
         ) : comments.length === 0 ? (
           <div className="text-center py-8">
-            <p className="text-gray-600">No comments yet. Be the first to comment!</p>
+            <p className="text-gray-600">
+              No comments yet. Be the first to comment!
+            </p>
           </div>
         ) : (
           <AnimatePresence>
@@ -317,14 +398,16 @@ const CommentsSection = ({ petitionId }) => {
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center space-x-3">
                     <div className="w-8 h-8 bg-[#3650AD] rounded-full flex items-center justify-center text-white font-medium">
-                      {comment.user.name.charAt(0).toUpperCase()}
+                      {comment?.user?.name
+                        ? comment.user.name.charAt(0).toUpperCase()
+                        : "?"}
                     </div>
                     <div>
                       <p className="font-medium text-gray-900">
-                        {comment.user.name}
+                        {comment?.user?.name || "Unknown User"}
                       </p>
                       <p className="text-sm text-gray-500">
-                        {comment.user.designation || "Citizen"} •{" "}
+                        {comment?.user?.designation || "Citizen"} •{" "}
                         {formatDate(comment.createdAt)}
                         {comment.isEdited && (
                           <span className="text-gray-400 ml-1">(edited)</span>
@@ -332,7 +415,7 @@ const CommentsSection = ({ petitionId }) => {
                       </p>
                     </div>
                   </div>
-                  {user && user._id === comment.user._id && (
+                  {user && user._id === comment?.user?._id && (
                     <div className="flex space-x-2">
                       <button
                         onClick={() => {
@@ -382,7 +465,7 @@ const CommentsSection = ({ petitionId }) => {
                     </div>
                   </div>
                 ) : (
-                  <p className="text-gray-800 mb-3">{comment.content}</p>
+                  <p className="text-gray-800 mb-3">{comment?.content || ""}</p>
                 )}
 
                 {/* Comment Actions */}
@@ -396,11 +479,13 @@ const CommentsSection = ({ petitionId }) => {
                     }`}
                   >
                     <span>👍</span>
-                    <span>{comment.likes.length}</span>
+                    <span>{(comment?.likes || []).length}</span>
                   </button>
                   <button
                     onClick={() => {
-                      setReplyingTo(replyingTo === comment._id ? null : comment._id);
+                      setReplyingTo(
+                        replyingTo === comment._id ? null : comment._id
+                      );
                       setReplyContent("");
                     }}
                     className="text-gray-500 hover:text-blue-600"
@@ -451,27 +536,36 @@ const CommentsSection = ({ petitionId }) => {
                 )}
 
                 {/* Replies */}
-                {comment.replies && comment.replies.length > 0 && (
+                {comment?.replies && comment.replies.length > 0 && (
                   <div className="mt-4 pl-8 border-l-2 border-gray-200 space-y-3">
                     {comment.replies.map((reply) => (
-                      <div key={reply._id} className="bg-gray-50 rounded-lg p-3">
+                      <div
+                        key={reply._id}
+                        className="bg-gray-50 rounded-lg p-3"
+                      >
                         <div className="flex items-center space-x-2 mb-2">
                           <div className="w-6 h-6 bg-gray-400 rounded-full flex items-center justify-center text-white text-xs font-medium">
-                            {reply.user.name.charAt(0).toUpperCase()}
+                            {reply?.user?.name
+                              ? reply.user.name.charAt(0).toUpperCase()
+                              : "?"}
                           </div>
                           <div>
                             <p className="font-medium text-sm text-gray-900">
-                              {reply.user.name}
+                              {reply?.user?.name || "Unknown User"}
                             </p>
                             <p className="text-xs text-gray-500">
                               {formatDate(reply.createdAt)}
                               {reply.isEdited && (
-                                <span className="text-gray-400 ml-1">(edited)</span>
+                                <span className="text-gray-400 ml-1">
+                                  (edited)
+                                </span>
                               )}
                             </p>
                           </div>
                         </div>
-                        <p className="text-sm text-gray-800">{reply.content}</p>
+                        <p className="text-sm text-gray-800">
+                          {reply?.content || ""}
+                        </p>
                       </div>
                     ))}
                   </div>
@@ -496,7 +590,10 @@ const CommentsSection = ({ petitionId }) => {
       </div>
 
       {/* Login Modal */}
-      <LoginModal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)} />
+      <LoginModal
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+      />
     </div>
   );
 };
