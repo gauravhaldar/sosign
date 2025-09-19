@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../context/AuthContext";
 import LoginModal from "./LoginModal";
+import config from "../config/api";
 
 const CommentsSection = ({ petitionId }) => {
   const [comments, setComments] = useState([]);
@@ -25,11 +26,18 @@ const CommentsSection = ({ petitionId }) => {
   const fetchComments = async (pageNum = 1, append = false) => {
     try {
       setLoading(true);
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-      const response = await fetch(
-        `${apiUrl}/api/comments/petition/${petitionId}?page=${pageNum}&limit=10`
+      console.log(
+        `Fetching comments for petition ${petitionId}, page ${pageNum}`
       );
+      console.log("API URL:", config.API_BASE_URL);
+
+      const response = await fetch(
+        `${config.API_BASE_URL}/api/comments/petition/${petitionId}?page=${pageNum}&limit=10`
+      );
+
+      console.log("Response status:", response.status);
       const data = await response.json();
+      console.log("Response data:", data);
 
       if (data.success) {
         if (append) {
@@ -67,10 +75,16 @@ const CommentsSection = ({ petitionId }) => {
 
     try {
       setSubmitting(true);
+      console.log("Submitting comment...");
+
       let userInfo = null;
       try {
         const stored = localStorage.getItem("user");
         userInfo = stored ? JSON.parse(stored) : null;
+        console.log(
+          "User info from localStorage:",
+          userInfo ? "Found" : "Not found"
+        );
       } catch (err) {
         console.error("Error parsing user data from localStorage:", err);
         setError("Authentication error. Please log in again.");
@@ -78,12 +92,13 @@ const CommentsSection = ({ petitionId }) => {
       }
 
       if (!userInfo?.token) {
+        console.error("No token found in user info");
         setError("Authentication error. Please log in again.");
         return;
       }
 
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-      const response = await fetch(`${apiUrl}/api/comments`, {
+      console.log("Making API call to submit comment");
+      const response = await fetch(`${config.API_BASE_URL}/api/comments`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -95,7 +110,10 @@ const CommentsSection = ({ petitionId }) => {
         }),
       });
 
+      console.log("Submit comment response status:", response.status);
       const data = await response.json();
+      console.log("Submit comment response data:", data);
+
       if (data.success) {
         setNewComment("");
         fetchComments(); // Refresh comments
@@ -130,17 +148,19 @@ const CommentsSection = ({ petitionId }) => {
         return;
       }
 
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-      const response = await fetch(`${apiUrl}/api/comments/${commentId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${userInfo.token}`,
-        },
-        body: JSON.stringify({
-          content: editContent.trim(),
-        }),
-      });
+      const response = await fetch(
+        `${config.API_BASE_URL}/api/comments/${commentId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${userInfo.token}`,
+          },
+          body: JSON.stringify({
+            content: editContent.trim(),
+          }),
+        }
+      );
 
       const data = await response.json();
       if (data.success) {
@@ -176,13 +196,15 @@ const CommentsSection = ({ petitionId }) => {
         return;
       }
 
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-      const response = await fetch(`${apiUrl}/api/comments/${commentId}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${userInfo.token}`,
-        },
-      });
+      const response = await fetch(
+        `${config.API_BASE_URL}/api/comments/${commentId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${userInfo.token}`,
+          },
+        }
+      );
 
       const data = await response.json();
       if (data.success) {
@@ -219,13 +241,15 @@ const CommentsSection = ({ petitionId }) => {
         return;
       }
 
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-      const response = await fetch(`${apiUrl}/api/comments/${commentId}/like`, {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${userInfo.token}`,
-        },
-      });
+      const response = await fetch(
+        `${config.API_BASE_URL}/api/comments/${commentId}/like`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${userInfo.token}`,
+          },
+        }
+      );
 
       const data = await response.json();
       if (data.success) {
@@ -281,9 +305,8 @@ const CommentsSection = ({ petitionId }) => {
         return;
       }
 
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
       const response = await fetch(
-        `${apiUrl}/api/comments/${commentId}/reply`,
+        `${config.API_BASE_URL}/api/comments/${commentId}/reply`,
         {
           method: "POST",
           headers: {
