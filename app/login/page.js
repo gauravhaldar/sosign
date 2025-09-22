@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Eye, EyeOff } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "../../context/AuthContext";
 import Image from "next/image";
 import { auth, provider } from "../../utils/Firebase";
@@ -12,6 +12,7 @@ export default function LoginPage() {
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [redirectUrl, setRedirectUrl] = useState("/");
 
   // State for login form
   const [loginEmail, setLoginEmail] = useState("");
@@ -30,6 +31,15 @@ export default function LoginPage() {
 
   const { login, signup, loading, googleLogin } = useAuth(); // Re-added googleLogin
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // Get redirect URL from query parameters
+  useEffect(() => {
+    const redirect = searchParams.get('redirect');
+    if (redirect) {
+      setRedirectUrl(redirect);
+    }
+  }, [searchParams]);
 
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
@@ -37,7 +47,7 @@ export default function LoginPage() {
 
     try {
       await login(loginEmail, loginPassword);
-      router.push("/");
+      router.push(redirectUrl);
     } catch (error) {
       setLoginError(error);
     }
@@ -47,6 +57,32 @@ export default function LoginPage() {
     e.preventDefault();
     setSignupError("");
 
+    // Validate required fields
+    if (!firstName.trim()) {
+      setSignupError("First name is required");
+      return;
+    }
+    if (!designation.trim()) {
+      setSignupError("Designation is required");
+      return;
+    }
+    if (!signupEmail.trim()) {
+      setSignupError("Email is required");
+      return;
+    }
+    if (!mobile.trim()) {
+      setSignupError("Mobile number is required");
+      return;
+    }
+    if (!createPassword.trim()) {
+      setSignupError("Password is required");
+      return;
+    }
+    if (!confirmPassword.trim()) {
+      setSignupError("Please confirm your password");
+      return;
+    }
+
     if (createPassword !== confirmPassword) {
       setSignupError("Passwords do not match");
       return;
@@ -55,7 +91,7 @@ export default function LoginPage() {
     try {
       const name = `${firstName} ${lastName}`;
       await signup(name, designation, signupEmail, mobile, createPassword);
-      router.push("/");
+      router.push(redirectUrl);
     } catch (error) {
       setSignupError(error);
     }
@@ -69,7 +105,7 @@ export default function LoginPage() {
 
       // Call the simulated backend login from AuthContext
       await googleLogin(user);
-      router.push("/");
+      router.push(redirectUrl);
     } catch (error) {
       console.error("Google Sign-In Error:", error);
       setLoginError("Failed to sign in with Google.");
@@ -199,6 +235,7 @@ export default function LoginPage() {
                   className="w-full border rounded-lg px-3 py-2 mt-1"
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
+                  required
                 />
               </div>
               <div>
@@ -225,6 +262,7 @@ export default function LoginPage() {
                 className="w-full border rounded-lg px-3 py-2 mt-1"
                 value={designation}
                 onChange={(e) => setDesignation(e.target.value)}
+                required
               />
             </div>
 
@@ -238,6 +276,7 @@ export default function LoginPage() {
                 className="w-full border rounded-lg px-3 py-2 mt-1"
                 value={mobile}
                 onChange={(e) => setMobile(e.target.value)}
+                required
               />
             </div>
 
@@ -251,6 +290,7 @@ export default function LoginPage() {
                 className="w-full border rounded-lg px-3 py-2 mt-1"
                 value={signupEmail}
                 onChange={(e) => setSignupEmail(e.target.value)}
+                required
               />
             </div>
 
@@ -264,6 +304,7 @@ export default function LoginPage() {
                 className="w-full border rounded-lg px-3 py-2 mt-1"
                 value={createPassword}
                 onChange={(e) => setCreatePassword(e.target.value)}
+                required
               />
               <button
                 type="button"
@@ -284,6 +325,7 @@ export default function LoginPage() {
                 className="w-full border rounded-lg px-3 py-2 mt-1"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
+                required
               />
               <button
                 type="button"

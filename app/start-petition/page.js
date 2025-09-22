@@ -45,7 +45,7 @@ export default function StartPetitionPage() {
   // Handle authentication loading and redirect
   useEffect(() => {
     if (!authLoading && !user) {
-      router.push("/login");
+      router.push("/login?redirect=/start-petition");
     }
   }, [user, authLoading, router]);
 
@@ -72,10 +72,12 @@ export default function StartPetitionPage() {
   };
 
   const isStep2Valid = () => {
-    // At least one recipient with name and email
+    // At least one recipient with name and valid email (must contain @)
     return recipients.some(
       (recipient) =>
-        recipient.name.trim() !== "" && recipient.email.trim() !== ""
+        recipient.name.trim() !== "" && 
+        recipient.email.trim() !== "" &&
+        recipient.email.includes("@")
     );
   };
 
@@ -164,7 +166,7 @@ export default function StartPetitionPage() {
       if (!user || !user.token) {
         setIsSubmitting(false);
         alert("User not authenticated. Please log in to create a petition.");
-        router.push("/login");
+        router.push("/login?redirect=/start-petition");
         return;
       }
 
@@ -189,7 +191,7 @@ export default function StartPetitionPage() {
           alert("Your session has expired. Please log in again.");
           // Clear user data and redirect to login
           clearUser();
-          router.push("/login");
+          router.push("/login?redirect=/start-petition");
           return;
         }
         throw new Error(result.message || "Failed to create petition");
@@ -269,7 +271,7 @@ export default function StartPetitionPage() {
             <p className="mb-4 font-medium text-gray-600">
               Add email address of decision makers{" "}
               <span className="text-red-500">
-                (At least one recipient with name and email is required)
+                (At least one recipient with name and valid email is required)
               </span>
             </p>
             <div className="space-y-3">
@@ -306,9 +308,18 @@ export default function StartPetitionPage() {
                     onChange={(e) =>
                       updateRecipient(recipientIdx, "email", e.target.value)
                     }
-                    className="w-full border p-3 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
+                    className={`w-full border p-3 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400 ${
+                      recipient.email && !recipient.email.includes("@") 
+                        ? "border-red-500 bg-red-50" 
+                        : ""
+                    }`}
                     placeholder="Email *"
                   />
+                  {recipient.email && !recipient.email.includes("@") && (
+                    <p className="text-red-500 text-sm mt-1">
+                      Email is required
+                    </p>
+                  )}
                   <motion.input
                     whileFocus={{ scale: 1.02, borderColor: "#0ea5e9" }}
                     type="tel"
