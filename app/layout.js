@@ -1,20 +1,14 @@
-import { Roboto, Roboto_Slab } from "next/font/google";
+import { Be_Vietnam_Pro } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { AuthProvider } from "../context/AuthContext";
 
 // Google Fonts
-const roboto = Roboto({
-  variable: "--font-roboto",
+const beVietnamPro = Be_Vietnam_Pro({
+  variable: "--font-be-vietnam-pro",
   subsets: ["latin"],
-  weight: ["400", "500", "700"],
-});
-
-const robotoSlab = Roboto_Slab({
-  variable: "--font-roboto-slab",
-  subsets: ["latin"],
-  weight: ["400", "700"],
+  weight: ["300", "400", "500", "600", "700"],
 });
 
 export const metadata = {
@@ -25,7 +19,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={`${roboto.variable} ${robotoSlab.variable} antialiased`}>
+      <body className={`${beVietnamPro.variable} antialiased`}>
         <AuthProvider>
           <Navbar />
           <main>{children}</main>

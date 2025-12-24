@@ -1,225 +1,266 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { useRouter } from "next/navigation"; // Import useRouter
+import { useRouter } from "next/navigation";
+import Image from "next/image";
+import { FaChevronLeft, FaChevronRight, FaCalendarAlt, FaComment, FaPause, FaPlay } from "react-icons/fa";
 
-const states = [
-  "Andhra Pradesh",
-  "Arunachal Pradesh",
-  "Assam",
-  "Bihar",
-  "Chhattisgarh",
-  "Goa",
-  "Gujarat",
-  "Haryana",
-  "Himachal Pradesh",
-  "Jharkhand",
-  "Karnataka",
-  "Kerala",
-  "Madhya Pradesh",
-  "Maharashtra",
-  "Manipur",
-  "Meghalaya",
-  "Mizoram",
-  "Nagaland",
-  "Odisha",
-  "Punjab",
-  "Rajasthan",
-  "Sikkim",
-  "Tamil Nadu",
-  "Telangana",
-  "Tripura",
-  "Uttar Pradesh",
-  "Uttarakhand",
-  "West Bengal",
-  "Andaman and Nicobar Islands",
-  "Chandigarh",
-  "Dadra and Nagar Haveli and Daman & Diu",
-  "Delhi",
-  "Jammu and Kashmir",
-  "Ladakh",
-  "Lakshadweep",
-  "Puducherry",
+// Sample top stories data
+const topStories = [
+  {
+    id: 1,
+    title: "Campaign history",
+    date: "February 21, 2024",
+    image: "https://picsum.photos/seed/story1/100/100",
+  },
+  {
+    id: 2,
+    title: "Rapid Aircraft Interior Design via Renderings",
+    date: "February 21, 2024",
+    image: "https://picsum.photos/seed/story2/100/100",
+  },
+  {
+    id: 3,
+    title: "Top color palettes in graphic design",
+    date: "February 21, 2024",
+    image: "https://picsum.photos/seed/story3/100/100",
+  },
+  {
+    id: 4,
+    title: "Introducing New Styles of Football Soccer",
+    date: "February 21, 2024",
+    image: "https://picsum.photos/seed/story4/100/100",
+  },
+];
+
+// Sample hero slides data
+const heroSlides = [
+  {
+    id: 1,
+    image: "https://picsum.photos/seed/hero1/800/600",
+    categories: ["Environment", "Social"],
+    title: "Join the Movement to Protect Our Planet",
+    description: "Be part of the change. Every signature counts towards creating a better future for our environment and communities. Together we can make a difference.",
+    date: "December 24, 2024",
+    comments: "24 Comments",
+    link: "/currentpetitions",
+  },
+  {
+    id: 2,
+    image: "https://picsum.photos/seed/hero2/800/600",
+    categories: ["Education", "Youth"],
+    title: "Empowering Youth Through Quality Education",
+    description: "Support our initiative to bring quality education to underprivileged children. Your voice can help shape the future of thousands of young minds.",
+    date: "December 20, 2024",
+    comments: "18 Comments",
+    link: "/currentpetitions",
+  },
+  {
+    id: 3,
+    image: "https://picsum.photos/seed/hero3/800/600",
+    categories: ["Healthcare", "Community"],
+    title: "Building Healthier Communities Together",
+    description: "Join hands to improve healthcare accessibility in rural areas. Every petition signed brings us closer to better health facilities for all.",
+    date: "December 18, 2024",
+    comments: "32 Comments",
+    link: "/currentpetitions",
+  },
 ];
 
 export default function Banner() {
-  const [selectedState, setSelectedState] = useState("Delhi");
-  const [showDropdown, setShowDropdown] = useState(false);
-  const [searchText, setSearchText] = useState("");
-  const [stats, setStats] = useState({
-    totalSignatures: 0,
-    totalUsers: 0,
-    victories: 0,
-    loading: true,
-  });
-  const dropdownRef = useRef(null);
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [isTickerPaused, setIsTickerPaused] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const router = useRouter();
 
-  const router = useRouter(); // Initialize useRouter
-
-  // Function to format numbers with commas
-  const formatNumber = (num) => {
-    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-  };
-
-  // Fetch stats from backend
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const response = await fetch("/api/petitions/stats");
-        if (response.ok) {
-          const data = await response.json();
-          setStats({
-            totalSignatures: data.totalSignatures || 0,
-            totalUsers: data.totalUsers || 0,
-            victories: data.victories || 0,
-            loading: false,
-          });
-        } else {
-          // Fallback to demo data if API fails
-          setStats({
-            totalSignatures: 56182617,
-            totalUsers: 45000,
-            victories: 12,
-            loading: false,
-          });
-        }
-      } catch (error) {
-        console.error("Failed to fetch stats:", error);
-        // Fallback to demo data
-        setStats({
-          totalSignatures: 56182617,
-          totalUsers: 45000,
-          victories: 12,
-          loading: false,
-        });
-      }
-    };
-
-    fetchStats();
-  }, []);
-
-  const handleSearch = () => {
-    if (searchText.trim()) {
-      router.push(
-        `/search?q=${encodeURIComponent(searchText)}`
-      );
-    }
-  };
-
-  // Close dropdown when clicking outside
   useEffect(() => {
     setMounted(true);
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setShowDropdown(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Auto-slide functionality
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
+  };
+
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + heroSlides.length) % heroSlides.length);
+  };
+
+  if (!mounted) return null;
+
   return (
-    <section className="bg-white py-12 px-4 flex flex-col items-center text-center">
-      {/* Quote */}
-      <motion.h1
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-        className="text-4xl md:text-5xl font-bold text-gray-500 mb-2"
-      >
-        Be The Change,
-        <br />
-        You Want To See In The World.
-      </motion.h1>
+    <section className="bg-[#f0f2f5] mt px-8 sm:px-16 lg:px-24 pt-6">
+      {/* Top Stories Ticker Bar */}
+      <div className="bg-white shadow-sm border border-gray-200 rounded-lg overflow-hidden flex items-stretch">
+        {/* Top Stories Label */}
+        <div className="flex items-center gap-2 bg-[#F43676] text-white px-5 shrink-0">
+          <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
+          <span className="font-bold text-sm">Top Stories</span>
+        </div>
 
-      {/* Author */}
-      <motion.p
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2, duration: 0.6 }}
-        className="text-teal-600 text-lg md:text-xl mb-4 font-medium"
-      >
-        — Mahatma Gandhi
-      </motion.p>
-
-      {/* Stats */}
-      <motion.p
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4, duration: 0.6 }}
-        className="text-gray-700 text-sm md:text-base mb-6"
-      >
-        {stats.loading ? (
-          <span className="animate-pulse">Loading statistics...</span>
-        ) : (
-          `${formatNumber(
-            stats.totalSignatures
-          )} signatures collected • ${formatNumber(
-            stats.totalUsers
-          )} people taking action • ${formatNumber(
-            stats.victories
-          )} victories achieved`
-        )}
-      </motion.p>
-
-      {mounted && (
-        <>
-          {/* Campaign / Fundraising options */}
+        {/* Scrolling News Ticker */}
+        <div className="flex-1 overflow-hidden relative py-3 px-4">
           <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6, duration: 0.6 }}
-            className="flex gap-4 mb-6"
+            className="flex gap-8 items-center"
+            animate={isTickerPaused ? {} : { x: [0, -1500] }}
+            transition={{
+              x: {
+                repeat: Infinity,
+                repeatType: "loop",
+                duration: 25,
+                ease: "linear",
+              },
+            }}
           >
-            <button className="px-6 py-2 bg-[#3650AD] text-white rounded-full hover:bg-teal-600 transition">
-              Campaign
-            </button>
-            <button className="px-6 py-2 bg-[#3650AD] text-white rounded-full hover:bg-teal-600 transition">
-              Fundraising
-            </button>
+            {[...topStories, ...topStories, ...topStories].map((story, index) => (
+              <Link
+                key={`${story.id}-${index}`}
+                href="/currentpetitions"
+                className="flex items-center gap-3 shrink-0 hover:opacity-80 transition-opacity"
+              >
+                <div className="w-10 h-10 rounded-md overflow-hidden bg-gray-200 shrink-0">
+                  <img 
+                    src={story.image} 
+                    alt={story.title}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-gray-800 font-bold text-sm whitespace-nowrap">
+                    {story.title}
+                  </span>
+                  <span className="text-gray-500 font-semibold text-xs flex items-center gap-1">
+                    <span className="text-[#F43676]">•</span> {story.date}
+                  </span>
+                </div>
+              </Link>
+            ))}
           </motion.div>
+        </div>
 
-          {/* Search bar */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8, duration: 0.6 }}
-            className="flex w-full max-w-2xl border rounded-full shadow relative"
-          >
-            {/* Input */}
-            <input
-              type="text"
-              placeholder="Search petitions..."
-              value={searchText}
-              onChange={(e) => setSearchText(e.target.value)}
-              className="flex-1 px-4 py-2 outline-none"
-            />
+        {/* Pause/Play Button */}
+        <button
+          onClick={() => setIsTickerPaused(!isTickerPaused)}
+          className="w-10 bg-[#2D3A8C] text-white flex items-center justify-center hover:bg-[#1e2a6c] transition-colors shrink-0"
+        >
+          {isTickerPaused ? <FaPlay className="text-xs" /> : <FaPause className="text-xs" />}
+        </button>
+      </div>
 
-            {/* Search button */}
+      {/* Hero Slider Section */}
+      <div className="py-6">
+        <div className="relative bg-white rounded-3xl shadow-lg overflow-visible p-4 lg:p-6">
+          <div className="flex flex-col lg:flex-row items-stretch">
+            {/* Left Side - Image */}
+            <div className="lg:w-1/2 relative h-[300px] sm:h-[400px] lg:h-[450px] overflow-hidden rounded-2xl group lg:-ml-14 shadow-xl">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={currentSlide}
+                  initial={{ opacity: 0, x: 100 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -100 }}
+                  transition={{ duration: 0.5, ease: "easeInOut" }}
+                  className="absolute inset-0"
+                >
+                  <div 
+                    className="w-full h-full bg-cover bg-center transition-transform duration-500 ease-out group-hover:scale-110"
+                    style={{
+                      backgroundImage: `url('${heroSlides[currentSlide].image}')`,
+                      backgroundColor: '#e5e7eb'
+                    }}
+                  >
+                    {/* Fallback gradient if image doesn't exist */}
+                    <div className="w-full h-full bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500 flex items-center justify-center opacity-0 hover:opacity-0">
+                    </div>
+                  </div>
+                </motion.div>
+              </AnimatePresence>
+
+              {/* Left Navigation Arrow */}
+              <button
+                onClick={prevSlide}
+                className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-gray-50 transition-colors z-10 border border-gray-100"
+              >
+                <FaChevronLeft className="text-gray-600 text-sm" />
+              </button>
+            </div>
+
+            {/* Right Side - Content */}
+            <div className="lg:w-1/2 p-6 lg:p-10 flex flex-col justify-center">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={currentSlide}
+                  initial={{ opacity: 0, x: 50 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -50 }}
+                  transition={{ duration: 0.5, ease: "easeInOut" }}
+                >
+                  {/* Category Tags */}
+                  <div className="flex gap-3 mb-5">
+                    {heroSlides[currentSlide].categories.map((category, index) => (
+                      <span
+                        key={index}
+                        className="px-4 py-1.5 bg-[#F43676]/10 text-[#F43676] rounded-full text-sm font-medium hover:bg-[#F43676]/20 transition-colors cursor-pointer"
+                      >
+                        {category}
+                      </span>
+                    ))}
+                  </div>
+
+                  {/* Title */}
+                  <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-[#1a1a2e] mb-4 leading-tight">
+                    {heroSlides[currentSlide].title}
+                  </h1>
+
+                  {/* Description */}
+                  <p className="text-gray-500 text-base mb-6 leading-relaxed">
+                    {heroSlides[currentSlide].description}
+                  </p>
+
+                  {/* Continue Reading Link */}
+                  <Link
+                    href={heroSlides[currentSlide].link}
+                    className="inline-flex items-center gap-2 text-gray-800 font-semibold hover:text-[#F43676] transition-colors mb-6 group"
+                  >
+                    Continue Reading
+                    <FaChevronRight className="text-xs group-hover:translate-x-1 transition-transform" />
+                  </Link>
+
+                  {/* Date and Comments */}
+                  <div className="flex items-center gap-4 text-gray-400 text-sm">
+                    <span className="flex items-center gap-2">
+                      <FaCalendarAlt className="text-gray-400" />
+                      {heroSlides[currentSlide].date}
+                    </span>
+                    <span className="text-[#F43676]">•</span>
+                    <span className="flex items-center gap-2">
+                      <FaComment className="text-gray-400" />
+                      {heroSlides[currentSlide].comments}
+                    </span>
+                  </div>
+                </motion.div>
+              </AnimatePresence>
+            </div>
+
+            {/* Right Navigation Arrow */}
             <button
-              onClick={handleSearch} // Call handleSearch on click
-              className="bg-[#3650AD] text-white px-6 py-2 rounded-r-full hover:bg-teal-600 transition"
+              onClick={nextSlide}
+              className="absolute right-8 top-1/2 -translate-y-1/2 w-10 h-10 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-gray-50 transition-colors z-10 border border-gray-100"
             >
-              Search
+              <FaChevronRight className="text-gray-600 text-sm" />
             </button>
-          </motion.div>
-
-          {/* Start a Petition button */}
-          <Link href="/start-petition">
-            <motion.button
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1, duration: 0.6 }}
-              className="mt-8 bg-[#3650AD] text-white px-8 py-3 rounded-2xl shadow-lg hover:bg-teal-600 transition"
-            >
-              Start a Petition
-            </motion.button>
-          </Link>
-        </>
-      )}
+          </div>
+        </div>
+      </div>
     </section>
   );
 }
