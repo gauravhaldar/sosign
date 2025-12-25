@@ -166,23 +166,33 @@ export default function Banner() {
           <span className="font-bold text-sm">Top Stories</span>
         </div>
 
-        {/* Scrolling News Ticker */}
+        {/* Scrolling News Ticker - Infinite Seamless Loop */}
         <div className="flex-1 overflow-hidden relative py-3 px-4">
-          <motion.div
-            className="flex gap-8 items-center"
-            animate={isTickerPaused ? {} : { x: [0, -1500] }}
-            transition={{
-              x: {
-                repeat: Infinity,
-                repeatType: "loop",
-                duration: 25,
-                ease: "linear",
-              },
-            }}
-          >
-            {[...topStories, ...topStories, ...topStories].map((story, index) => (
+          <style jsx>{`
+            @keyframes ticker-scroll {
+              0% {
+                transform: translateX(0);
+              }
+              100% {
+                transform: translateX(-50%);
+              }
+            }
+            .ticker-track {
+              display: flex;
+              gap: 2rem;
+              width: max-content;
+              animation: ticker-scroll 30s linear infinite;
+            }
+            .ticker-track:hover,
+            .ticker-track.paused {
+              animation-play-state: paused;
+            }
+          `}</style>
+          <div className={`ticker-track ${isTickerPaused ? 'paused' : ''}`}>
+            {/* First set of stories */}
+            {[...topStories, ...topStories, ...topStories, ...topStories].map((story, index) => (
               <Link
-                key={`${story.id}-${index}`}
+                key={`first-${story.id}-${index}`}
                 href="/currentpetitions"
                 className="flex items-center gap-3 shrink-0 hover:opacity-80 transition-opacity"
               >
@@ -203,7 +213,31 @@ export default function Banner() {
                 </div>
               </Link>
             ))}
-          </motion.div>
+            {/* Duplicate set for seamless loop */}
+            {[...topStories, ...topStories, ...topStories, ...topStories].map((story, index) => (
+              <Link
+                key={`second-${story.id}-${index}`}
+                href="/currentpetitions"
+                className="flex items-center gap-3 shrink-0 hover:opacity-80 transition-opacity"
+              >
+                <div className="w-10 h-10 rounded-md overflow-hidden bg-gray-200 shrink-0">
+                  <img
+                    src={story.image}
+                    alt={story.title}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-gray-800 font-bold text-sm whitespace-nowrap">
+                    {story.title}
+                  </span>
+                  <span className="text-gray-500 font-semibold text-xs flex items-center gap-1">
+                    <span className="text-[#F43676]">•</span> {story.date}
+                  </span>
+                </div>
+              </Link>
+            ))}
+          </div>
         </div>
 
         {/* Pause/Play Button */}
