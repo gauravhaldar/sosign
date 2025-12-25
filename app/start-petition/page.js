@@ -18,7 +18,24 @@ export default function StartPetitionPage() {
   const [selectedImage, setSelectedImage] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [touchedFields, setTouchedFields] = useState({});
+  const [selectedCategories, setSelectedCategories] = useState([]);
   const totalSteps = 4;
+
+  // Available categories for petitions
+  const categories = [
+    { id: "animals", label: "Animals", icon: "🐾" },
+    { id: "game", label: "Game", icon: "🎮" },
+    { id: "interior", label: "Interior", icon: "🏠" },
+    { id: "lifestyle", label: "Lifestyle", icon: "✨" },
+    { id: "sports", label: "Sports", icon: "⚽" },
+    { id: "technology", label: "Technology", icon: "💻" },
+    { id: "travel", label: "Travel", icon: "✈️" },
+    { id: "environment", label: "Environment", icon: "🌍" },
+    { id: "education", label: "Education", icon: "📚" },
+    { id: "health", label: "Health", icon: "🏥" },
+    { id: "politics", label: "Politics", icon: "🏛️" },
+    { id: "human_rights", label: "Human Rights", icon: "✊" },
+  ];
 
   // Form data state
   const [formData, setFormData] = useState({
@@ -284,7 +301,17 @@ export default function StartPetitionPage() {
   // Enhanced Validation functions for each step
   const isStep1Valid = () => {
     const titleValidation = validateField("title", formData.title);
-    return titleValidation.isValid;
+    const hasCategories = selectedCategories.length > 0;
+    return titleValidation.isValid && hasCategories;
+  };
+
+  // Toggle category selection
+  const toggleCategory = (categoryId) => {
+    setSelectedCategories((prev) =>
+      prev.includes(categoryId)
+        ? prev.filter((id) => id !== categoryId)
+        : [...prev, categoryId]
+    );
   };
 
   const isStep2Valid = () => {
@@ -375,6 +402,7 @@ export default function StartPetitionPage() {
       const submitData = new FormData();
       submitData.append("title", formData.title);
       submitData.append("country", formData.country);
+      submitData.append("categories", JSON.stringify(selectedCategories));
 
       const validRecipients = recipients.filter((r) => r.name && r.email);
       submitData.append("decisionMakers", JSON.stringify(validRecipients));
@@ -538,6 +566,56 @@ export default function StartPetitionPage() {
                 {formData.title.length}/150 characters
                 {formData.title.length > 0 && formData.title.length < 10 && " (minimum 10)"}
               </p>
+
+              {/* Category Selection */}
+              <div className="mt-8">
+                <label className="block mb-3 font-medium">
+                  Select Categories <span className="text-red-500">*</span>
+                  <span className="text-gray-400 text-sm ml-2">(at least one required)</span>
+                </label>
+                <p className="text-sm text-gray-500 mb-4 flex items-center gap-1">
+                  <FaInfoCircle className="text-blue-400" />
+                  Choose categories that best describe your petition. This helps people find your cause.
+                </p>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                  {categories.map((category) => {
+                    const isSelected = selectedCategories.includes(category.id);
+                    return (
+                      <motion.button
+                        key={category.id}
+                        type="button"
+                        onClick={() => toggleCategory(category.id)}
+                        whileHover={{ scale: 1.03 }}
+                        whileTap={{ scale: 0.97 }}
+                        className={`flex items-center gap-2 px-4 py-3 rounded-xl border-2 transition-all duration-200 text-sm font-medium ${isSelected
+                          ? "border-[#F43676] bg-gradient-to-r from-[#F43676]/10 to-[#2D3A8C]/10 text-[#F43676] shadow-md"
+                          : "border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:bg-gray-50"
+                          }`}
+                      >
+                        <span className="text-lg">{category.icon}</span>
+                        <span>{category.label}</span>
+                        {isSelected && (
+                          <FaCheckCircle className="ml-auto text-[#F43676]" />
+                        )}
+                      </motion.button>
+                    );
+                  })}
+                </div>
+
+                {/* Category validation feedback */}
+                {selectedCategories.length === 0 && (
+                  <p className="text-orange-500 text-sm mt-3 flex items-center gap-1">
+                    <FaExclamationCircle className="text-xs" />
+                    Please select at least one category for your petition
+                  </p>
+                )}
+                {selectedCategories.length > 0 && (
+                  <p className="text-green-600 text-sm mt-3 flex items-center gap-1">
+                    <FaCheckCircle className="text-xs" />
+                    {selectedCategories.length} {selectedCategories.length === 1 ? "category" : "categories"} selected
+                  </p>
+                )}
+              </div>
             </motion.div>
           )}
 
