@@ -211,9 +211,9 @@ export default function Navbar() {
             </div>
 
             {/* Dark Mode Toggle */}
-            <button className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-gray-200 transition-colors">
+            {/* <button className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-gray-200 transition-colors">
               <FaMoon className="text-sm" />
-            </button>
+            </button> */}
 
             {/* Search Button */}
             <Link 

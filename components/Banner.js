@@ -250,60 +250,72 @@ export default function Banner() {
       </div>
 
       {/* Hero Slider Section */}
-      <div className="py-6">
-        <div className="relative bg-white rounded-3xl shadow-lg overflow-hidden p-4 sm:p-6 lg:p-8">
-          <div className="flex flex-col lg:flex-row items-stretch gap-6 lg:gap-8">
-            {/* Left Side - Image */}
-            <div className="lg:w-[55%] relative h-[280px] sm:h-[350px] lg:h-[400px] overflow-hidden rounded-2xl group shadow-lg bg-gray-100 flex-shrink-0">
+      <div className="pt-16 pb-6 sm:py-6">
+        <div className="relative bg-white rounded-3xl shadow-lg overflow-visible p-6 sm:p-8 lg:p-10">
+          <div className="flex flex-col sm:flex-row items-center">
+            {/* Left Side - Image Extended Outside */}
+            <div className="w-full sm:w-1/2 relative -mt-12 sm:mt-0 sm:-ml-16 mx-4 sm:mx-0 sm:my-6">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={currentSlide}
-                  initial={{ opacity: 0, scale: 1.05 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.98 }}
+                  initial={{ opacity: 0, x: 100 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -100 }}
                   transition={{ duration: 0.5, ease: "easeInOut" }}
-                  className="absolute inset-0 w-full h-full"
+                  className="aspect-[16/10] rounded-2xl overflow-hidden shadow-xl"
                 >
                   {/* Image with proper error handling */}
                   <img
                     src={heroSlides[currentSlide]?.image || "https://picsum.photos/seed/default/800/600"}
                     alt={heroSlides[currentSlide]?.title || "Petition"}
-                    className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+                    className="w-full h-full object-cover transition-transform duration-500 ease-out hover:scale-105"
                     onError={(e) => {
                       e.target.onerror = null;
                       e.target.src = `https://picsum.photos/seed/${heroSlides[currentSlide]?.id || "fallback"}/800/600`;
                     }}
                   />
-                  {/* Gradient overlay for better visual appeal */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent"></div>
                 </motion.div>
               </AnimatePresence>
 
-              {/* Left Navigation Arrow */}
+              {/* Navigation Arrows */}
               <button
                 onClick={prevSlide}
-                className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-10 sm:h-10 bg-white/95 backdrop-blur-sm rounded-full shadow-lg flex items-center justify-center hover:bg-white hover:scale-105 transition-all z-10 border border-gray-100"
+                className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-10 sm:h-10 bg-white/95 backdrop-blur-sm rounded-full shadow-lg flex items-center justify-center hover:bg-white hover:scale-105 transition-all z-10 border border-gray-100"
               >
                 <FaChevronLeft className="text-gray-600 text-xs sm:text-sm" />
               </button>
 
-              {/* Right Navigation Arrow - Inside Image */}
               <button
                 onClick={nextSlide}
-                className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-10 sm:h-10 bg-white/95 backdrop-blur-sm rounded-full shadow-lg flex items-center justify-center hover:bg-white hover:scale-105 transition-all z-10 border border-gray-100"
+                className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-10 sm:h-10 bg-white/95 backdrop-blur-sm rounded-full shadow-lg flex items-center justify-center hover:bg-white hover:scale-105 transition-all z-10 border border-gray-100"
               >
                 <FaChevronRight className="text-gray-600 text-xs sm:text-sm" />
               </button>
+
+              {/* Slide Indicators - On Image */}
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+                {heroSlides.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentSlide(index)}
+                    className={`w-2 h-2 rounded-full transition-all duration-300 ${index === currentSlide
+                      ? "bg-white w-6"
+                      : "bg-white/50 hover:bg-white/80"
+                      }`}
+                    aria-label={`Go to slide ${index + 1}`}
+                  />
+                ))}
+              </div>
             </div>
 
             {/* Right Side - Content */}
-            <div className="lg:w-1/2 p-4 sm:p-6 lg:p-8 flex flex-col justify-center min-h-[200px] lg:min-h-0">
+            <div className="sm:w-1/2 p-4 sm:p-6 lg:p-8">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={currentSlide}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
+                  initial={{ opacity: 0, x: 50 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -50 }}
                   transition={{ duration: 0.4, ease: "easeInOut" }}
                 >
                   {/* Category Tags */}
@@ -311,7 +323,7 @@ export default function Banner() {
                     {heroSlides[currentSlide]?.categories?.map((category, index) => (
                       <span
                         key={index}
-                        className="px-3 sm:px-4 py-1 sm:py-1.5 bg-[#F43676]/10 text-[#F43676] rounded-full text-xs sm:text-sm font-medium hover:bg-[#F43676]/20 transition-colors cursor-pointer"
+                        className="px-3 sm:px-4 py-1 sm:py-1.5 bg-[#fce4ec] text-[#F43676] rounded-full text-xs sm:text-sm font-medium hover:bg-[#F43676]/20 transition-colors cursor-pointer"
                       >
                         {category}
                       </span>
@@ -319,7 +331,7 @@ export default function Banner() {
                   </div>
 
                   {/* Title */}
-                  <h1 className="text-lg sm:text-xl lg:text-2xl xl:text-3xl font-bold text-[#1a1a2e] mb-3 sm:mb-4 leading-tight line-clamp-2">
+                  <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-[#1a1a2e] mb-3 sm:mb-4 leading-tight line-clamp-2 hover:text-[#F43676] transition-colors">
                     {heroSlides[currentSlide]?.title}
                   </h1>
 
@@ -338,13 +350,13 @@ export default function Banner() {
                   </Link>
 
                   {/* Date and Signatures */}
-                  <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-gray-400 text-xs sm:text-sm">
-                    <span className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-sm">
+                    <span className="flex items-center gap-2 text-gray-600 font-medium">
                       <FaCalendarAlt className="text-gray-400" />
                       {heroSlides[currentSlide]?.date}
                     </span>
-                    <span className="text-[#F43676] hidden sm:inline">•</span>
-                    <span className="flex items-center gap-2">
+                    <span className="text-[#F43676]">•</span>
+                    <span className="flex items-center gap-2 text-gray-400">
                       <FaComment className="text-gray-400" />
                       {heroSlides[currentSlide]?.comments}
                     </span>
@@ -352,21 +364,6 @@ export default function Banner() {
                 </motion.div>
               </AnimatePresence>
             </div>
-          </div>
-
-          {/* Slide Indicators */}
-          <div className="flex justify-center gap-2 mt-4 lg:mt-6">
-            {heroSlides.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => setCurrentSlide(index)}
-                className={`w-2 h-2 rounded-full transition-all duration-300 ${index === currentSlide
-                  ? "bg-[#F43676] w-6"
-                  : "bg-gray-300 hover:bg-gray-400"
-                  }`}
-                aria-label={`Go to slide ${index + 1}`}
-              />
-            ))}
           </div>
         </div>
       </div>

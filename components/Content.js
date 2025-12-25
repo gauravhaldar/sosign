@@ -80,6 +80,82 @@ const blogPosts = [
   },
 ];
 
+// Page 2 blog posts data
+const blogPostsPage2 = [
+  {
+    id: 7,
+    slug: "sustainable-architecture-future",
+    title: "Sustainable Architecture: Building the Future",
+    description: "Exploring how eco-friendly designs and renewable materials are reshaping the construction industry for a greener tomorrow...",
+    categories: ["Interior", "Technology"],
+    author: "greenbuilder",
+    date: "February 18, 2024",
+    image: "https://picsum.photos/seed/blog7/500/400",
+    featured: true,
+    hasVideo: false,
+  },
+  {
+    id: 8,
+    slug: "wildlife-photography-tips",
+    title: "Wildlife Photography: Capturing Nature's Beauty",
+    description: "Master the art of wildlife photography with these essential tips and techniques from professional nature photographers...",
+    categories: ["Animals", "Travel"],
+    author: "naturelens",
+    date: "February 17, 2024",
+    image: "https://picsum.photos/seed/blog8/500/400",
+    featured: false,
+    hasVideo: true,
+  },
+  {
+    id: 9,
+    slug: "gaming-industry-evolution",
+    title: "The Evolution of Gaming: From Pixels to Virtual Reality",
+    description: "A comprehensive look at how video games have transformed from simple arcade classics to immersive virtual experiences...",
+    categories: ["Game", "Technology"],
+    author: "gamerpro",
+    date: "February 15, 2024",
+    image: "https://picsum.photos/seed/blog9/500/400",
+    featured: false,
+    hasVideo: true,
+  },
+  {
+    id: 10,
+    slug: "minimalist-living-guide",
+    title: "The Complete Guide to Minimalist Living",
+    description: "Discover the freedom of living with less. Learn how minimalism can reduce stress and improve your quality of life...",
+    categories: ["Lifestyle", "Interior"],
+    author: "simplyliving",
+    date: "February 14, 2024",
+    image: "https://picsum.photos/seed/blog10/500/400",
+    featured: false,
+    hasVideo: false,
+  },
+  {
+    id: 11,
+    slug: "extreme-sports-adventures",
+    title: "Extreme Sports: Pushing Human Limits",
+    description: "From skydiving to base jumping, explore the world of extreme sports and the athletes who dare to defy gravity...",
+    categories: ["Sports", "Lifestyle"],
+    author: "adrenalinehunter",
+    date: "February 12, 2024",
+    image: "https://picsum.photos/seed/blog11/500/400",
+    featured: false,
+    hasVideo: true,
+  },
+  {
+    id: 12,
+    slug: "hidden-travel-destinations",
+    title: "Hidden Travel Destinations You Must Visit",
+    description: "Escape the tourist crowds and discover these breathtaking hidden gems around the world that offer authentic experiences...",
+    categories: ["Travel", "Lifestyle"],
+    author: "wanderlust",
+    date: "February 10, 2024",
+    image: "https://picsum.photos/seed/blog12/500/400",
+    featured: false,
+    hasVideo: false,
+  },
+];
+
 // Recent posts for sidebar
 const recentPosts = [
   "Top Luxury Ideas for High-End Home Exterior Decor",
@@ -124,8 +200,8 @@ export default function Content() {
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Main Content - Left Side */}
           <div className="lg:w-2/3">
-            <div className="space-y-6">
-              {blogPosts.map((post, index) => (
+            <div className="space-y-12 sm:space-y-6">
+              {(currentPage === 1 ? blogPosts : blogPostsPage2).map((post, index) => (
                 <div
                   key={post.id}
                   className={`relative bg-white rounded-3xl shadow-sm hover:shadow-md transition-shadow ${post.featured ? "ring-2 ring-[#F43676]" : ""
@@ -133,8 +209,8 @@ export default function Content() {
                 >
                   <Link href={`/category/${post.categories[0].toLowerCase()}/${post.slug}`} className="flex flex-col sm:flex-row items-center">
                     {/* Image - Extended outside */}
-                    <div className="sm:w-2/5 relative sm:-ml-6 my-4 sm:my-6">
-                      <div className="aspect-[4/3] rounded-2xl overflow-hidden shadow-lg">
+                    <div className="w-[85%] sm:w-2/5 relative -mt-8 sm:mt-0 sm:-ml-6 mx-auto sm:mx-0 sm:my-6">
+                      <div className="aspect-[16/10] sm:aspect-[4/3] rounded-2xl overflow-hidden shadow-lg">
                         <img
                           src={post.image}
                           alt={post.title}
@@ -157,7 +233,7 @@ export default function Content() {
                     </div>
 
                     {/* Content */}
-                    <div className="sm:w-3/5 p-6">
+                    <div className="w-full sm:w-3/5 p-4 sm:p-6">
                       {/* Category Tags */}
                       <div className="flex flex-wrap gap-2 mb-3">
                         {post.categories.map((category, idx) => (
@@ -171,17 +247,17 @@ export default function Content() {
                       </div>
 
                       {/* Title */}
-                      <h3 className="text-xl font-bold text-[#1a1a2e] mb-3 leading-tight hover:text-[#F43676] transition-colors">
+                      <h3 className="text-lg sm:text-xl font-bold text-[#1a1a2e] mb-2 sm:mb-3 leading-tight hover:text-[#F43676] transition-colors">
                         {post.title}
                       </h3>
 
                       {/* Description */}
-                      <p className="text-gray-500 text-sm mb-4 leading-relaxed">
+                      <p className="text-gray-500 text-sm mb-3 sm:mb-4 leading-relaxed line-clamp-2 sm:line-clamp-none">
                         {post.description}
                       </p>
 
                       {/* Author Info */}
-                      <div className="flex items-center gap-3 text-sm">
+                      <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm">
                         <div className="w-8 h-8 rounded-full overflow-hidden">
                           <img
                             src={`https://ui-avatars.com/api/?name=${post.author}&background=random&size=32`}
@@ -204,13 +280,28 @@ export default function Content() {
 
             {/* Pagination */}
             <div className="flex items-center justify-center gap-2 mt-10">
-              <button className="w-10 h-10 rounded-full bg-[#F43676] text-white font-medium flex items-center justify-center">
+              <button
+                onClick={() => setCurrentPage(1)}
+                className={`w-10 h-10 rounded-full font-medium flex items-center justify-center transition-colors ${currentPage === 1
+                  ? "bg-[#F43676] text-white"
+                  : "bg-white text-gray-600 hover:bg-gray-100"
+                  }`}
+              >
                 1
               </button>
-              <button className="w-10 h-10 rounded-full bg-white text-gray-600 font-medium flex items-center justify-center hover:bg-gray-100 transition-colors">
+              <button
+                onClick={() => setCurrentPage(2)}
+                className={`w-10 h-10 rounded-full font-medium flex items-center justify-center transition-colors ${currentPage === 2
+                  ? "bg-[#F43676] text-white"
+                  : "bg-white text-gray-600 hover:bg-gray-100"
+                  }`}
+              >
                 2
               </button>
-              <button className="w-10 h-10 rounded-full bg-white text-gray-600 flex items-center justify-center hover:bg-gray-100 transition-colors border border-gray-200">
+              <button
+                onClick={() => setCurrentPage(currentPage === 1 ? 2 : 1)}
+                className="w-10 h-10 rounded-full bg-white text-gray-600 flex items-center justify-center hover:bg-gray-100 transition-colors border border-gray-200"
+              >
                 <FaChevronRight className="text-sm" />
               </button>
             </div>

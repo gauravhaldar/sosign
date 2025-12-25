@@ -5,8 +5,10 @@ import { Eye, EyeOff } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "../../context/AuthContext";
 import Image from "next/image";
+import Link from "next/link";
 import { auth, provider } from "../../utils/Firebase";
 import { signInWithPopup } from "firebase/auth";
+import { FaChevronRight } from "react-icons/fa";
 
 export default function LoginPage() {
   const [isLogin, setIsLogin] = useState(true);
@@ -29,7 +31,7 @@ export default function LoginPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [signupError, setSignupError] = useState("");
 
-  const { login, signup, loading, googleLogin } = useAuth(); // Re-added googleLogin
+  const { login, signup, loading, googleLogin } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -100,10 +102,7 @@ export default function LoginPage() {
   const handleGoogleSignIn = async () => {
     try {
       const result = await signInWithPopup(auth, provider);
-      // The signed-in user info.
       const user = result.user;
-
-      // Call the simulated backend login from AuthContext
       await googleLogin(user);
       router.push(redirectUrl);
     } catch (error) {
@@ -114,247 +113,274 @@ export default function LoginPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        Loading...
+      <div className="min-h-screen flex items-center justify-center bg-[#f0f2f5]">
+        <div className="text-[#F43676] text-lg font-medium">Loading...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-8">
-      <div className="w-full max-w-md bg-white shadow-lg rounded-2xl p-6">
-        {/* Toggle Heading */}
-        <h2 className="text-2xl font-bold text-center mb-4 text-gray-800">
-          {isLogin ? "Login to SoSign" : "Create your account"}
-        </h2>
-
-        {/* Continue with Google */}
-        <button
-          onClick={handleGoogleSignIn}
-          className="w-full flex items-center justify-center border border-gray-300 rounded-lg py-2 mb-4 hover:bg-gray-100 transition"
-        >
-          <Image
-            src="https://www.svgrepo.com/show/355037/google.svg"
-            alt="Google"
-            className="w-5 h-5 mr-2"
-            width={20}
-            height={20}
-          />
-          Continue with Google
-        </button>
-
-        {/* Divider */}
-        <div className="flex items-center my-4">
-          <hr className="flex-grow border-gray-300" />
-          <span className="px-2 text-gray-500 text-sm">or</span>
-          <hr className="flex-grow border-gray-300" />
+    <div className="min-h-screen bg-[#f0f2f5]">
+      {/* Header Banner */}
+      <div className="bg-gradient-to-r from-[#fce4ec] to-[#f8bbd9] py-6 px-8 sm:px-16 lg:px-24">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <h1 className="text-2xl sm:text-3xl font-bold text-[#1a1a2e]">
+            {isLogin ? "Login" : "Sign Up"}
+          </h1>
+          <nav className="flex items-center gap-2 text-sm text-[#1a1a2e]">
+            <Link href="/" className="hover:text-[#F43676] transition-colors">Home</Link>
+            <FaChevronRight className="text-xs text-gray-500" />
+            <span className="text-[#1a1a2e] font-medium">{isLogin ? "Login" : "Sign Up"}</span>
+          </nav>
         </div>
+      </div>
 
-        {isLogin ? (
-          // ------------------- LOGIN FORM -------------------
-          <form className="space-y-4" onSubmit={handleLoginSubmit}>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Email
-              </label>
-              <input
-                type="email"
-                placeholder="Enter your email"
-                className="w-full border rounded-lg px-3 py-2 mt-1"
-                value={loginEmail}
-                onChange={(e) => setLoginEmail(e.target.value)}
-                required
-              />
-            </div>
+      {/* Main Content */}
+      <div className="flex items-center justify-center px-4 py-12">
+        <div className="w-full max-w-md bg-white shadow-xl rounded-3xl p-8">
+          {/* Toggle Heading */}
+          <div className="text-center mb-6">
+            <p className="text-[#F43676] font-medium mb-2">Welcome to SoSign</p>
+            <h2 className="text-2xl sm:text-3xl font-bold text-[#1a1a2e]">
+              {isLogin ? "Login to your account" : "Create your account"}
+            </h2>
+          </div>
 
-            <div className="relative">
-              <label className="block text-sm font-medium text-gray-700">
-                Password
-              </label>
-              <input
-                type={showPassword ? "text" : "password"}
-                placeholder="Enter your password"
-                className="w-full border rounded-lg px-3 py-2 mt-1"
-                value={loginPassword}
-                onChange={(e) => setLoginPassword(e.target.value)}
-                required
-              />
-              <button
-                type="button"
-                className="absolute right-3 top-9 text-gray-500"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
-            </div>
+          {/* Continue with Google */}
+          <button
+            onClick={handleGoogleSignIn}
+            className="w-full flex items-center justify-center border-2 border-gray-200 rounded-xl py-3 mb-6 hover:bg-gray-50 hover:border-[#F43676] transition-all group"
+          >
+            <Image
+              src="https://www.svgrepo.com/show/355037/google.svg"
+              alt="Google"
+              className="w-5 h-5 mr-3"
+              width={20}
+              height={20}
+            />
+            <span className="font-medium text-gray-700 group-hover:text-[#1a1a2e]">
+              Continue with Google
+            </span>
+          </button>
 
-            {loginError && (
-              <p className="text-red-500 text-sm text-center">{loginError}</p>
-            )}
+          {/* Divider */}
+          <div className="flex items-center my-6">
+            <hr className="flex-grow border-gray-200" />
+            <span className="px-4 text-gray-400 text-sm font-medium">or</span>
+            <hr className="flex-grow border-gray-200" />
+          </div>
 
-            <button
-              type="submit"
-              className="w-full bg-[#3650AD] text-white py-2 rounded-lg hover:bg-blue-700 transition"
-            >
-              Login
-            </button>
-
-            <p className="text-xs text-gray-500 text-center">
-              By joining or logging in, you accept{" "}
-              <span className="text-[#3650AD] cursor-pointer">
-                sosign.in Terms of Service
-              </span>{" "}
-              and{" "}
-              <span className="text-[#3650AD] cursor-pointer">
-                Privacy Policy
-              </span>
-              .
-            </p>
-
-            <p className="text-sm text-center text-gray-600">
-              Don’t have an account?{" "}
-              <span
-                className="text-[#3650AD] font-medium cursor-pointer"
-                onClick={() => setIsLogin(false)}
-              >
-                Sign up
-              </span>
-            </p>
-          </form>
-        ) : (
-          // ------------------- SIGNUP FORM -------------------
-          <form className="space-y-4" onSubmit={handleSignupSubmit}>
-            <div className="grid grid-cols-2 gap-3">
+          {isLogin ? (
+            // ------------------- LOGIN FORM -------------------
+            <form className="space-y-5" onSubmit={handleLoginSubmit}>
               <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  First Name
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Email
                 </label>
                 <input
-                  type="text"
-                  placeholder="First name"
-                  className="w-full border rounded-lg px-3 py-2 mt-1"
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
+                  type="email"
+                  placeholder="Enter your email"
+                  className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-[#F43676] transition-colors"
+                  value={loginEmail}
+                  onChange={(e) => setLoginEmail(e.target.value)}
                   required
                 />
               </div>
+
+              <div className="relative">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Password
+                </label>
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Enter your password"
+                  className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 pr-12 focus:outline-none focus:border-[#F43676] transition-colors"
+                  value={loginPassword}
+                  onChange={(e) => setLoginPassword(e.target.value)}
+                  required
+                />
+                <button
+                  type="button"
+                  className="absolute right-4 top-10 text-gray-400 hover:text-[#F43676] transition-colors"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
+
+              {loginError && (
+                <p className="text-red-500 text-sm text-center bg-red-50 py-2 rounded-lg">{loginError}</p>
+              )}
+
+              <button
+                type="submit"
+                className="w-full bg-[#F43676] text-white py-3 rounded-xl font-medium hover:bg-[#e02a60] transition-colors shadow-lg hover:shadow-xl"
+              >
+                Login
+              </button>
+
+              <p className="text-xs text-gray-500 text-center leading-relaxed">
+                By joining or logging in, you accept{" "}
+                <Link href="/terms" className="text-[#F43676] hover:underline">
+                  SoSign Terms of Service
+                </Link>{" "}
+                and{" "}
+                <Link href="/privacy" className="text-[#F43676] hover:underline">
+                  Privacy Policy
+                </Link>
+                .
+              </p>
+
+              <p className="text-sm text-center text-gray-600">
+                Don't have an account?{" "}
+                <button
+                  type="button"
+                  className="text-[#F43676] font-semibold hover:underline"
+                  onClick={() => setIsLogin(false)}
+                >
+                  Sign up
+                </button>
+              </p>
+            </form>
+          ) : (
+            // ------------------- SIGNUP FORM -------------------
+            <form className="space-y-4" onSubmit={handleSignupSubmit}>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    First Name
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="First name"
+                    className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-[#F43676] transition-colors"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Last Name
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Last name"
+                    className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-[#F43676] transition-colors"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                  />
+                </div>
+              </div>
+
               <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Last Name
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Designation
                 </label>
                 <input
                   type="text"
-                  placeholder="Last name"
-                  className="w-full border rounded-lg px-3 py-2 mt-1"
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
+                  placeholder="Your designation"
+                  className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-[#F43676] transition-colors"
+                  value={designation}
+                  onChange={(e) => setDesignation(e.target.value)}
+                  required
                 />
               </div>
-            </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Designation
-              </label>
-              <input
-                type="text"
-                placeholder="Your designation"
-                className="w-full border rounded-lg px-3 py-2 mt-1"
-                value={designation}
-                onChange={(e) => setDesignation(e.target.value)}
-                required
-              />
-            </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Mobile
+                </label>
+                <input
+                  type="tel"
+                  placeholder="Enter mobile number"
+                  className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-[#F43676] transition-colors"
+                  value={mobile}
+                  onChange={(e) => setMobile(e.target.value)}
+                  required
+                />
+              </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Mobile
-              </label>
-              <input
-                type="tel"
-                placeholder="Enter mobile number"
-                className="w-full border rounded-lg px-3 py-2 mt-1"
-                value={mobile}
-                onChange={(e) => setMobile(e.target.value)}
-                required
-              />
-            </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  placeholder="Enter email"
+                  className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-[#F43676] transition-colors"
+                  value={signupEmail}
+                  onChange={(e) => setSignupEmail(e.target.value)}
+                  required
+                />
+              </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Email
-              </label>
-              <input
-                type="email"
-                placeholder="Enter email"
-                className="w-full border rounded-lg px-3 py-2 mt-1"
-                value={signupEmail}
-                onChange={(e) => setSignupEmail(e.target.value)}
-                required
-              />
-            </div>
+              <div className="relative">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Create Password
+                </label>
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Create password"
+                  className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 pr-12 focus:outline-none focus:border-[#F43676] transition-colors"
+                  value={createPassword}
+                  onChange={(e) => setCreatePassword(e.target.value)}
+                  required
+                />
+                <button
+                  type="button"
+                  className="absolute right-4 top-10 text-gray-400 hover:text-[#F43676] transition-colors"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
 
-            <div className="relative">
-              <label className="block text-sm font-medium text-gray-700">
-                Create Password
-              </label>
-              <input
-                type={showPassword ? "text" : "password"}
-                placeholder="Create password"
-                className="w-full border rounded-lg px-3 py-2 mt-1"
-                value={createPassword}
-                onChange={(e) => setCreatePassword(e.target.value)}
-                required
-              />
+              <div className="relative">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Confirm Password
+                </label>
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  placeholder="Confirm password"
+                  className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 pr-12 focus:outline-none focus:border-[#F43676] transition-colors"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                />
+                <button
+                  type="button"
+                  className="absolute right-4 top-10 text-gray-400 hover:text-[#F43676] transition-colors"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                >
+                  {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
+
+              {signupError && (
+                <p className="text-red-500 text-sm text-center bg-red-50 py-2 rounded-lg">{signupError}</p>
+              )}
+
               <button
-                type="button"
-                className="absolute right-3 top-9 text-gray-500"
-                onClick={() => setShowPassword(!showPassword)}
+                type="submit"
+                className="w-full bg-[#F43676] text-white py-3 rounded-xl font-medium hover:bg-[#e02a60] transition-colors shadow-lg hover:shadow-xl"
               >
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                Sign Up
               </button>
-            </div>
 
-            <div className="relative">
-              <label className="block text-sm font-medium text-gray-700">
-                Confirm Password
-              </label>
-              <input
-                type={showConfirmPassword ? "text" : "password"}
-                placeholder="Confirm password"
-                className="w-full border rounded-lg px-3 py-2 mt-1"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-              />
-              <button
-                type="button"
-                className="absolute right-3 top-9 text-gray-500"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              >
-                {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
-            </div>
-
-            {signupError && (
-              <p className="text-red-500 text-sm text-center">{signupError}</p>
-            )}
-
-            <button className="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition">
-              Sign Up
-            </button>
-
-            <p className="text-sm text-center text-gray-600">
-              Already have an account?{" "}
-              <span
-                className="text-[#3650AD] font-medium cursor-pointer"
-                onClick={() => setIsLogin(true)}
-              >
-                Login
-              </span>
-            </p>
-          </form>
-        )}
+              <p className="text-sm text-center text-gray-600">
+                Already have an account?{" "}
+                <button
+                  type="button"
+                  className="text-[#F43676] font-semibold hover:underline"
+                  onClick={() => setIsLogin(true)}
+                >
+                  Login
+                </button>
+              </p>
+            </form>
+          )}
+        </div>
       </div>
     </div>
   );
