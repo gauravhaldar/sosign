@@ -6,92 +6,151 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { FaChevronLeft, FaChevronRight, FaCalendarAlt, FaComment, FaPause, FaPlay } from "react-icons/fa";
+import config from "@/config/api";
 
-// Sample top stories data
-const topStories = [
+// Default fallback data in case API fails or returns empty
+const defaultHeroSlides = [
   {
-    id: 1,
-    title: "Campaign history",
-    date: "February 21, 2024",
-    image: "https://picsum.photos/seed/story1/100/100",
-  },
-  {
-    id: 2,
-    title: "Rapid Aircraft Interior Design via Renderings",
-    date: "February 21, 2024",
-    image: "https://picsum.photos/seed/story2/100/100",
-  },
-  {
-    id: 3,
-    title: "Top color palettes in graphic design",
-    date: "February 21, 2024",
-    image: "https://picsum.photos/seed/story3/100/100",
-  },
-  {
-    id: 4,
-    title: "Introducing New Styles of Football Soccer",
-    date: "February 21, 2024",
-    image: "https://picsum.photos/seed/story4/100/100",
-  },
-];
-
-// Sample hero slides data
-const heroSlides = [
-  {
-    id: 1,
+    id: "default-1",
     image: "https://picsum.photos/seed/hero1/800/600",
     categories: ["Environment", "Social"],
     title: "Join the Movement to Protect Our Planet",
     description: "Be part of the change. Every signature counts towards creating a better future for our environment and communities. Together we can make a difference.",
     date: "December 24, 2024",
-    comments: "24 Comments",
-    link: "/currentpetitions",
-  },
-  {
-    id: 2,
-    image: "https://picsum.photos/seed/hero2/800/600",
-    categories: ["Education", "Youth"],
-    title: "Empowering Youth Through Quality Education",
-    description: "Support our initiative to bring quality education to underprivileged children. Your voice can help shape the future of thousands of young minds.",
-    date: "December 20, 2024",
-    comments: "18 Comments",
-    link: "/currentpetitions",
-  },
-  {
-    id: 3,
-    image: "https://picsum.photos/seed/hero3/800/600",
-    categories: ["Healthcare", "Community"],
-    title: "Building Healthier Communities Together",
-    description: "Join hands to improve healthcare accessibility in rural areas. Every petition signed brings us closer to better health facilities for all.",
-    date: "December 18, 2024",
-    comments: "32 Comments",
+    comments: "0 Comments",
     link: "/currentpetitions",
   },
 ];
+
+const defaultTopStories = [
+  {
+    id: "default-story-1",
+    title: "Start your own petition today",
+    date: "Today",
+    image: "https://picsum.photos/seed/story1/100/100",
+  },
+];
+
+// Helper function to format date
+const formatDate = (dateString) => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
+};
+
+// Helper function to extract categories from petition (based on country or keywords)
+const extractCategories = (petition) => {
+  const categories = [];
+  
+  // Add country as a category
+  if (petition.country) {
+    categories.push(petition.country);
+  }
+  
+  // Try to extract category from title or problem description
+  const text = `${petition.title} ${petition.petitionDetails?.problem || ""}`.toLowerCase();
+  
+  if (text.includes("environment") || text.includes("climate") || text.includes("pollution")) {
+    categories.push("Environment");
+  } else if (text.includes("health") || text.includes("medical") || text.includes("hospital")) {
+    categories.push("Healthcare");
+  } else if (text.includes("education") || text.includes("school") || text.includes("student")) {
+    categories.push("Education");
+  } else if (text.includes("social") || text.includes("community") || text.includes("society")) {
+    categories.push("Community");
+  } else {
+    categories.push("Social");
+  }
+  
+  return categories.slice(0, 2); // Return max 2 categories
+};
 
 export default function Banner() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isTickerPaused, setIsTickerPaused] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [heroSlides, setHeroSlides] = useState(defaultHeroSlides);
+  const [topStories, setTopStories] = useState(defaultTopStories);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const router = useRouter();
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
+  // Fetch petitions from the backend
+  useEffect(() => {
+    const fetchPetitions = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`${config.API_BASE_URL}/api/petitions?limit=10`);
+        
+        if (!response.ok) {
+          throw new Error("Failed to fetch petitions");
+        }
+        
+        const data = await response.json();
+        
+        if (data.petitions && data.petitions.length > 0) {
+          // Transform petitions into hero slides format
+          const slides = data.petitions.map((petition) => ({
+            id: petition._id,
+            image: petition.petitionDetails?.image || `https://picsum.photos/seed/${petition._id}/800/600`,
+            categories: extractCategories(petition),
+            title: petition.title,
+            description: petition.petitionDetails?.problem || petition.petitionDetails?.solution || "Support this important cause by signing the petition.",
+            date: formatDate(petition.createdAt),
+            comments: `${petition.numberOfSignatures || 0} Signatures`,
+            link: `/petitions/${petition._id}`,
+          }));
+          
+          setHeroSlides(slides);
+          
+          // Transform petitions into top stories format
+          const stories = data.petitions.map((petition) => ({
+            id: petition._id,
+            title: petition.title.length > 40 ? petition.title.substring(0, 40) + "..." : petition.title,
+            date: formatDate(petition.createdAt),
+            image: petition.petitionDetails?.image || `https://picsum.photos/seed/${petition._id}/100/100`,
+          }));
+          
+          setTopStories(stories);
+        }
+        
+        setError(null);
+      } catch (err) {
+        console.error("Error fetching petitions:", err);
+        setError(err.message);
+        // Keep default data on error
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchPetitions();
+  }, []);
+
   // Auto-slide functionality
   useEffect(() => {
+    if (heroSlides.length === 0) return;
+    
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
     }, 5000);
     return () => clearInterval(interval);
-  }, []);
+  }, [heroSlides.length]);
 
   const nextSlide = () => {
+    if (heroSlides.length === 0) return;
     setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
   };
 
   const prevSlide = () => {
+    if (heroSlides.length === 0) return;
     setCurrentSlide((prev) => (prev - 1 + heroSlides.length) % heroSlides.length);
   };
 
