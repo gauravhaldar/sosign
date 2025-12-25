@@ -44,15 +44,15 @@ const formatDate = (dateString) => {
 // Helper function to extract categories from petition (based on country or keywords)
 const extractCategories = (petition) => {
   const categories = [];
-  
+
   // Add country as a category
   if (petition.country) {
     categories.push(petition.country);
   }
-  
+
   // Try to extract category from title or problem description
   const text = `${petition.title} ${petition.petitionDetails?.problem || ""}`.toLowerCase();
-  
+
   if (text.includes("environment") || text.includes("climate") || text.includes("pollution")) {
     categories.push("Environment");
   } else if (text.includes("health") || text.includes("medical") || text.includes("hospital")) {
@@ -64,7 +64,7 @@ const extractCategories = (petition) => {
   } else {
     categories.push("Social");
   }
-  
+
   return categories.slice(0, 2); // Return max 2 categories
 };
 
@@ -88,13 +88,13 @@ export default function Banner() {
       try {
         setLoading(true);
         const response = await fetch(`${config.API_BASE_URL}/api/petitions?limit=10`);
-        
+
         if (!response.ok) {
           throw new Error("Failed to fetch petitions");
         }
-        
+
         const data = await response.json();
-        
+
         if (data.petitions && data.petitions.length > 0) {
           // Transform petitions into hero slides format
           const slides = data.petitions.map((petition) => ({
@@ -107,9 +107,9 @@ export default function Banner() {
             comments: `${petition.numberOfSignatures || 0} Signatures`,
             link: `/petitions/${petition._id}`,
           }));
-          
+
           setHeroSlides(slides);
-          
+
           // Transform petitions into top stories format
           const stories = data.petitions.map((petition) => ({
             id: petition._id,
@@ -117,10 +117,10 @@ export default function Banner() {
             date: formatDate(petition.createdAt),
             image: petition.petitionDetails?.image || `https://picsum.photos/seed/${petition._id}/100/100`,
           }));
-          
+
           setTopStories(stories);
         }
-        
+
         setError(null);
       } catch (err) {
         console.error("Error fetching petitions:", err);
@@ -130,14 +130,14 @@ export default function Banner() {
         setLoading(false);
       }
     };
-    
+
     fetchPetitions();
   }, []);
 
   // Auto-slide functionality
   useEffect(() => {
     if (heroSlides.length === 0) return;
-    
+
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
     }, 5000);
@@ -187,8 +187,8 @@ export default function Banner() {
                 className="flex items-center gap-3 shrink-0 hover:opacity-80 transition-opacity"
               >
                 <div className="w-10 h-10 rounded-md overflow-hidden bg-gray-200 shrink-0">
-                  <img 
-                    src={story.image} 
+                  <img
+                    src={story.image}
                     alt={story.title}
                     className="w-full h-full object-cover"
                   />
@@ -217,58 +217,67 @@ export default function Banner() {
 
       {/* Hero Slider Section */}
       <div className="py-6">
-        <div className="relative bg-white rounded-3xl shadow-lg overflow-visible p-4 lg:p-6">
-          <div className="flex flex-col lg:flex-row items-stretch">
+        <div className="relative bg-white rounded-3xl shadow-lg overflow-hidden p-4 sm:p-6 lg:p-8">
+          <div className="flex flex-col lg:flex-row items-stretch gap-6 lg:gap-8">
             {/* Left Side - Image */}
-            <div className="lg:w-1/2 relative h-[300px] sm:h-[400px] lg:h-[450px] overflow-hidden rounded-2xl group lg:-ml-14 shadow-xl">
+            <div className="lg:w-[55%] relative h-[280px] sm:h-[350px] lg:h-[400px] overflow-hidden rounded-2xl group shadow-lg bg-gray-100 flex-shrink-0">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={currentSlide}
-                  initial={{ opacity: 0, x: 100 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -100 }}
+                  initial={{ opacity: 0, scale: 1.05 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.98 }}
                   transition={{ duration: 0.5, ease: "easeInOut" }}
-                  className="absolute inset-0"
+                  className="absolute inset-0 w-full h-full"
                 >
-                  <div 
-                    className="w-full h-full bg-cover bg-center transition-transform duration-500 ease-out group-hover:scale-110"
-                    style={{
-                      backgroundImage: `url('${heroSlides[currentSlide].image}')`,
-                      backgroundColor: '#e5e7eb'
+                  {/* Image with proper error handling */}
+                  <img
+                    src={heroSlides[currentSlide]?.image || "https://picsum.photos/seed/default/800/600"}
+                    alt={heroSlides[currentSlide]?.title || "Petition"}
+                    className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = `https://picsum.photos/seed/${heroSlides[currentSlide]?.id || "fallback"}/800/600`;
                     }}
-                  >
-                    {/* Fallback gradient if image doesn't exist */}
-                    <div className="w-full h-full bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500 flex items-center justify-center opacity-0 hover:opacity-0">
-                    </div>
-                  </div>
+                  />
+                  {/* Gradient overlay for better visual appeal */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent"></div>
                 </motion.div>
               </AnimatePresence>
 
               {/* Left Navigation Arrow */}
               <button
                 onClick={prevSlide}
-                className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-gray-50 transition-colors z-10 border border-gray-100"
+                className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-10 sm:h-10 bg-white/95 backdrop-blur-sm rounded-full shadow-lg flex items-center justify-center hover:bg-white hover:scale-105 transition-all z-10 border border-gray-100"
               >
-                <FaChevronLeft className="text-gray-600 text-sm" />
+                <FaChevronLeft className="text-gray-600 text-xs sm:text-sm" />
+              </button>
+
+              {/* Right Navigation Arrow - Inside Image */}
+              <button
+                onClick={nextSlide}
+                className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-10 sm:h-10 bg-white/95 backdrop-blur-sm rounded-full shadow-lg flex items-center justify-center hover:bg-white hover:scale-105 transition-all z-10 border border-gray-100"
+              >
+                <FaChevronRight className="text-gray-600 text-xs sm:text-sm" />
               </button>
             </div>
 
             {/* Right Side - Content */}
-            <div className="lg:w-1/2 p-6 lg:p-10 flex flex-col justify-center">
+            <div className="lg:w-1/2 p-4 sm:p-6 lg:p-8 flex flex-col justify-center min-h-[200px] lg:min-h-0">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={currentSlide}
-                  initial={{ opacity: 0, x: 50 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -50 }}
-                  transition={{ duration: 0.5, ease: "easeInOut" }}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.4, ease: "easeInOut" }}
                 >
                   {/* Category Tags */}
-                  <div className="flex gap-3 mb-5">
-                    {heroSlides[currentSlide].categories.map((category, index) => (
+                  <div className="flex flex-wrap gap-2 sm:gap-3 mb-4 sm:mb-5">
+                    {heroSlides[currentSlide]?.categories?.map((category, index) => (
                       <span
                         key={index}
-                        className="px-4 py-1.5 bg-[#F43676]/10 text-[#F43676] rounded-full text-sm font-medium hover:bg-[#F43676]/20 transition-colors cursor-pointer"
+                        className="px-3 sm:px-4 py-1 sm:py-1.5 bg-[#F43676]/10 text-[#F43676] rounded-full text-xs sm:text-sm font-medium hover:bg-[#F43676]/20 transition-colors cursor-pointer"
                       >
                         {category}
                       </span>
@@ -276,47 +285,54 @@ export default function Banner() {
                   </div>
 
                   {/* Title */}
-                  <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-[#1a1a2e] mb-4 leading-tight">
-                    {heroSlides[currentSlide].title}
+                  <h1 className="text-lg sm:text-xl lg:text-2xl xl:text-3xl font-bold text-[#1a1a2e] mb-3 sm:mb-4 leading-tight line-clamp-2">
+                    {heroSlides[currentSlide]?.title}
                   </h1>
 
                   {/* Description */}
-                  <p className="text-gray-500 text-base mb-6 leading-relaxed">
-                    {heroSlides[currentSlide].description}
+                  <p className="text-gray-500 text-sm sm:text-base mb-4 sm:mb-6 leading-relaxed line-clamp-3">
+                    {heroSlides[currentSlide]?.description}
                   </p>
 
                   {/* Continue Reading Link */}
                   <Link
-                    href={heroSlides[currentSlide].link}
-                    className="inline-flex items-center gap-2 text-gray-800 font-semibold hover:text-[#F43676] transition-colors mb-6 group"
+                    href={heroSlides[currentSlide]?.link || "/currentpetitions"}
+                    className="inline-flex items-center gap-2 text-gray-800 font-semibold hover:text-[#F43676] transition-colors mb-4 sm:mb-6 group text-sm sm:text-base"
                   >
                     Continue Reading
                     <FaChevronRight className="text-xs group-hover:translate-x-1 transition-transform" />
                   </Link>
 
-                  {/* Date and Comments */}
-                  <div className="flex items-center gap-4 text-gray-400 text-sm">
+                  {/* Date and Signatures */}
+                  <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-gray-400 text-xs sm:text-sm">
                     <span className="flex items-center gap-2">
                       <FaCalendarAlt className="text-gray-400" />
-                      {heroSlides[currentSlide].date}
+                      {heroSlides[currentSlide]?.date}
                     </span>
-                    <span className="text-[#F43676]">•</span>
+                    <span className="text-[#F43676] hidden sm:inline">•</span>
                     <span className="flex items-center gap-2">
                       <FaComment className="text-gray-400" />
-                      {heroSlides[currentSlide].comments}
+                      {heroSlides[currentSlide]?.comments}
                     </span>
                   </div>
                 </motion.div>
               </AnimatePresence>
             </div>
+          </div>
 
-            {/* Right Navigation Arrow */}
-            <button
-              onClick={nextSlide}
-              className="absolute right-8 top-1/2 -translate-y-1/2 w-10 h-10 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-gray-50 transition-colors z-10 border border-gray-100"
-            >
-              <FaChevronRight className="text-gray-600 text-sm" />
-            </button>
+          {/* Slide Indicators */}
+          <div className="flex justify-center gap-2 mt-4 lg:mt-6">
+            {heroSlides.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentSlide(index)}
+                className={`w-2 h-2 rounded-full transition-all duration-300 ${index === currentSlide
+                  ? "bg-[#F43676] w-6"
+                  : "bg-gray-300 hover:bg-gray-400"
+                  }`}
+                aria-label={`Go to slide ${index + 1}`}
+              />
+            ))}
           </div>
         </div>
       </div>
