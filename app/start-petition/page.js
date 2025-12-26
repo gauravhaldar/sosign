@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { FaYoutube, FaPlus, FaInfoCircle, FaCheckCircle, FaExclamationCircle } from "react-icons/fa";
+import { FaYoutube, FaPlus, FaCircleInfo, FaCircleCheck, FaCircleExclamation, FaPaw, FaGamepad, FaCouch, FaPersonRunning, FaLaptopCode, FaPlane, FaGraduationCap, FaHeartPulse, FaHandFist, FaLeaf, FaLandmarkDome, FaSpa } from "react-icons/fa6";
 import { useAuth } from "../../context/AuthContext";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -23,18 +23,18 @@ export default function StartPetitionPage() {
 
   // Available categories for petitions
   const categories = [
-    { id: "animals", label: "Animals", icon: "🐾" },
-    { id: "game", label: "Game", icon: "🎮" },
-    { id: "interior", label: "Interior", icon: "🏠" },
-    { id: "lifestyle", label: "Lifestyle", icon: "✨" },
-    { id: "sports", label: "Sports", icon: "⚽" },
-    { id: "technology", label: "Technology", icon: "💻" },
-    { id: "travel", label: "Travel", icon: "✈️" },
-    { id: "environment", label: "Environment", icon: "🌍" },
-    { id: "education", label: "Education", icon: "📚" },
-    { id: "health", label: "Health", icon: "🏥" },
-    { id: "politics", label: "Politics", icon: "🏛️" },
-    { id: "human_rights", label: "Human Rights", icon: "✊" },
+    { id: "animals", label: "Animals", icon: FaPaw },
+    { id: "game", label: "Game", icon: FaGamepad },
+    { id: "interior", label: "Interior", icon: FaCouch },
+    { id: "lifestyle", label: "Lifestyle", icon: FaSpa },
+    { id: "sports", label: "Sports", icon: FaPersonRunning },
+    { id: "technology", label: "Technology", icon: FaLaptopCode },
+    { id: "travel", label: "Travel", icon: FaPlane },
+    { id: "environment", label: "Environment", icon: FaLeaf },
+    { id: "education", label: "Education", icon: FaGraduationCap },
+    { id: "health", label: "Health", icon: FaHeartPulse },
+    { id: "politics", label: "Politics", icon: FaLandmarkDome },
+    { id: "human_rights", label: "Human Rights", icon: FaHandFist },
   ];
 
   // Form data state
@@ -540,18 +540,18 @@ export default function StartPetitionPage() {
                         className={props.className}
                         placeholder="Enter a clear, compelling petition title..."
                       />
-                      {props.showError && <FaExclamationCircle className="absolute right-3 top-3 text-red-500" />}
-                      {props.showSuccess && <FaCheckCircle className="absolute right-3 top-3 text-green-500" />}
+                      {props.showError && <FaCircleExclamation className="absolute right-3 top-3 text-red-500" />}
+                      {props.showSuccess && <FaCircleCheck className="absolute right-3 top-3 text-green-500" />}
                     </div>
                     {props.showError && (
                       <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
-                        <FaExclamationCircle className="text-xs" />
+                        <FaCircleExclamation className="text-xs" />
                         {props.error}
                       </p>
                     )}
                     {props.rules?.example && !props.showError && formData.title === "" && (
                       <p className="text-gray-500 text-xs mt-1 flex items-center gap-1">
-                        <FaInfoCircle className="text-xs text-blue-400" />
+                        <FaCircleInfo className="text-xs text-blue-400" />
                         {props.rules.example}
                       </p>
                     )}
@@ -574,7 +574,7 @@ export default function StartPetitionPage() {
                   <span className="text-gray-400 text-sm ml-2">(at least one required)</span>
                 </label>
                 <p className="text-sm text-gray-500 mb-4 flex items-center gap-1">
-                  <FaInfoCircle className="text-blue-400" />
+                  <FaCircleInfo className="text-blue-400" />
                   Choose categories that best describe your petition. This helps people find your cause.
                 </p>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
@@ -592,10 +592,13 @@ export default function StartPetitionPage() {
                           : "border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:bg-gray-50"
                           }`}
                       >
-                        <span className="text-lg">{category.icon}</span>
+                        {(() => {
+                          const IconComponent = category.icon;
+                          return <IconComponent className={`text-lg ${isSelected ? 'text-[#F43676]' : 'text-[#2D3A8C]'}`} />;
+                        })()}
                         <span>{category.label}</span>
                         {isSelected && (
-                          <FaCheckCircle className="ml-auto text-[#F43676]" />
+                          <FaCircleCheck className="ml-auto text-[#F43676]" />
                         )}
                       </motion.button>
                     );
@@ -605,13 +608,13 @@ export default function StartPetitionPage() {
                 {/* Category validation feedback */}
                 {selectedCategories.length === 0 && (
                   <p className="text-orange-500 text-sm mt-3 flex items-center gap-1">
-                    <FaExclamationCircle className="text-xs" />
+                    <FaCircleExclamation className="text-xs" />
                     Please select at least one category for your petition
                   </p>
                 )}
                 {selectedCategories.length > 0 && (
                   <p className="text-green-600 text-sm mt-3 flex items-center gap-1">
-                    <FaCheckCircle className="text-xs" />
+                    <FaCircleCheck className="text-xs" />
                     {selectedCategories.length} {selectedCategories.length === 1 ? "category" : "categories"} selected
                   </p>
                 )}
@@ -635,7 +638,7 @@ export default function StartPetitionPage() {
                 Add contact details of decision makers who have the power to address your petition.
               </p>
               <p className="mb-4 text-sm text-gray-500 flex items-center gap-1">
-                <FaInfoCircle className="text-blue-400" />
+                <FaCircleInfo className="text-blue-400" />
                 At least one recipient with a valid name (3+ characters) and email address is required.
               </p>
               <div className="space-y-4">
@@ -678,18 +681,18 @@ export default function StartPetitionPage() {
                             placeholder="e.g., Dr. Rajesh Kumar or Hon. Smt. Nirmala Sitharaman"
                           />
                           {touchedFields[`recipient_${recipientIdx}_name`] && nameValidation.isValid && recipient.name && (
-                            <FaCheckCircle className="absolute right-3 top-3 text-green-500" />
+                            <FaCircleCheck className="absolute right-3 top-3 text-green-500" />
                           )}
                         </div>
                         {!recipient.name && (
                           <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
-                            <FaInfoCircle className="text-blue-400" />
+                            <FaCircleInfo className="text-blue-400" />
                             Enter the decision maker&apos;s full name with title if applicable
                           </p>
                         )}
                         {touchedFields[`recipient_${recipientIdx}_name`] && !nameValidation.isValid && recipient.name && (
                           <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
-                            <FaExclamationCircle className="text-xs" />
+                            <FaCircleExclamation className="text-xs" />
                             {nameValidation.error}
                           </p>
                         )}
@@ -709,7 +712,7 @@ export default function StartPetitionPage() {
                         />
                         {!recipient.organization && (
                           <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
-                            <FaInfoCircle className="text-blue-400" />
+                            <FaCircleInfo className="text-blue-400" />
                             The government ministry, department, or organization they represent
                           </p>
                         )}
@@ -735,18 +738,18 @@ export default function StartPetitionPage() {
                             placeholder="e.g., secretary@ministry.gov.in or contact@organization.org"
                           />
                           {touchedFields[`recipient_${recipientIdx}_email`] && emailValidation.isValid && recipient.email && (
-                            <FaCheckCircle className="absolute right-3 top-3 text-green-500" />
+                            <FaCircleCheck className="absolute right-3 top-3 text-green-500" />
                           )}
                         </div>
                         {!recipient.email && (
                           <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
-                            <FaInfoCircle className="text-blue-400" />
+                            <FaCircleInfo className="text-blue-400" />
                             Official email address where petition will be delivered
                           </p>
                         )}
                         {touchedFields[`recipient_${recipientIdx}_email`] && !emailValidation.isValid && recipient.email && (
                           <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
-                            <FaExclamationCircle className="text-xs" />
+                            <FaCircleExclamation className="text-xs" />
                             {emailValidation.error}
                           </p>
                         )}
@@ -772,18 +775,18 @@ export default function StartPetitionPage() {
                             placeholder="e.g., +91 11 2338 8911 or 011-23388911"
                           />
                           {touchedFields[`recipient_${recipientIdx}_phone`] && phoneValidation.isValid && recipient.phone && (
-                            <FaCheckCircle className="absolute right-3 top-3 text-green-500" />
+                            <FaCircleCheck className="absolute right-3 top-3 text-green-500" />
                           )}
                         </div>
                         {!recipient.phone && (
                           <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
-                            <FaInfoCircle className="text-blue-400" />
+                            <FaCircleInfo className="text-blue-400" />
                             Official phone or landline number (if available)
                           </p>
                         )}
                         {touchedFields[`recipient_${recipientIdx}_phone`] && !phoneValidation.isValid && recipient.phone && (
                           <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
-                            <FaExclamationCircle className="text-xs" />
+                            <FaCircleExclamation className="text-xs" />
                             {phoneValidation.error}
                           </p>
                         )}
@@ -812,7 +815,7 @@ export default function StartPetitionPage() {
                     <option>Other</option>
                   </select>
                   <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
-                    <FaInfoCircle className="text-blue-400" />
+                    <FaCircleInfo className="text-blue-400" />
                     Select the country where the petition is addressed
                   </p>
                 </div>
@@ -833,7 +836,7 @@ export default function StartPetitionPage() {
                 Petition Details
               </h2>
               <p className="mb-4 text-sm text-gray-500 flex items-center gap-1">
-                <FaInfoCircle className="text-blue-400" />
+                <FaCircleInfo className="text-blue-400" />
                 Describe your cause clearly to help supporters understand and sign your petition.
               </p>
 
@@ -858,13 +861,13 @@ export default function StartPetitionPage() {
                       />
                       {props.showError && (
                         <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
-                          <FaExclamationCircle className="text-xs" />
+                          <FaCircleExclamation className="text-xs" />
                           {props.error}
                         </p>
                       )}
                       {props.rules?.example && !props.showError && formData.problem === "" && (
                         <p className="text-gray-500 text-xs mt-1 flex items-center gap-1">
-                          <FaInfoCircle className="text-xs text-blue-400" />
+                          <FaCircleInfo className="text-xs text-blue-400" />
                           {props.rules.example}
                         </p>
                       )}
@@ -901,13 +904,13 @@ export default function StartPetitionPage() {
                       />
                       {props.showError && (
                         <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
-                          <FaExclamationCircle className="text-xs" />
+                          <FaCircleExclamation className="text-xs" />
                           {props.error}
                         </p>
                       )}
                       {props.rules?.example && !props.showError && formData.solution === "" && (
                         <p className="text-gray-500 text-xs mt-1 flex items-center gap-1">
-                          <FaInfoCircle className="text-xs text-blue-400" />
+                          <FaCircleInfo className="text-xs text-blue-400" />
                           {props.rules.example}
                         </p>
                       )}
@@ -955,7 +958,7 @@ export default function StartPetitionPage() {
                   />
                 </div>
                 <p className="text-xs text-gray-500 flex items-center gap-1">
-                  <FaInfoCircle className="text-blue-400" />
+                  <FaCircleInfo className="text-blue-400" />
                   Add a powerful image that represents your cause (JPG, PNG, or GIF, max 5MB)
                 </p>
               </div>
@@ -981,18 +984,18 @@ export default function StartPetitionPage() {
                   />
                   <FaYoutube className="absolute left-3 top-1/2 -translate-y-1/2 text-red-500 text-xl" />
                   {touchedFields.videoUrl && formData.videoUrl && validateField("videoUrl", formData.videoUrl).isValid && (
-                    <FaCheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 text-green-500" />
+                    <FaCircleCheck className="absolute right-3 top-1/2 -translate-y-1/2 text-green-500" />
                   )}
                 </div>
                 {!formData.videoUrl && (
                   <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
-                    <FaInfoCircle className="text-blue-400" />
+                    <FaCircleInfo className="text-blue-400" />
                     Add a YouTube video explaining your cause to increase engagement
                   </p>
                 )}
                 {touchedFields.videoUrl && formData.videoUrl && !validateField("videoUrl", formData.videoUrl).isValid && (
                   <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
-                    <FaExclamationCircle className="text-xs" />
+                    <FaCircleExclamation className="text-xs" />
                     Please enter a valid YouTube URL (e.g., youtube.com/watch?v=... or youtu.be/...)
                   </p>
                 )}
@@ -1013,7 +1016,7 @@ export default function StartPetitionPage() {
                 Petition Starter Information
               </h2>
               <p className="mb-4 text-sm text-gray-500 flex items-center gap-1">
-                <FaInfoCircle className="text-blue-400" />
+                <FaCircleInfo className="text-blue-400" />
                 Your personal information helps verify your identity as the petition creator. Fields marked with * are required.
               </p>
 
@@ -1036,7 +1039,7 @@ export default function StartPetitionPage() {
                   )}
                   {formData.starter.name === "" && (
                     <p className="text-gray-500 text-xs mt-1 flex items-center gap-1">
-                      <FaInfoCircle className="text-xs text-blue-400" />
+                      <FaCircleInfo className="text-xs text-blue-400" />
                       Enter your full legal name as it appears on ID
                     </p>
                   )}
@@ -1060,7 +1063,7 @@ export default function StartPetitionPage() {
                   )}
                   {formData.starter.age === "" && (
                     <p className="text-gray-500 text-xs mt-1 flex items-center gap-1">
-                      <FaInfoCircle className="text-xs text-blue-400" />
+                      <FaCircleInfo className="text-xs text-blue-400" />
                       You must be 18 years or older
                     </p>
                   )}
@@ -1084,7 +1087,7 @@ export default function StartPetitionPage() {
                   )}
                   {formData.starter.email === "" && (
                     <p className="text-gray-500 text-xs mt-1 flex items-center gap-1">
-                      <FaInfoCircle className="text-xs text-blue-400" />
+                      <FaCircleInfo className="text-xs text-blue-400" />
                       We&apos;ll send petition updates to this email
                     </p>
                   )}
@@ -1108,7 +1111,7 @@ export default function StartPetitionPage() {
                   )}
                   {formData.starter.mobile === "" && (
                     <p className="text-gray-500 text-xs mt-1 flex items-center gap-1">
-                      <FaInfoCircle className="text-xs text-blue-400" />
+                      <FaCircleInfo className="text-xs text-blue-400" />
                       10-digit Indian mobile number starting with 6-9
                     </p>
                   )}
@@ -1132,7 +1135,7 @@ export default function StartPetitionPage() {
                   )}
                   {formData.starter.location === "" && (
                     <p className="text-gray-500 text-xs mt-1 flex items-center gap-1">
-                      <FaInfoCircle className="text-xs text-blue-400" />
+                      <FaCircleInfo className="text-xs text-blue-400" />
                       Your city, locality and state
                     </p>
                   )}
@@ -1153,7 +1156,7 @@ export default function StartPetitionPage() {
                   />
                   {formData.starter.comment === "" && (
                     <p className="text-gray-500 text-xs mt-1 flex items-center gap-1">
-                      <FaInfoCircle className="text-xs text-blue-400" />
+                      <FaCircleInfo className="text-xs text-blue-400" />
                       Optional: Share your personal connection to this cause
                     </p>
                   )}
@@ -1164,7 +1167,7 @@ export default function StartPetitionPage() {
               <div className="mt-6 pt-6 border-t border-gray-200">
                 <h3 className="text-lg font-semibold mb-2 text-gray-700">Identity Verification</h3>
                 <p className="mb-4 text-sm text-gray-500 flex items-center gap-1">
-                  <FaInfoCircle className="text-blue-400" />
+                  <FaCircleInfo className="text-blue-400" />
                   Provide at least your Aadhar number for identity verification. Other documents are optional.
                 </p>
 
@@ -1198,7 +1201,7 @@ export default function StartPetitionPage() {
                     )}
                     {formData.starter.aadharNumber === "" && (
                       <p className="text-gray-500 text-xs mt-1 flex items-center gap-1">
-                        <FaInfoCircle className="text-xs text-blue-400" />
+                        <FaCircleInfo className="text-xs text-blue-400" />
                         12 digits, cannot start with 0 or 1
                       </p>
                     )}
@@ -1247,7 +1250,7 @@ export default function StartPetitionPage() {
                     )}
                     {formData.starter.panNumber === "" && (
                       <p className="text-gray-500 text-xs mt-1 flex items-center gap-1">
-                        <FaInfoCircle className="text-xs text-blue-400" />
+                        <FaCircleInfo className="text-xs text-blue-400" />
                         Format: XXXXX0000X (all uppercase)
                       </p>
                     )}
@@ -1285,7 +1288,7 @@ export default function StartPetitionPage() {
                     )}
                     {formData.starter.voterNumber === "" && (
                       <p className="text-gray-500 text-xs mt-1 flex items-center gap-1">
-                        <FaInfoCircle className="text-xs text-blue-400" />
+                        <FaCircleInfo className="text-xs text-blue-400" />
                         Format: XXX0000000 (3 letters + 7 digits)
                       </p>
                     )}
@@ -1309,7 +1312,7 @@ export default function StartPetitionPage() {
                     )}
                     {formData.starter.pincode === "" && (
                       <p className="text-gray-500 text-xs mt-1 flex items-center gap-1">
-                        <FaInfoCircle className="text-xs text-blue-400" />
+                        <FaCircleInfo className="text-xs text-blue-400" />
                         6-digit Indian pincode
                       </p>
                     )}
@@ -1330,7 +1333,7 @@ export default function StartPetitionPage() {
                     />
                     {formData.starter.mpConstituencyNumber === "" && (
                       <p className="text-gray-500 text-xs mt-1 flex items-center gap-1">
-                        <FaInfoCircle className="text-xs text-blue-400" />
+                        <FaCircleInfo className="text-xs text-blue-400" />
                         Find at eci.gov.in
                       </p>
                     )}
@@ -1351,7 +1354,7 @@ export default function StartPetitionPage() {
                     />
                     {formData.starter.mlaConstituencyNumber === "" && (
                       <p className="text-gray-500 text-xs mt-1 flex items-center gap-1">
-                        <FaInfoCircle className="text-xs text-blue-400" />
+                        <FaCircleInfo className="text-xs text-blue-400" />
                         Find at your state election commission
                       </p>
                     )}
@@ -1363,7 +1366,7 @@ export default function StartPetitionPage() {
               {!isStep4Valid() && (
                 <div className="mt-6 p-4 bg-orange-50 border border-orange-200 rounded-lg">
                   <p className="text-orange-700 text-sm flex items-center gap-2">
-                    <FaExclamationCircle />
+                    <FaCircleExclamation />
                     Please complete all required fields (*) with valid information before submitting.
                   </p>
                 </div>
