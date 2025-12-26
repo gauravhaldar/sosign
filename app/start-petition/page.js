@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { FaYoutube, FaPlus } from "react-icons/fa";
+import { FaYoutube, FaPlus, FaInfoCircle, FaCheckCircle, FaExclamationCircle } from "react-icons/fa";
 import { useAuth } from "../../context/AuthContext";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -17,7 +17,25 @@ export default function StartPetitionPage() {
   ]);
   const [selectedImage, setSelectedImage] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [touchedFields, setTouchedFields] = useState({});
+  const [selectedCategories, setSelectedCategories] = useState([]);
   const totalSteps = 4;
+
+  // Available categories for petitions
+  const categories = [
+    { id: "animals", label: "Animals", icon: "🐾" },
+    { id: "game", label: "Game", icon: "🎮" },
+    { id: "interior", label: "Interior", icon: "🏠" },
+    { id: "lifestyle", label: "Lifestyle", icon: "✨" },
+    { id: "sports", label: "Sports", icon: "⚽" },
+    { id: "technology", label: "Technology", icon: "💻" },
+    { id: "travel", label: "Travel", icon: "✈️" },
+    { id: "environment", label: "Environment", icon: "🌍" },
+    { id: "education", label: "Education", icon: "📚" },
+    { id: "health", label: "Health", icon: "🏥" },
+    { id: "politics", label: "Politics", icon: "🏛️" },
+    { id: "human_rights", label: "Human Rights", icon: "✊" },
+  ];
 
   // Form data state
   const [formData, setFormData] = useState({
@@ -41,6 +59,220 @@ export default function StartPetitionPage() {
       mlaConstituencyNumber: "",
     },
   });
+
+  // ===== VALIDATION RULES =====
+  const validationRules = {
+    // Step 1
+    title: {
+      required: true,
+      minLength: 10,
+      maxLength: 150,
+      pattern: null,
+      message: "Title must be between 10-150 characters",
+      example: "e.g., 'Stop Illegal Deforestation in Western Ghats' or 'Improve Road Safety in School Zones'"
+    },
+
+    // Step 2 - Recipients
+    recipientName: {
+      required: true,
+      minLength: 3,
+      maxLength: 100,
+      pattern: /^[a-zA-Z\s.'-]+$/,
+      message: "Please enter a valid name (letters, spaces, and basic punctuation only)",
+      example: "e.g., 'Dr. Rajesh Kumar' or 'Smt. Priya Sharma'"
+    },
+    recipientOrganization: {
+      required: false,
+      minLength: 3,
+      maxLength: 150,
+      pattern: null,
+      message: "Organization name should be at least 3 characters",
+      example: "e.g., 'Ministry of Environment' or 'Municipal Corporation of Delhi'"
+    },
+    recipientEmail: {
+      required: true,
+      minLength: 5,
+      maxLength: 100,
+      pattern: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+      message: "Please enter a valid email address",
+      example: "e.g., 'official@ministry.gov.in' or 'contact@organization.org'"
+    },
+    recipientPhone: {
+      required: false,
+      minLength: 10,
+      maxLength: 15,
+      pattern: /^[\+]?[(]?[0-9]{1,4}[)]?[-\s\.]?[0-9]{1,4}[-\s\.]?[0-9]{1,9}$/,
+      message: "Please enter a valid phone number (10-15 digits)",
+      example: "e.g., '+91 98765 43210' or '011-23456789'"
+    },
+
+    // Step 3
+    problem: {
+      required: true,
+      minLength: 50,
+      maxLength: 2000,
+      pattern: null,
+      message: "Problem description must be between 50-2000 characters",
+      example: "Describe who is affected, what the issue is, and why it matters. Be specific about locations, numbers, and impact."
+    },
+    solution: {
+      required: true,
+      minLength: 30,
+      maxLength: 1500,
+      pattern: null,
+      message: "Solution must be between 30-1500 characters",
+      example: "What specific action do you want the decision maker to take? Be clear about timelines and expected outcomes."
+    },
+    videoUrl: {
+      required: false,
+      minLength: 0,
+      maxLength: 500,
+      pattern: /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)[a-zA-Z0-9_-]{11}$/,
+      message: "Please enter a valid YouTube URL",
+      example: "e.g., 'https://www.youtube.com/watch?v=abc123xyz' or 'https://youtu.be/abc123xyz'"
+    },
+
+    // Step 4 - Petition Starter
+    starterName: {
+      required: true,
+      minLength: 3,
+      maxLength: 100,
+      pattern: /^[a-zA-Z\s.'-]+$/,
+      message: "Please enter your full legal name (letters and spaces only)",
+      example: "e.g., 'Rajesh Kumar Singh' or 'Priya Sharma'"
+    },
+    starterAge: {
+      required: true,
+      minLength: 1,
+      maxLength: 3,
+      pattern: /^(?:1[89]|[2-9][0-9]|1[01][0-9]|120)$/,
+      message: "Age must be between 18-120 years",
+      example: "e.g., '25' or '45' (You must be 18+ to create a petition)"
+    },
+    starterEmail: {
+      required: true,
+      minLength: 5,
+      maxLength: 100,
+      pattern: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+      message: "Please enter a valid email address",
+      example: "e.g., 'yourname@gmail.com' or 'yourname@company.co.in'"
+    },
+    starterMobile: {
+      required: true,
+      minLength: 10,
+      maxLength: 15,
+      pattern: /^[6-9]\d{9}$/,
+      message: "Please enter a valid 10-digit Indian mobile number",
+      example: "e.g., '9876543210' (without country code, starting with 6-9)"
+    },
+    starterLocation: {
+      required: true,
+      minLength: 5,
+      maxLength: 200,
+      pattern: null,
+      message: "Location must be at least 5 characters",
+      example: "e.g., 'Andheri West, Mumbai, Maharashtra' or 'Sector 15, Noida, UP'"
+    },
+    starterComment: {
+      required: false,
+      minLength: 0,
+      maxLength: 500,
+      pattern: null,
+      message: "Comment must be under 500 characters",
+      example: "Share why this cause is important to you or any additional context"
+    },
+    aadharNumber: {
+      required: true,
+      minLength: 12,
+      maxLength: 14,
+      pattern: /^[2-9]{1}[0-9]{3}[\s-]?[0-9]{4}[\s-]?[0-9]{4}$/,
+      message: "Please enter a valid 12-digit Aadhar number",
+      example: "e.g., '2345 6789 0123' or '234567890123' (12 digits, cannot start with 0 or 1)"
+    },
+    panNumber: {
+      required: false,
+      minLength: 10,
+      maxLength: 10,
+      pattern: /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/,
+      message: "Please enter a valid PAN number (5 letters, 4 digits, 1 letter)",
+      example: "e.g., 'ABCDE1234F' (Format: XXXXX0000X - all uppercase)"
+    },
+    voterNumber: {
+      required: false,
+      minLength: 10,
+      maxLength: 10,
+      pattern: /^[A-Z]{3}[0-9]{7}$/,
+      message: "Please enter a valid Voter ID (3 letters + 7 digits)",
+      example: "e.g., 'ABC1234567' (Format: XXX0000000 - 3 uppercase letters + 7 digits)"
+    },
+    pincode: {
+      required: false,
+      minLength: 6,
+      maxLength: 6,
+      pattern: /^[1-9][0-9]{5}$/,
+      message: "Please enter a valid 6-digit Indian pincode",
+      example: "e.g., '400001' (Mumbai) or '110001' (Delhi) - cannot start with 0"
+    },
+    mpConstituencyNumber: {
+      required: false,
+      minLength: 1,
+      maxLength: 5,
+      pattern: /^[1-9][0-9]{0,4}$/,
+      message: "Please enter a valid constituency number (1-543)",
+      example: "e.g., '1' to '543' - Find your constituency number at eci.gov.in"
+    },
+    mlaConstituencyNumber: {
+      required: false,
+      minLength: 1,
+      maxLength: 5,
+      pattern: /^[1-9][0-9]{0,4}$/,
+      message: "Please enter a valid constituency number",
+      example: "e.g., '1' to '403' (varies by state) - Find yours at your state election commission"
+    }
+  };
+
+  // ===== VALIDATION HELPER FUNCTIONS =====
+  const validateField = (fieldName, value, customRules = null) => {
+    const rules = customRules || validationRules[fieldName];
+    if (!rules) return { isValid: true, error: null };
+
+    const trimmedValue = value?.toString().trim() || "";
+
+    // Check required
+    if (rules.required && trimmedValue === "") {
+      return { isValid: false, error: "This field is required" };
+    }
+
+    // If not required and empty, it's valid
+    if (!rules.required && trimmedValue === "") {
+      return { isValid: true, error: null };
+    }
+
+    // Check min length
+    if (rules.minLength && trimmedValue.length < rules.minLength) {
+      return { isValid: false, error: `Must be at least ${rules.minLength} characters` };
+    }
+
+    // Check max length
+    if (rules.maxLength && trimmedValue.length > rules.maxLength) {
+      return { isValid: false, error: `Must be no more than ${rules.maxLength} characters` };
+    }
+
+    // Check pattern
+    if (rules.pattern && !rules.pattern.test(trimmedValue)) {
+      return { isValid: false, error: rules.message };
+    }
+
+    return { isValid: true, error: null };
+  };
+
+  const getFieldValidation = (fieldName, value) => {
+    return validateField(fieldName, value);
+  };
+
+  const markFieldTouched = (fieldName) => {
+    setTouchedFields(prev => ({ ...prev, [fieldName]: true }));
+  };
 
   // Handle authentication loading and redirect
   useEffect(() => {
@@ -66,36 +298,60 @@ export default function StartPetitionPage() {
   const nextStep = () => setStep((prev) => Math.min(prev + 1, totalSteps));
   const prevStep = () => setStep((prev) => Math.max(prev - 1, 1));
 
-  // Validation functions for each step
+  // Enhanced Validation functions for each step
   const isStep1Valid = () => {
-    return formData.title.trim() !== "";
+    const titleValidation = validateField("title", formData.title);
+    const hasCategories = selectedCategories.length > 0;
+    return titleValidation.isValid && hasCategories;
+  };
+
+  // Toggle category selection
+  const toggleCategory = (categoryId) => {
+    setSelectedCategories((prev) =>
+      prev.includes(categoryId)
+        ? prev.filter((id) => id !== categoryId)
+        : [...prev, categoryId]
+    );
   };
 
   const isStep2Valid = () => {
-    // At least one recipient with name and valid email (must contain @)
-    return recipients.some(
-      (recipient) =>
-        recipient.name.trim() !== "" && 
-        recipient.email.trim() !== "" &&
-        recipient.email.includes("@")
-    );
+    // At least one recipient with valid name and email
+    return recipients.some((recipient) => {
+      const nameValid = validateField("recipientName", recipient.name).isValid;
+      const emailValid = validateField("recipientEmail", recipient.email).isValid;
+      return nameValid && emailValid;
+    });
   };
 
   const isStep3Valid = () => {
-    return formData.problem.trim() !== "" && formData.solution.trim() !== "";
+    const problemValid = validateField("problem", formData.problem).isValid;
+    const solutionValid = validateField("solution", formData.solution).isValid;
+    const videoValid = !formData.videoUrl || validateField("videoUrl", formData.videoUrl).isValid;
+    return problemValid && solutionValid && videoValid;
   };
 
   const isStep4Valid = () => {
-    const { name, age, email, mobile, location, aadharNumber } =
-      formData.starter;
-    return (
-      name.trim() !== "" &&
-      age.trim() !== "" &&
-      email.trim() !== "" &&
-      mobile.trim() !== "" &&
-      location.trim() !== "" &&
-      aadharNumber.trim() !== ""
-    );
+    const validations = [
+      validateField("starterName", formData.starter.name),
+      validateField("starterAge", formData.starter.age),
+      validateField("starterEmail", formData.starter.email),
+      validateField("starterMobile", formData.starter.mobile),
+      validateField("starterLocation", formData.starter.location),
+      validateField("aadharNumber", formData.starter.aadharNumber),
+    ];
+
+    // Optional fields - only validate if they have a value
+    if (formData.starter.panNumber) {
+      validations.push(validateField("panNumber", formData.starter.panNumber));
+    }
+    if (formData.starter.voterNumber) {
+      validations.push(validateField("voterNumber", formData.starter.voterNumber));
+    }
+    if (formData.starter.pincode) {
+      validations.push(validateField("pincode", formData.starter.pincode));
+    }
+
+    return validations.every(v => v.isValid);
   };
 
   // Function to check if current step is valid
@@ -146,6 +402,7 @@ export default function StartPetitionPage() {
       const submitData = new FormData();
       submitData.append("title", formData.title);
       submitData.append("country", formData.country);
+      submitData.append("categories", JSON.stringify(selectedCategories));
 
       const validRecipients = recipients.filter((r) => r.name && r.email);
       submitData.append("decisionMakers", JSON.stringify(validRecipients));
@@ -210,504 +467,963 @@ export default function StartPetitionPage() {
     exit: { opacity: 0, x: -50, scale: 0.95 },
   };
 
+  // ===== HELPER FUNCTION FOR INPUT STYLING (not a component to avoid focus issues) =====
+  const getInputProps = (fieldName, value) => {
+    const rules = validationRules[fieldName];
+    const validation = getFieldValidation(fieldName, value);
+    const isTouched = touchedFields[fieldName];
+    const showError = isTouched && !validation.isValid && value !== "";
+    const showSuccess = isTouched && validation.isValid && value !== "";
+
+    const inputClasses = `w-full border p-3 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F43676] focus:outline-none transition-all duration-200 ${showError ? "border-red-400 bg-red-50" :
+      showSuccess ? "border-green-400 bg-green-50" :
+        "border-gray-300"
+      }`;
+
+    return {
+      className: inputClasses,
+      showError,
+      showSuccess,
+      error: validation.error,
+      rules,
+      isTouched
+    };
+  };
+
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <motion.div
-        className="w-full bg-gray-200 rounded-full h-3 mb-6 overflow-hidden"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-      >
+    <section className="bg-[#f0f2f5] min-h-screen px-8 sm:px-16 lg:px-24 py-8">
+      <div className="max-w-4xl mx-auto bg-white rounded-3xl shadow-lg p-6 sm:p-8 lg:p-10">
         <motion.div
-          className="bg-gradient-to-r from-blue-500 to-teal-500 h-3 rounded-full"
-          initial={{ width: 0 }}
-          animate={{ width: `${(step / totalSteps) * 100}%` }}
-          transition={{ duration: 0.5 }}
-        ></motion.div>
-      </motion.div>
-
-      <AnimatePresence mode="wait">
-        {step === 1 && (
+          className="w-full bg-gray-200 rounded-full h-3 mb-6 overflow-hidden"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+        >
           <motion.div
-            key="step1"
-            variants={stepVariants}
-            initial="initial"
-            animate="animate"
-            exit="exit"
-            transition={{ duration: 0.4 }}
-          >
-            <h1 className="text-3xl font-extrabold mb-2 text-gray-700">
-              Create a Powerful Online Petition in Minutes!
-            </h1>
-            <p className="mb-6 text-gray-600">
-              Start by filling out this form, and in a few minutes you will be
-              ready to collect thousands of signatures.
-            </p>
-            <label className="block mb-2 font-medium">
-              Petition Title <span className="text-red-500">*</span>
-            </label>
-            <motion.input
-              whileFocus={{ scale: 1.02, borderColor: "#0ea5e9" }}
-              type="text"
-              value={formData.title}
-              onChange={(e) => handleInputChange("title", e.target.value)}
-              className="w-full border p-3 rounded-lg shadow-sm mb-4 focus:ring-2 focus:ring-blue-400"
-              placeholder="Enter petition title"
-            />
-          </motion.div>
-        )}
+            className="bg-gradient-to-r from-[#2D3A8C] via-[#F43676] to-[#2D3A8C] h-3 rounded-full"
+            initial={{ width: 0 }}
+            animate={{ width: `${(step / totalSteps) * 100}%` }}
+            transition={{ duration: 0.5 }}
+          ></motion.div>
+        </motion.div>
 
-        {step === 2 && (
-          <motion.div
-            key="step2"
-            variants={stepVariants}
-            initial="initial"
-            animate="animate"
-            exit="exit"
-            transition={{ duration: 0.4 }}
-          >
-            <h2 className="text-2xl font-bold mb-4 text-gray-700">
-              Who can make it happen?
-            </h2>
-            <p className="mb-4 font-medium text-gray-600">
-              Add email address of decision makers{" "}
-              <span className="text-red-500">
-                (At least one recipient with name and valid email is required)
-              </span>
-            </p>
-            <div className="space-y-3">
-              {recipients.map((recipient, recipientIdx) => (
-                <div key={recipientIdx} className="space-y-3">
-                  <motion.input
-                    whileFocus={{ scale: 1.02, borderColor: "#0ea5e9" }}
+        <AnimatePresence mode="wait">
+          {step === 1 && (
+            <motion.div
+              key="step1"
+              variants={stepVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={{ duration: 0.4 }}
+            >
+              <h1 className="text-3xl font-extrabold mb-2 text-gray-700">
+                Create a Powerful Online Petition in Minutes!
+              </h1>
+              <p className="mb-6 text-gray-600">
+                Start by filling out this form, and in a few minutes you will be
+                ready to collect thousands of signatures.
+              </p>
+              <label className="block mb-2 font-medium">
+                Petition Title <span className="text-red-500">*</span>
+                <span className="text-gray-400 text-sm ml-2">(10-150 characters)</span>
+              </label>
+              {(() => {
+                const props = getInputProps("title", formData.title);
+                return (
+                  <div className="relative">
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={formData.title}
+                        onChange={(e) => handleInputChange("title", e.target.value)}
+                        onBlur={() => markFieldTouched("title")}
+                        className={props.className}
+                        placeholder="Enter a clear, compelling petition title..."
+                      />
+                      {props.showError && <FaExclamationCircle className="absolute right-3 top-3 text-red-500" />}
+                      {props.showSuccess && <FaCheckCircle className="absolute right-3 top-3 text-green-500" />}
+                    </div>
+                    {props.showError && (
+                      <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
+                        <FaExclamationCircle className="text-xs" />
+                        {props.error}
+                      </p>
+                    )}
+                    {props.rules?.example && !props.showError && formData.title === "" && (
+                      <p className="text-gray-500 text-xs mt-1 flex items-center gap-1">
+                        <FaInfoCircle className="text-xs text-blue-400" />
+                        {props.rules.example}
+                      </p>
+                    )}
+                  </div>
+                );
+              })()}
+              {/* Character counter for title */}
+              <p className={`text-xs mt-1 text-right ${formData.title.length < 10 ? "text-orange-500" :
+                formData.title.length > 150 ? "text-red-500" :
+                  "text-gray-400"
+                }`}>
+                {formData.title.length}/150 characters
+                {formData.title.length > 0 && formData.title.length < 10 && " (minimum 10)"}
+              </p>
+
+              {/* Category Selection */}
+              <div className="mt-8">
+                <label className="block mb-3 font-medium">
+                  Select Categories <span className="text-red-500">*</span>
+                  <span className="text-gray-400 text-sm ml-2">(at least one required)</span>
+                </label>
+                <p className="text-sm text-gray-500 mb-4 flex items-center gap-1">
+                  <FaInfoCircle className="text-blue-400" />
+                  Choose categories that best describe your petition. This helps people find your cause.
+                </p>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                  {categories.map((category) => {
+                    const isSelected = selectedCategories.includes(category.id);
+                    return (
+                      <motion.button
+                        key={category.id}
+                        type="button"
+                        onClick={() => toggleCategory(category.id)}
+                        whileHover={{ scale: 1.03 }}
+                        whileTap={{ scale: 0.97 }}
+                        className={`flex items-center gap-2 px-4 py-3 rounded-xl border-2 transition-all duration-200 text-sm font-medium ${isSelected
+                          ? "border-[#F43676] bg-gradient-to-r from-[#F43676]/10 to-[#2D3A8C]/10 text-[#F43676] shadow-md"
+                          : "border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:bg-gray-50"
+                          }`}
+                      >
+                        <span className="text-lg">{category.icon}</span>
+                        <span>{category.label}</span>
+                        {isSelected && (
+                          <FaCheckCircle className="ml-auto text-[#F43676]" />
+                        )}
+                      </motion.button>
+                    );
+                  })}
+                </div>
+
+                {/* Category validation feedback */}
+                {selectedCategories.length === 0 && (
+                  <p className="text-orange-500 text-sm mt-3 flex items-center gap-1">
+                    <FaExclamationCircle className="text-xs" />
+                    Please select at least one category for your petition
+                  </p>
+                )}
+                {selectedCategories.length > 0 && (
+                  <p className="text-green-600 text-sm mt-3 flex items-center gap-1">
+                    <FaCheckCircle className="text-xs" />
+                    {selectedCategories.length} {selectedCategories.length === 1 ? "category" : "categories"} selected
+                  </p>
+                )}
+              </div>
+            </motion.div>
+          )}
+
+          {step === 2 && (
+            <motion.div
+              key="step2"
+              variants={stepVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={{ duration: 0.4 }}
+            >
+              <h2 className="text-2xl font-bold mb-4 text-gray-700">
+                Who can make it happen?
+              </h2>
+              <p className="mb-2 font-medium text-gray-600">
+                Add contact details of decision makers who have the power to address your petition.
+              </p>
+              <p className="mb-4 text-sm text-gray-500 flex items-center gap-1">
+                <FaInfoCircle className="text-blue-400" />
+                At least one recipient with a valid name (3+ characters) and email address is required.
+              </p>
+              <div className="space-y-4">
+                {recipients.map((recipient, recipientIdx) => {
+                  const nameValidation = validateField("recipientName", recipient.name);
+                  const emailValidation = validateField("recipientEmail", recipient.email);
+                  const phoneValidation = recipient.phone ? validateField("recipientPhone", recipient.phone) : { isValid: true };
+
+                  return (
+                    <div key={recipientIdx} className="p-4 border border-gray-200 rounded-lg bg-gray-50 space-y-3">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium text-gray-600">Decision Maker #{recipientIdx + 1}</span>
+                        {recipientIdx > 0 && (
+                          <button
+                            onClick={() => setRecipients(recipients.filter((_, i) => i !== recipientIdx))}
+                            className="text-red-500 text-sm hover:underline"
+                          >
+                            Remove
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Name Field */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Full Name <span className="text-red-500">*</span>
+                        </label>
+                        <div className="relative">
+                          <input
+                            type="text"
+                            value={recipient.name}
+                            onChange={(e) => updateRecipient(recipientIdx, "name", e.target.value)}
+                            onBlur={() => markFieldTouched(`recipient_${recipientIdx}_name`)}
+                            className={`w-full border p-3 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F43676] transition-all ${touchedFields[`recipient_${recipientIdx}_name`] && !nameValidation.isValid && recipient.name
+                              ? "border-red-400 bg-red-50"
+                              : touchedFields[`recipient_${recipientIdx}_name`] && nameValidation.isValid && recipient.name
+                                ? "border-green-400 bg-green-50"
+                                : "border-gray-300"
+                              }`}
+                            placeholder="e.g., Dr. Rajesh Kumar or Hon. Smt. Nirmala Sitharaman"
+                          />
+                          {touchedFields[`recipient_${recipientIdx}_name`] && nameValidation.isValid && recipient.name && (
+                            <FaCheckCircle className="absolute right-3 top-3 text-green-500" />
+                          )}
+                        </div>
+                        {!recipient.name && (
+                          <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
+                            <FaInfoCircle className="text-blue-400" />
+                            Enter the decision maker's full name with title if applicable
+                          </p>
+                        )}
+                        {touchedFields[`recipient_${recipientIdx}_name`] && !nameValidation.isValid && recipient.name && (
+                          <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
+                            <FaExclamationCircle className="text-xs" />
+                            {nameValidation.error}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Organization Field */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Office/Organization <span className="text-gray-400">(optional)</span>
+                        </label>
+                        <input
+                          type="text"
+                          value={recipient.organization}
+                          onChange={(e) => updateRecipient(recipientIdx, "organization", e.target.value)}
+                          className="w-full border p-3 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F43676] border-gray-300"
+                          placeholder="e.g., Ministry of Environment or Municipal Corporation of Delhi"
+                        />
+                        {!recipient.organization && (
+                          <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
+                            <FaInfoCircle className="text-blue-400" />
+                            The government ministry, department, or organization they represent
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Email Field */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Email Address <span className="text-red-500">*</span>
+                        </label>
+                        <div className="relative">
+                          <input
+                            type="email"
+                            value={recipient.email}
+                            onChange={(e) => updateRecipient(recipientIdx, "email", e.target.value)}
+                            onBlur={() => markFieldTouched(`recipient_${recipientIdx}_email`)}
+                            className={`w-full border p-3 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F43676] transition-all ${touchedFields[`recipient_${recipientIdx}_email`] && !emailValidation.isValid && recipient.email
+                              ? "border-red-400 bg-red-50"
+                              : touchedFields[`recipient_${recipientIdx}_email`] && emailValidation.isValid && recipient.email
+                                ? "border-green-400 bg-green-50"
+                                : "border-gray-300"
+                              }`}
+                            placeholder="e.g., secretary@ministry.gov.in or contact@organization.org"
+                          />
+                          {touchedFields[`recipient_${recipientIdx}_email`] && emailValidation.isValid && recipient.email && (
+                            <FaCheckCircle className="absolute right-3 top-3 text-green-500" />
+                          )}
+                        </div>
+                        {!recipient.email && (
+                          <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
+                            <FaInfoCircle className="text-blue-400" />
+                            Official email address where petition will be delivered
+                          </p>
+                        )}
+                        {touchedFields[`recipient_${recipientIdx}_email`] && !emailValidation.isValid && recipient.email && (
+                          <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
+                            <FaExclamationCircle className="text-xs" />
+                            {emailValidation.error}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Phone Field */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Phone Number <span className="text-gray-400">(optional)</span>
+                        </label>
+                        <div className="relative">
+                          <input
+                            type="tel"
+                            value={recipient.phone}
+                            onChange={(e) => updateRecipient(recipientIdx, "phone", e.target.value)}
+                            onBlur={() => markFieldTouched(`recipient_${recipientIdx}_phone`)}
+                            className={`w-full border p-3 rounded-lg shadow-sm focus:ring-2 focus:ring-[#F43676] transition-all ${touchedFields[`recipient_${recipientIdx}_phone`] && !phoneValidation.isValid && recipient.phone
+                              ? "border-red-400 bg-red-50"
+                              : touchedFields[`recipient_${recipientIdx}_phone`] && phoneValidation.isValid && recipient.phone
+                                ? "border-green-400 bg-green-50"
+                                : "border-gray-300"
+                              }`}
+                            placeholder="e.g., +91 11 2338 8911 or 011-23388911"
+                          />
+                          {touchedFields[`recipient_${recipientIdx}_phone`] && phoneValidation.isValid && recipient.phone && (
+                            <FaCheckCircle className="absolute right-3 top-3 text-green-500" />
+                          )}
+                        </div>
+                        {!recipient.phone && (
+                          <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
+                            <FaInfoCircle className="text-blue-400" />
+                            Official phone or landline number (if available)
+                          </p>
+                        )}
+                        {touchedFields[`recipient_${recipientIdx}_phone`] && !phoneValidation.isValid && recipient.phone && (
+                          <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
+                            <FaExclamationCircle className="text-xs" />
+                            {phoneValidation.error}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+                <button
+                  onClick={addRecipient}
+                  className="text-[#F43676] font-semibold hover:underline flex items-center gap-2"
+                >
+                  <FaPlus className="text-sm" /> Add another decision maker
+                </button>
+                <div className="mt-4">
+                  <label className="block font-medium mb-2">
+                    Country or Region
+                  </label>
+                  <select
+                    value={formData.country}
+                    onChange={(e) => handleInputChange("country", e.target.value)}
+                    className="w-full border p-3 rounded-lg shadow-sm border-gray-300 focus:ring-2 focus:ring-[#F43676]"
+                  >
+                    <option>India</option>
+                    <option>USA</option>
+                    <option>UK</option>
+                    <option>Other</option>
+                  </select>
+                  <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
+                    <FaInfoCircle className="text-blue-400" />
+                    Select the country where the petition is addressed
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          {step === 3 && (
+            <motion.div
+              key="step3"
+              variants={stepVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={{ duration: 0.4 }}
+            >
+              <h2 className="text-2xl font-bold mb-4 text-gray-700">
+                Petition Details
+              </h2>
+              <p className="mb-4 text-sm text-gray-500 flex items-center gap-1">
+                <FaInfoCircle className="text-blue-400" />
+                Describe your cause clearly to help supporters understand and sign your petition.
+              </p>
+
+              {/* Problem Description */}
+              <div className="mb-6">
+                <h3 className="font-semibold mb-2">
+                  Describe the People Involved and the Problem They Are Facing{" "}
+                  <span className="text-red-500">*</span>
+                  <span className="text-gray-400 text-sm ml-2">(50-2000 characters)</span>
+                </h3>
+                {(() => {
+                  const props = getInputProps("problem", formData.problem);
+                  return (
+                    <div className="relative">
+                      <textarea
+                        value={formData.problem}
+                        onChange={(e) => handleInputChange("problem", e.target.value)}
+                        onBlur={() => markFieldTouched("problem")}
+                        className={props.className}
+                        placeholder="Describe who is affected, what the issue is, where it's happening, and why it matters. Be specific with facts, numbers, and real examples..."
+                        rows={5}
+                      />
+                      {props.showError && (
+                        <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
+                          <FaExclamationCircle className="text-xs" />
+                          {props.error}
+                        </p>
+                      )}
+                      {props.rules?.example && !props.showError && formData.problem === "" && (
+                        <p className="text-gray-500 text-xs mt-1 flex items-center gap-1">
+                          <FaInfoCircle className="text-xs text-blue-400" />
+                          {props.rules.example}
+                        </p>
+                      )}
+                      <p className={`text-xs mt-1 text-right ${formData.problem.length < 50 ? "text-orange-500" :
+                        formData.problem.length > 2000 ? "text-red-500" :
+                          "text-gray-400"
+                        }`}>
+                        {formData.problem.length}/2000 characters
+                        {formData.problem.length > 0 && formData.problem.length < 50 && " (minimum 50)"}
+                      </p>
+                    </div>
+                  );
+                })()}
+              </div>
+
+              {/* Solution Description */}
+              <div className="mb-6">
+                <h3 className="font-semibold mb-2">
+                  Describe the Solution You Are Proposing{" "}
+                  <span className="text-red-500">*</span>
+                  <span className="text-gray-400 text-sm ml-2">(30-1500 characters)</span>
+                </h3>
+                {(() => {
+                  const props = getInputProps("solution", formData.solution);
+                  return (
+                    <div className="relative">
+                      <textarea
+                        value={formData.solution}
+                        onChange={(e) => handleInputChange("solution", e.target.value)}
+                        onBlur={() => markFieldTouched("solution")}
+                        className={props.className}
+                        placeholder="What specific action do you want the decision maker to take? Be clear about timelines, expected outcomes, and how this will help the affected people..."
+                        rows={4}
+                      />
+                      {props.showError && (
+                        <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
+                          <FaExclamationCircle className="text-xs" />
+                          {props.error}
+                        </p>
+                      )}
+                      {props.rules?.example && !props.showError && formData.solution === "" && (
+                        <p className="text-gray-500 text-xs mt-1 flex items-center gap-1">
+                          <FaInfoCircle className="text-xs text-blue-400" />
+                          {props.rules.example}
+                        </p>
+                      )}
+                      <p className={`text-xs mt-1 text-right ${formData.solution.length < 30 ? "text-orange-500" :
+                        formData.solution.length > 1500 ? "text-red-500" :
+                          "text-gray-400"
+                        }`}>
+                        {formData.solution.length}/1500 characters
+                        {formData.solution.length > 0 && formData.solution.length < 30 && " (minimum 30)"}
+                      </p>
+                    </div>
+                  );
+                })()}
+              </div>
+
+              {/* Image Upload */}
+              <div className="mb-6">
+                <label className="block font-medium mb-2">
+                  Upload a Supporting Image <span className="text-gray-400">(optional)</span>
+                </label>
+                <div
+                  className="w-full h-48 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center cursor-pointer mb-2 relative hover:border-[#F43676] transition-colors"
+                  onClick={() => document.getElementById("imageUpload").click()}
+                >
+                  {selectedImage ? (
+                    <Image
+                      src={URL.createObjectURL(selectedImage)}
+                      alt="Selected"
+                      className="w-full h-full object-cover rounded-lg"
+                      width={500}
+                      height={300}
+                    />
+                  ) : (
+                    <>
+                      <FaPlus className="text-gray-400 text-4xl mb-2" />
+                      <p className="text-gray-500 text-sm">Click to upload an image</p>
+                    </>
+                  )}
+                  <input
+                    id="imageUpload"
+                    type="file"
+                    className="hidden"
+                    accept="image/*"
+                    onChange={(e) => setSelectedImage(e.target.files[0])}
+                  />
+                </div>
+                <p className="text-xs text-gray-500 flex items-center gap-1">
+                  <FaInfoCircle className="text-blue-400" />
+                  Add a powerful image that represents your cause (JPG, PNG, or GIF, max 5MB)
+                </p>
+              </div>
+
+              {/* YouTube Video URL */}
+              <div className="mb-4">
+                <label className="block font-medium mb-2">
+                  YouTube Video Link <span className="text-gray-400">(optional)</span>
+                </label>
+                <div className="relative">
+                  <input
+                    type="url"
+                    value={formData.videoUrl}
+                    onChange={(e) => handleInputChange("videoUrl", e.target.value)}
+                    onBlur={() => markFieldTouched("videoUrl")}
+                    className={`w-full border p-3 rounded-lg shadow-sm pl-10 focus:ring-2 focus:ring-[#F43676] transition-all ${touchedFields.videoUrl && formData.videoUrl && !validateField("videoUrl", formData.videoUrl).isValid
+                      ? "border-red-400 bg-red-50"
+                      : touchedFields.videoUrl && formData.videoUrl && validateField("videoUrl", formData.videoUrl).isValid
+                        ? "border-green-400 bg-green-50"
+                        : "border-gray-300"
+                      }`}
+                    placeholder="e.g., https://www.youtube.com/watch?v=abc123xyz or https://youtu.be/abc123xyz"
+                  />
+                  <FaYoutube className="absolute left-3 top-1/2 -translate-y-1/2 text-red-500 text-xl" />
+                  {touchedFields.videoUrl && formData.videoUrl && validateField("videoUrl", formData.videoUrl).isValid && (
+                    <FaCheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 text-green-500" />
+                  )}
+                </div>
+                {!formData.videoUrl && (
+                  <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
+                    <FaInfoCircle className="text-blue-400" />
+                    Add a YouTube video explaining your cause to increase engagement
+                  </p>
+                )}
+                {touchedFields.videoUrl && formData.videoUrl && !validateField("videoUrl", formData.videoUrl).isValid && (
+                  <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
+                    <FaExclamationCircle className="text-xs" />
+                    Please enter a valid YouTube URL (e.g., youtube.com/watch?v=... or youtu.be/...)
+                  </p>
+                )}
+              </div>
+            </motion.div>
+          )}
+
+          {step === 4 && (
+            <motion.div
+              key="step4"
+              variants={stepVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={{ duration: 0.4 }}
+            >
+              <h2 className="text-2xl font-bold mb-2 text-gray-700">
+                Petition Starter Information
+              </h2>
+              <p className="mb-4 text-sm text-gray-500 flex items-center gap-1">
+                <FaInfoCircle className="text-blue-400" />
+                Your personal information helps verify your identity as the petition creator. Fields marked with * are required.
+              </p>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Full Name */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Full Name <span className="text-red-500">*</span>
+                  </label>
+                  <input
                     type="text"
-                    value={recipient.name}
-                    onChange={(e) =>
-                      updateRecipient(recipientIdx, "name", e.target.value)
-                    }
-                    className="w-full border p-3 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
-                    placeholder="Name *"
+                    value={formData.starter.name}
+                    onChange={(e) => handleInputChange("starter.name", e.target.value)}
+                    onBlur={() => markFieldTouched("starterName")}
+                    className={getInputProps("starterName", formData.starter.name).className}
+                    placeholder="e.g., Rajesh Kumar Singh"
                   />
-                  <motion.input
-                    whileFocus={{ scale: 1.02, borderColor: "#0ea5e9" }}
-                    type="text"
-                    value={recipient.organization}
-                    onChange={(e) =>
-                      updateRecipient(
-                        recipientIdx,
-                        "organization",
-                        e.target.value
-                      )
-                    }
-                    className="w-full border p-3 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
-                    placeholder="Office title or organization"
-                  />
-                  <motion.input
-                    whileFocus={{ scale: 1.02, borderColor: "#0ea5e9" }}
-                    type="email"
-                    value={recipient.email}
-                    onChange={(e) =>
-                      updateRecipient(recipientIdx, "email", e.target.value)
-                    }
-                    className={`w-full border p-3 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400 ${
-                      recipient.email && !recipient.email.includes("@") 
-                        ? "border-red-500 bg-red-50" 
-                        : ""
-                    }`}
-                    placeholder="Email *"
-                  />
-                  {recipient.email && !recipient.email.includes("@") && (
-                    <p className="text-red-500 text-sm mt-1">
-                      Email is required
+                  {getInputProps("starterName", formData.starter.name).showError && (
+                    <p className="text-red-500 text-sm mt-1">{getInputProps("starterName", formData.starter.name).error}</p>
+                  )}
+                  {formData.starter.name === "" && (
+                    <p className="text-gray-500 text-xs mt-1 flex items-center gap-1">
+                      <FaInfoCircle className="text-xs text-blue-400" />
+                      Enter your full legal name as it appears on ID
                     </p>
                   )}
-                  <motion.input
-                    whileFocus={{ scale: 1.02, borderColor: "#0ea5e9" }}
+                </div>
+
+                {/* Age */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Age <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="number"
+                    value={formData.starter.age}
+                    onChange={(e) => handleInputChange("starter.age", e.target.value)}
+                    onBlur={() => markFieldTouched("starterAge")}
+                    className={getInputProps("starterAge", formData.starter.age).className}
+                    placeholder="e.g., 25 (must be 18+)"
+                  />
+                  {getInputProps("starterAge", formData.starter.age).showError && (
+                    <p className="text-red-500 text-sm mt-1">{getInputProps("starterAge", formData.starter.age).error}</p>
+                  )}
+                  {formData.starter.age === "" && (
+                    <p className="text-gray-500 text-xs mt-1 flex items-center gap-1">
+                      <FaInfoCircle className="text-xs text-blue-400" />
+                      You must be 18 years or older
+                    </p>
+                  )}
+                </div>
+
+                {/* Email */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Email Address <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="email"
+                    value={formData.starter.email}
+                    onChange={(e) => handleInputChange("starter.email", e.target.value)}
+                    onBlur={() => markFieldTouched("starterEmail")}
+                    className={getInputProps("starterEmail", formData.starter.email).className}
+                    placeholder="e.g., yourname@gmail.com"
+                  />
+                  {getInputProps("starterEmail", formData.starter.email).showError && (
+                    <p className="text-red-500 text-sm mt-1">{getInputProps("starterEmail", formData.starter.email).error}</p>
+                  )}
+                  {formData.starter.email === "" && (
+                    <p className="text-gray-500 text-xs mt-1 flex items-center gap-1">
+                      <FaInfoCircle className="text-xs text-blue-400" />
+                      We'll send petition updates to this email
+                    </p>
+                  )}
+                </div>
+
+                {/* Mobile Number */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Mobile Number <span className="text-red-500">*</span>
+                  </label>
+                  <input
                     type="tel"
-                    value={recipient.phone}
-                    onChange={(e) =>
-                      updateRecipient(recipientIdx, "phone", e.target.value)
-                    }
-                    className="w-full border p-3 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400"
-                    placeholder="Phone number"
+                    value={formData.starter.mobile}
+                    onChange={(e) => handleInputChange("starter.mobile", e.target.value)}
+                    onBlur={() => markFieldTouched("starterMobile")}
+                    className={getInputProps("starterMobile", formData.starter.mobile).className}
+                    placeholder="e.g., 9876543210"
                   />
+                  {getInputProps("starterMobile", formData.starter.mobile).showError && (
+                    <p className="text-red-500 text-sm mt-1">{getInputProps("starterMobile", formData.starter.mobile).error}</p>
+                  )}
+                  {formData.starter.mobile === "" && (
+                    <p className="text-gray-500 text-xs mt-1 flex items-center gap-1">
+                      <FaInfoCircle className="text-xs text-blue-400" />
+                      10-digit Indian mobile number starting with 6-9
+                    </p>
+                  )}
                 </div>
-              ))}
-              <button
-                onClick={addRecipient}
-                className="text-[#3650AD] font-semibold hover:underline"
-              >
-                + Add another recipient
-              </button>
-              <div>
-                <label className="block font-medium mb-2">
-                  Country or Region
-                </label>
-                <select
-                  value={formData.country}
-                  onChange={(e) => handleInputChange("country", e.target.value)}
-                  className="w-full border p-3 rounded-lg shadow-sm"
-                >
-                  <option>India</option>
-                  <option>USA</option>
-                  <option>UK</option>
-                  <option>Other</option>
-                </select>
-              </div>
-            </div>
-          </motion.div>
-        )}
 
-        {step === 3 && (
-          <motion.div
-            key="step3"
-            variants={stepVariants}
-            initial="initial"
-            animate="animate"
-            exit="exit"
-            transition={{ duration: 0.4 }}
-          >
-            <h2 className="text-2xl font-bold mb-4 text-gray-700">
-              Petition Details
-            </h2>
-            <h3 className="font-semibold mb-2">
-              Describe the People Involved and the Problem They Are Facing:{" "}
-              <span className="text-red-500">*</span>
-            </h3>
-            <textarea
-              value={formData.problem}
-              onChange={(e) => handleInputChange("problem", e.target.value)}
-              className="w-full border p-3 rounded-lg shadow-sm mb-4"
-              rows="3"
-              placeholder="Describe the problem in detail..."
-            />
-            <h3 className="font-semibold mb-2">
-              Describe the Solution: <span className="text-red-500">*</span>
-            </h3>
-            <textarea
-              value={formData.solution}
-              onChange={(e) => handleInputChange("solution", e.target.value)}
-              className="w-full border p-3 rounded-lg shadow-sm mb-4"
-              rows="3"
-              placeholder="What solution do you propose?"
-            />
-            <label className="block font-medium mb-2">
-              Upload Image (optional)
-            </label>
-            <div
-              className="w-full h-48 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center cursor-pointer mb-4 relative"
-              onClick={() => document.getElementById("imageUpload").click()}
-            >
-              {selectedImage ? (
-                <Image
-                  src={URL.createObjectURL(selectedImage)}
-                  alt="Selected"
-                  className="w-full h-full object-cover rounded-lg"
-                  width={500}
-                  height={300}
-                />
-              ) : (
-                <FaPlus className="text-gray-400 text-5xl" />
+                {/* Location */}
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Location/Address <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.starter.location}
+                    onChange={(e) => handleInputChange("starter.location", e.target.value)}
+                    onBlur={() => markFieldTouched("starterLocation")}
+                    className={getInputProps("starterLocation", formData.starter.location).className}
+                    placeholder="e.g., Andheri West, Mumbai, Maharashtra"
+                  />
+                  {getInputProps("starterLocation", formData.starter.location).showError && (
+                    <p className="text-red-500 text-sm mt-1">{getInputProps("starterLocation", formData.starter.location).error}</p>
+                  )}
+                  {formData.starter.location === "" && (
+                    <p className="text-gray-500 text-xs mt-1 flex items-center gap-1">
+                      <FaInfoCircle className="text-xs text-blue-400" />
+                      Your city, locality and state
+                    </p>
+                  )}
+                </div>
+
+                {/* Comment/Notes */}
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Comment/Notes <span className="text-gray-400">(optional)</span>
+                  </label>
+                  <textarea
+                    value={formData.starter.comment}
+                    onChange={(e) => handleInputChange("starter.comment", e.target.value)}
+                    onBlur={() => markFieldTouched("starterComment")}
+                    className={getInputProps("starterComment", formData.starter.comment).className}
+                    placeholder="Share why this cause is important to you or any additional context..."
+                    rows={3}
+                  />
+                  {formData.starter.comment === "" && (
+                    <p className="text-gray-500 text-xs mt-1 flex items-center gap-1">
+                      <FaInfoCircle className="text-xs text-blue-400" />
+                      Optional: Share your personal connection to this cause
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* Identity Verification Section */}
+              <div className="mt-6 pt-6 border-t border-gray-200">
+                <h3 className="text-lg font-semibold mb-2 text-gray-700">Identity Verification</h3>
+                <p className="mb-4 text-sm text-gray-500 flex items-center gap-1">
+                  <FaInfoCircle className="text-blue-400" />
+                  Provide at least your Aadhar number for identity verification. Other documents are optional.
+                </p>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Aadhar Card */}
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Aadhar Number <span className="text-red-500">*</span>
+                    </label>
+                    <div className="flex space-x-2">
+                      <div className="flex-1">
+                        <input
+                          type="text"
+                          value={formData.starter.aadharNumber}
+                          onChange={(e) => handleInputChange("starter.aadharNumber", e.target.value)}
+                          onBlur={() => markFieldTouched("aadharNumber")}
+                          className={getInputProps("aadharNumber", formData.starter.aadharNumber).className}
+                          placeholder="e.g., 2345 6789 0123 (12 digits)"
+                        />
+                      </div>
+                      <button
+                        disabled
+                        className="px-4 py-2 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed whitespace-nowrap"
+                        title="OTP verification coming soon"
+                      >
+                        Send OTP
+                      </button>
+                    </div>
+                    {getInputProps("aadharNumber", formData.starter.aadharNumber).showError && (
+                      <p className="text-red-500 text-sm mt-1">{getInputProps("aadharNumber", formData.starter.aadharNumber).error}</p>
+                    )}
+                    {formData.starter.aadharNumber === "" && (
+                      <p className="text-gray-500 text-xs mt-1 flex items-center gap-1">
+                        <FaInfoCircle className="text-xs text-blue-400" />
+                        12 digits, cannot start with 0 or 1
+                      </p>
+                    )}
+                    <div className="flex space-x-2 mt-2">
+                      <input
+                        type="text"
+                        disabled
+                        className="w-full border p-3 rounded-lg shadow-sm bg-gray-100"
+                        placeholder="Enter OTP (feature coming soon)"
+                      />
+                      <button
+                        disabled
+                        className="px-4 py-2 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed whitespace-nowrap"
+                      >
+                        Verify OTP
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* PAN Card */}
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      PAN Number <span className="text-gray-400">(optional)</span>
+                    </label>
+                    <div className="flex space-x-2">
+                      <div className="flex-1">
+                        <input
+                          type="text"
+                          value={formData.starter.panNumber}
+                          onChange={(e) => handleInputChange("starter.panNumber", e.target.value.toUpperCase())}
+                          onBlur={() => markFieldTouched("panNumber")}
+                          className={getInputProps("panNumber", formData.starter.panNumber).className}
+                          placeholder="e.g., ABCDE1234F (5 letters, 4 digits, 1 letter)"
+                        />
+                      </div>
+                      <button
+                        disabled
+                        className="px-4 py-2 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed whitespace-nowrap"
+                        title="OTP verification coming soon"
+                      >
+                        Send OTP
+                      </button>
+                    </div>
+                    {getInputProps("panNumber", formData.starter.panNumber).showError && (
+                      <p className="text-red-500 text-sm mt-1">{getInputProps("panNumber", formData.starter.panNumber).error}</p>
+                    )}
+                    {formData.starter.panNumber === "" && (
+                      <p className="text-gray-500 text-xs mt-1 flex items-center gap-1">
+                        <FaInfoCircle className="text-xs text-blue-400" />
+                        Format: XXXXX0000X (all uppercase)
+                      </p>
+                    )}
+                    <div className="flex space-x-2 mt-2">
+                      <input
+                        type="text"
+                        disabled
+                        className="w-full border p-3 rounded-lg shadow-sm bg-gray-100"
+                        placeholder="Enter OTP (feature coming soon)"
+                      />
+                      <button
+                        disabled
+                        className="px-4 py-2 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed whitespace-nowrap"
+                      >
+                        Verify OTP
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Voter ID */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Voter ID <span className="text-gray-400">(optional)</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.starter.voterNumber}
+                      onChange={(e) => handleInputChange("starter.voterNumber", e.target.value.toUpperCase())}
+                      onBlur={() => markFieldTouched("voterNumber")}
+                      className={getInputProps("voterNumber", formData.starter.voterNumber).className}
+                      placeholder="e.g., ABC1234567"
+                    />
+                    {getInputProps("voterNumber", formData.starter.voterNumber).showError && (
+                      <p className="text-red-500 text-sm mt-1">{getInputProps("voterNumber", formData.starter.voterNumber).error}</p>
+                    )}
+                    {formData.starter.voterNumber === "" && (
+                      <p className="text-gray-500 text-xs mt-1 flex items-center gap-1">
+                        <FaInfoCircle className="text-xs text-blue-400" />
+                        Format: XXX0000000 (3 letters + 7 digits)
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Pincode */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Pincode <span className="text-gray-400">(optional)</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.starter.pincode}
+                      onChange={(e) => handleInputChange("starter.pincode", e.target.value)}
+                      onBlur={() => markFieldTouched("pincode")}
+                      className={getInputProps("pincode", formData.starter.pincode).className}
+                      placeholder="e.g., 400001"
+                    />
+                    {getInputProps("pincode", formData.starter.pincode).showError && (
+                      <p className="text-red-500 text-sm mt-1">{getInputProps("pincode", formData.starter.pincode).error}</p>
+                    )}
+                    {formData.starter.pincode === "" && (
+                      <p className="text-gray-500 text-xs mt-1 flex items-center gap-1">
+                        <FaInfoCircle className="text-xs text-blue-400" />
+                        6-digit Indian pincode
+                      </p>
+                    )}
+                  </div>
+
+                  {/* MP Constituency */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      MP Constituency Number <span className="text-gray-400">(optional)</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.starter.mpConstituencyNumber}
+                      onChange={(e) => handleInputChange("starter.mpConstituencyNumber", e.target.value)}
+                      onBlur={() => markFieldTouched("mpConstituencyNumber")}
+                      className={getInputProps("mpConstituencyNumber", formData.starter.mpConstituencyNumber).className}
+                      placeholder="e.g., 1 to 543"
+                    />
+                    {formData.starter.mpConstituencyNumber === "" && (
+                      <p className="text-gray-500 text-xs mt-1 flex items-center gap-1">
+                        <FaInfoCircle className="text-xs text-blue-400" />
+                        Find at eci.gov.in
+                      </p>
+                    )}
+                  </div>
+
+                  {/* MLA Constituency */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      MLA Constituency Number <span className="text-gray-400">(optional)</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.starter.mlaConstituencyNumber}
+                      onChange={(e) => handleInputChange("starter.mlaConstituencyNumber", e.target.value)}
+                      onBlur={() => markFieldTouched("mlaConstituencyNumber")}
+                      className={getInputProps("mlaConstituencyNumber", formData.starter.mlaConstituencyNumber).className}
+                      placeholder="e.g., 1 to 403 (varies by state)"
+                    />
+                    {formData.starter.mlaConstituencyNumber === "" && (
+                      <p className="text-gray-500 text-xs mt-1 flex items-center gap-1">
+                        <FaInfoCircle className="text-xs text-blue-400" />
+                        Find at your state election commission
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Validation Summary */}
+              {!isStep4Valid() && (
+                <div className="mt-6 p-4 bg-orange-50 border border-orange-200 rounded-lg">
+                  <p className="text-orange-700 text-sm flex items-center gap-2">
+                    <FaExclamationCircle />
+                    Please complete all required fields (*) with valid information before submitting.
+                  </p>
+                </div>
               )}
-              <input
-                id="imageUpload"
-                type="file"
-                className="hidden"
-                accept="image/*"
-                onChange={(e) => setSelectedImage(e.target.files[0])}
-              />
-            </div>
-            <div className="relative mb-4">
-              <input
-                type="url"
-                value={formData.videoUrl}
-                onChange={(e) => handleInputChange("videoUrl", e.target.value)}
-                className="w-full border p-3 rounded-lg shadow-sm pl-10"
-                placeholder="Add YouTube video link (optional)"
-              />
-              <FaYoutube className="absolute left-3 top-1/2 -translate-y-1/2 text-red-500 text-xl" />
-            </div>
-          </motion.div>
-        )}
 
-        {step === 4 && (
-          <motion.div
-            key="step4"
-            variants={stepVariants}
-            initial="initial"
-            animate="animate"
-            exit="exit"
-            transition={{ duration: 0.4 }}
-          >
-            <h2 className="text-2xl font-bold mb-4 text-gray-700">
-              Signing Form Configuration
-            </h2>
-            <div className="grid grid-cols-1 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Full Name <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={formData.starter.name}
-                  onChange={(e) =>
-                    handleInputChange("starter.name", e.target.value)
-                  }
-                  className="w-full border p-3 rounded-lg shadow-sm"
-                  placeholder="Full name"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Age <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="number"
-                  value={formData.starter.age}
-                  onChange={(e) =>
-                    handleInputChange("starter.age", e.target.value)
-                  }
-                  className="w-full border p-3 rounded-lg shadow-sm"
-                  placeholder="Age"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Email <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="email"
-                  value={formData.starter.email}
-                  onChange={(e) =>
-                    handleInputChange("starter.email", e.target.value)
-                  }
-                  className="w-full border p-3 rounded-lg shadow-sm"
-                  placeholder="Email"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Mobile Number <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="tel"
-                  value={formData.starter.mobile}
-                  onChange={(e) =>
-                    handleInputChange("starter.mobile", e.target.value)
-                  }
-                  className="w-full border p-3 rounded-lg shadow-sm"
-                  placeholder="Mobile number"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Location <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={formData.starter.location}
-                  onChange={(e) =>
-                    handleInputChange("starter.location", e.target.value)
-                  }
-                  className="w-full border p-3 rounded-lg shadow-sm"
-                  placeholder="Location"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Comment/Notes
-                </label>
-                <textarea
-                  value={formData.starter.comment}
-                  onChange={(e) =>
-                    handleInputChange("starter.comment", e.target.value)
-                  }
-                  className="w-full border p-3 rounded-lg shadow-sm"
-                  placeholder="Comment/Notes"
-                  rows="3"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Aadhar Card <span className="text-red-500">*</span>
-                </label>
-                <div className="flex space-x-2">
-                  <input
-                    type="text"
-                    value={formData.starter.aadharNumber}
-                    onChange={(e) =>
-                      handleInputChange("starter.aadharNumber", e.target.value)
-                    }
-                    className="w-full border p-3 rounded-lg shadow-sm"
-                    placeholder="Enter Aadhar number"
-                    required
-                  />
-                  <button
-                    disabled
-                    className="px-4 py-2 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed"
-                  >
-                    Send OTP
-                  </button>
-                </div>
-                <div className="flex space-x-2 mt-2">
-                  <input
-                    type="text"
-                    disabled
-                    className="w-full border p-3 rounded-lg shadow-sm bg-gray-100"
-                    placeholder="Enter OTP"
-                  />
-                  <button
-                    disabled
-                    className="px-4 py-2 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed"
-                  >
-                    Verify OTP
-                  </button>
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  PAN Card
-                </label>
-                <div className="flex space-x-2">
-                  <input
-                    type="text"
-                    value={formData.starter.panNumber}
-                    onChange={(e) =>
-                      handleInputChange("starter.panNumber", e.target.value)
-                    }
-                    className="w-full border p-3 rounded-lg shadow-sm"
-                    placeholder="Enter PAN number"
-                  />
-                  <button
-                    disabled
-                    className="px-4 py-2 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed"
-                  >
-                    Send OTP
-                  </button>
-                </div>
-                <div className="flex space-x-2 mt-2">
-                  <input
-                    type="text"
-                    disabled
-                    className="w-full border p-3 rounded-lg shadow-sm bg-gray-100"
-                    placeholder="Enter OTP"
-                  />
-                  <button
-                    disabled
-                    className="px-4 py-2 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed"
-                  >
-                    Verify OTP
-                  </button>
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Voter ID
-                </label>
-                <input
-                  type="text"
-                  value={formData.starter.voterNumber}
-                  onChange={(e) =>
-                    handleInputChange("starter.voterNumber", e.target.value)
-                  }
-                  className="w-full border p-3 rounded-lg shadow-sm"
-                  placeholder="Voter ID (optional)"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Pincode
-                </label>
-                <input
-                  type="text"
-                  value={formData.starter.pincode}
-                  onChange={(e) =>
-                    handleInputChange("starter.pincode", e.target.value)
-                  }
-                  className="w-full border p-3 rounded-lg shadow-sm"
-                  placeholder="Pincode"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  MP Constituency Number
-                </label>
-                <input
-                  type="text"
-                  value={formData.starter.mpConstituencyNumber}
-                  onChange={(e) =>
-                    handleInputChange(
-                      "starter.mpConstituencyNumber",
-                      e.target.value
-                    )
-                  }
-                  className="w-full border p-3 rounded-lg shadow-sm"
-                  placeholder="MP Constituency Number"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  MLA Constituency Number
-                </label>
-                <input
-                  type="text"
-                  value={formData.starter.mlaConstituencyNumber}
-                  onChange={(e) =>
-                    handleInputChange(
-                      "starter.mlaConstituencyNumber",
-                      e.target.value
-                    )
-                  }
-                  className="w-full border p-3 rounded-lg shadow-sm"
-                  placeholder="MLA Constituency Number"
-                />
-              </div>
-            </div>
-            <motion.button
-              whileHover={
-                isStep4Valid() && !isSubmitting ? { scale: 1.05 } : {}
-              }
-              whileTap={isStep4Valid() && !isSubmitting ? { scale: 0.95 } : {}}
-              onClick={handleSubmit}
-              disabled={isSubmitting || !isStep4Valid()}
-              className={`mt-6 px-6 py-3 font-bold rounded-lg w-full shadow-lg transition-all duration-200 ${
-                isSubmitting || !isStep4Valid()
+              <motion.button
+                whileHover={
+                  isStep4Valid() && !isSubmitting ? { scale: 1.02 } : {}
+                }
+                whileTap={isStep4Valid() && !isSubmitting ? { scale: 0.98 } : {}}
+                onClick={handleSubmit}
+                disabled={isSubmitting || !isStep4Valid()}
+                className={`mt-6 px-6 py-4 font-bold rounded-lg w-full shadow-lg transition-all duration-200 text-lg ${isSubmitting || !isStep4Valid()
                   ? "bg-gray-400 text-gray-600 cursor-not-allowed"
-                  : "bg-gradient-to-r from-blue-500 to-teal-500 text-white hover:from-blue-600 hover:to-teal-600"
-              }`}
-            >
-              {isSubmitting ? "Submitting..." : "Submit Petition"}
-            </motion.button>
-          </motion.div>
-        )}
-      </AnimatePresence>
+                  : "bg-gradient-to-r from-[#2D3A8C] to-[#F43676] text-white hover:from-[#1e2a6c] hover:to-[#d62860]"
+                  }`}
+              >
+                {isSubmitting ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Submitting Your Petition...
+                  </span>
+                ) : (
+                  "🚀 Submit Petition"
+                )}
+              </motion.button>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-      <div className="flex justify-between mt-8">
-        {step > 1 && (
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={prevStep}
-            className="px-6 py-2 bg-gray-400 text-white rounded-lg shadow-md"
-          >
-            Previous
-          </motion.button>
-        )}
-        {step < totalSteps && (
-          <motion.button
-            whileHover={isCurrentStepValid() ? { scale: 1.05 } : {}}
-            whileTap={isCurrentStepValid() ? { scale: 0.95 } : {}}
-            onClick={nextStep}
-            disabled={!isCurrentStepValid()}
-            className={`px-6 py-2 rounded-lg shadow-md transition-all duration-200 ${
-              isCurrentStepValid()
-                ? "bg-gradient-to-r from-blue-500 to-teal-500 text-white hover:from-blue-600 hover:to-teal-600 cursor-pointer"
+        <div className="flex justify-between mt-8">
+          {step > 1 && (
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={prevStep}
+              className="px-6 py-2 bg-[#2D3A8C] text-white rounded-lg shadow-md hover:bg-[#1e2a6c] transition-colors"
+            >
+              Previous
+            </motion.button>
+          )}
+          {step < totalSteps && (
+            <motion.button
+              whileHover={isCurrentStepValid() ? { scale: 1.05 } : {}}
+              whileTap={isCurrentStepValid() ? { scale: 0.95 } : {}}
+              onClick={nextStep}
+              disabled={!isCurrentStepValid()}
+              className={`px-6 py-2 rounded-lg shadow-md transition-all duration-200 ${isCurrentStepValid()
+                ? "bg-gradient-to-r from-[#2D3A8C] to-[#F43676] text-white hover:from-[#1e2a6c] hover:to-[#d62860] cursor-pointer"
                 : "bg-gray-300 text-gray-500 cursor-not-allowed"
-            }`}
-          >
-            Next
-          </motion.button>
-        )}
+                }`}
+            >
+              Next
+            </motion.button>
+          )}
+        </div>
       </div>
-    </div>
+    </section >
   );
 }
