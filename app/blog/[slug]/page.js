@@ -108,7 +108,7 @@ export default function BlogDetailPage() {
 
   // Find the current post
   const post = blogPosts.find(p => p.slug === params.slug) || blogPosts[0];
-  
+
   // Find previous and next posts
   const currentIndex = blogPosts.findIndex(p => p.slug === params.slug);
   const prevPost = currentIndex > 0 ? blogPosts[currentIndex - 1] : null;
@@ -206,7 +206,7 @@ export default function BlogDetailPage() {
                       Neque porro quisquam est, qui <strong>dolorem ipsum</strong> quia <strong>dolor sit amet</strong>, <strong>consectetur</strong>, <strong>adipisci velit, sed</strong> quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem.
                     </p>
                     <p className="text-gray-500 text-sm">— John Doe</p>
-                    <div className="absolute bottom-4 right-6 text-6xl text-gray-200 font-serif">"</div>
+                    <div className="absolute bottom-4 right-6 text-6xl text-gray-200 font-serif">&quot;</div>
                   </div>
 
                   <p className="text-gray-600 leading-relaxed mb-8">
@@ -317,7 +317,7 @@ export default function BlogDetailPage() {
                 {/* Comments Section */}
                 <div className="bg-white rounded-3xl p-8 shadow-sm">
                   <h3 className="text-2xl font-bold text-[#1a1a2e] text-center mb-2">Comments</h3>
-                  <p className="text-gray-500 text-center mb-8">No comments yet. Why don't you start the discussion?</p>
+                  <p className="text-gray-500 text-center mb-8">No comments yet. Why don&apos;t you start the discussion?</p>
 
                   <h4 className="text-2xl font-bold text-[#1a1a2e] text-center mb-2">Leave a Reply</h4>
                   <p className="text-gray-600 text-center mb-6">

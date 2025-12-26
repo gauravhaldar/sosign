@@ -684,7 +684,7 @@ export default function StartPetitionPage() {
                         {!recipient.name && (
                           <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
                             <FaInfoCircle className="text-blue-400" />
-                            Enter the decision maker's full name with title if applicable
+                            Enter the decision maker&apos;s full name with title if applicable
                           </p>
                         )}
                         {touchedFields[`recipient_${recipientIdx}_name`] && !nameValidation.isValid && recipient.name && (
@@ -1085,7 +1085,7 @@ export default function StartPetitionPage() {
                   {formData.starter.email === "" && (
                     <p className="text-gray-500 text-xs mt-1 flex items-center gap-1">
                       <FaInfoCircle className="text-xs text-blue-400" />
-                      We'll send petition updates to this email
+                      We&apos;ll send petition updates to this email
                     </p>
                   )}
                 </div>
