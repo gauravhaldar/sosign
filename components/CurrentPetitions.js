@@ -128,7 +128,7 @@ export default function CurrentPetitions() {
       try {
         setLoading(true);
         const data = await safeFetch("/api/petitions");
-        
+
         if (data.success === false && data.rateLimited) {
           console.warn('Rate limit exceeded for current petitions, using fallback');
           setPetitions([]);
@@ -156,12 +156,13 @@ export default function CurrentPetitions() {
 
   if (loading) {
     return (
-      <section className="bg-gray-50 py-6 px-6">
-        <h2 className="text-2xl md:text-3xl font-medium text-center mb-8">
+      <section className="py-6 px-6">
+        <h2 className="text-3xl font-bold text-center mb-8 text-[#1a1a2e]">
           Current Petitions
         </h2>
         <div className="text-center">
-          <p className="text-gray-600">Loading petitions...</p>
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[#F43676] border-t-transparent"></div>
+          <p className="text-gray-600 mt-4">Loading petitions...</p>
         </div>
       </section>
     );
@@ -169,26 +170,33 @@ export default function CurrentPetitions() {
 
   if (error) {
     return (
-      <section className="bg-gray-50 py-6 px-6">
-        <h2 className="text-2xl md:text-3xl font-medium text-center mb-8">
+      <section className="py-6 px-6">
+        <h2 className="text-3xl font-bold text-center mb-8 text-[#1a1a2e]">
           Current Petitions
         </h2>
-        <div className="text-center">
-          <p className="text-red-500">Error loading petitions: {error}</p>
+        <div className="text-center bg-red-50 border border-red-200 rounded-2xl p-6 max-w-md mx-auto">
+          <p className="text-red-600">Error loading petitions: {error}</p>
         </div>
       </section>
     );
   }
 
   return (
-    <section className="bg-gray-50 py-6 px-6">
-      <h2 className="text-2xl md:text-3xl font-medium text-center mb-8">
+    <section className="py-6 px-6">
+      <h2 className="text-3xl font-bold text-center mb-3 text-[#1a1a2e]">
         Current Petitions
       </h2>
+      <p className="text-center text-gray-500 mb-8 max-w-2xl mx-auto">
+        Browse and support active petitions making a difference in communities
+      </p>
 
       {petitions.length === 0 ? (
-        <div className="text-center">
-          <p className="text-gray-600">No petitions available at the moment.</p>
+        <div className="text-center bg-white rounded-3xl p-12 shadow-sm max-w-md mx-auto">
+          <div className="w-20 h-20 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <span className="text-4xl">📋</span>
+          </div>
+          <h3 className="text-xl font-bold text-gray-700 mb-2">No Petitions Available</h3>
+          <p className="text-gray-500">Check back soon for new petitions to support!</p>
         </div>
       ) : (
         <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
@@ -199,9 +207,9 @@ export default function CurrentPetitions() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
-                className="bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col cursor-pointer hover:shadow-2xl transition"
+                className="bg-white rounded-3xl shadow-md overflow-hidden flex flex-col cursor-pointer hover:shadow-xl hover:scale-[1.02] transition-all duration-200 border border-pink-100"
               >
-                <div className="w-full h-36 md:h-48 bg-gray-200 flex items-center justify-center">
+                <div className="w-full h-36 md:h-48 bg-gradient-to-br from-pink-50 to-gray-100 flex items-center justify-center relative overflow-hidden">
                   {petition.petitionDetails?.image ? (
                     <Image
                       src={petition.petitionDetails.image}
@@ -211,37 +219,40 @@ export default function CurrentPetitions() {
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <div className="text-gray-500 text-center">
-                      <p className="text-sm">No Image</p>
-                      <p className="text-xs">📋</p>
+                    <div className="text-gray-400 text-center">
+                      <p className="text-4xl mb-2">📋</p>
+                      <p className="text-xs">No Image</p>
                     </div>
                   )}
+                  {/* Signature Badge */}
+                  <div className="absolute top-3 right-3 bg-gradient-to-r from-[#F43676] to-[#e02a60] text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg">
+                    {petition.numberOfSignatures || 0} ✍️
+                  </div>
                 </div>
-                <div className="p-4 md:p-6 text-center">
-                  <p className="text-gray-700 text-sm md:text-base mb-2">
+                <div className="p-4 md:p-6 text-center flex-1 flex flex-col">
+                  <p className="text-gray-700 text-sm md:text-base mb-3 line-clamp-3 flex-1">
                     &quot;
                     {petition.petitionDetails?.problem?.substring(0, 100) ||
                       petition.title}
                     &quot;
                   </p>
-                  <h3 className="font-semibold text-base md:text-lg text-gray-900">
-                    {petition.petitionStarter?.user?.name ||
-                      petition.petitionStarter?.name ||
-                      "Anonymous"}
-                  </h3>
-                  <p className="text-xs md:text-sm text-gray-500">
-                    {petition.petitionStarter?.user?.designation ||
-                      petition.petitionStarter?.designation ||
-                      "Citizen"}
-                  </p>
-                  <p className="text-xs md:text-sm text-gray-500 mt-1">
-                    Signatures: {petition.numberOfSignatures || 0}
-                  </p>
-                  {petition.country && (
-                    <p className="text-xs md:text-sm text-gray-500 mt-1">
-                      Country: {petition.country}
+                  <div className="mt-auto">
+                    <h3 className="font-bold text-base md:text-lg text-[#1a1a2e] mb-1">
+                      {petition.petitionStarter?.user?.name ||
+                        petition.petitionStarter?.name ||
+                        "Anonymous"}
+                    </h3>
+                    <p className="text-xs md:text-sm text-gray-500 mb-2">
+                      {petition.petitionStarter?.user?.designation ||
+                        petition.petitionStarter?.designation ||
+                        "Citizen"}
                     </p>
-                  )}
+                    {petition.country && (
+                      <p className="text-xs text-[#F43676] font-semibold">
+                        📍 {petition.country}
+                      </p>
+                    )}
+                  </div>
                 </div>
               </motion.div>
             </Link>
@@ -249,21 +260,21 @@ export default function CurrentPetitions() {
         </div>
       )}
 
-      <div className="flex justify-center mt-6 space-x-4">
+      <div className="flex justify-center mt-8 space-x-4">
         {visibleCount < petitions.length && (
           <button
             onClick={handleLoadMore}
-            className="bg-[#3650AD] text-white px-6 py-2 rounded-full font-medium hover:bg-teal-600 transition"
+            className="bg-gradient-to-r from-[#F43676] to-[#e02a60] text-white px-8 py-3 rounded-xl font-semibold hover:shadow-lg hover:scale-105 transition-all duration-200"
           >
-            Load More
+            Load More Petitions
           </button>
         )}
-        {visibleCount === petitions.length && (
+        {visibleCount === petitions.length && petitions.length > 5 && (
           <button
             onClick={handleReadLess}
-            className="bg-gray-300 text-gray-800 px-6 py-2 rounded-full font-medium hover:bg-gray-400 transition"
+            className="bg-white border-2 border-pink-200 text-gray-700 px-8 py-3 rounded-xl font-semibold hover:bg-pink-50 hover:border-[#F43676] transition-all duration-200"
           >
-            Read Less
+            Show Less
           </button>
         )}
       </div>

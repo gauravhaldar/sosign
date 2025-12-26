@@ -121,22 +121,25 @@ function LoginContent() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-8">
-      <div className="w-full max-w-md bg-white shadow-lg rounded-2xl p-6">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-50 via-white to-pink-50 px-4 py-8">
+      <div className="w-full max-w-md bg-white shadow-2xl rounded-3xl p-8 border border-pink-100">
         {/* Toggle Heading */}
-        <h2 className="text-2xl font-bold text-center mb-4 text-gray-800">
-          {isLogin ? "Login to SoSign" : "Create your account"}
+        <h2 className="text-3xl font-bold text-center mb-6 text-[#1a1a2e]">
+          {isLogin ? "Welcome Back!" : "Join SoSign"}
         </h2>
+        <p className="text-center text-gray-500 mb-6 text-sm">
+          {isLogin ? "Login to continue your journey" : "Create your account to get started"}
+        </p>
 
         {/* Continue with Google */}
         <button
           onClick={handleGoogleSignIn}
-          className="w-full flex items-center justify-center border border-gray-300 rounded-lg py-2 mb-4 hover:bg-gray-100 transition"
+          className="w-full flex items-center justify-center border-2 border-gray-200 rounded-xl py-3 mb-4 hover:border-[#F43676] hover:bg-pink-50 transition-all duration-200 font-medium"
         >
           <Image
             src="https://www.svgrepo.com/show/355037/google.svg"
             alt="Google"
-            className="w-5 h-5 mr-2"
+            className="w-5 h-5 mr-3"
             width={20}
             height={20}
           />
@@ -144,23 +147,23 @@ function LoginContent() {
         </button>
 
         {/* Divider */}
-        <div className="flex items-center my-4">
-          <hr className="flex-grow border-gray-300" />
-          <span className="px-2 text-gray-500 text-sm">or</span>
-          <hr className="flex-grow border-gray-300" />
+        <div className="flex items-center my-6">
+          <hr className="flex-grow border-gray-200" />
+          <span className="px-3 text-gray-400 text-sm font-medium">or</span>
+          <hr className="flex-grow border-gray-200" />
         </div>
 
         {isLogin ? (
           // ------------------- LOGIN FORM -------------------
-          <form className="space-y-4" onSubmit={handleLoginSubmit}>
+          <form className="space-y-5" onSubmit={handleLoginSubmit}>
             <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Email
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Email Address
               </label>
               <input
                 type="email"
                 placeholder="Enter your email"
-                className="w-full border rounded-lg px-3 py-2 mt-1"
+                className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-[#F43676] focus:outline-none transition-colors"
                 value={loginEmail}
                 onChange={(e) => setLoginEmail(e.target.value)}
                 required
@@ -168,53 +171,53 @@ function LoginContent() {
             </div>
 
             <div className="relative">
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Password
               </label>
               <input
                 type={showPassword ? "text" : "password"}
                 placeholder="Enter your password"
-                className="w-full border rounded-lg px-3 py-2 mt-1"
+                className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-[#F43676] focus:outline-none transition-colors"
                 value={loginPassword}
                 onChange={(e) => setLoginPassword(e.target.value)}
                 required
               />
               <button
                 type="button"
-                className="absolute right-3 top-9 text-gray-500"
+                className="absolute right-4 top-11 text-gray-400 hover:text-[#F43676] transition-colors"
                 onClick={() => setShowPassword(!showPassword)}
               >
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
             </div>
 
             {loginError && (
-              <p className="text-red-500 text-sm text-center">{loginError}</p>
+              <p className="text-red-500 text-sm text-center bg-red-50 py-2 rounded-lg">{loginError}</p>
             )}
 
             <button
               type="submit"
-              className="w-full bg-[#3650AD] text-white py-2 rounded-lg hover:bg-blue-700 transition"
+              className="w-full bg-gradient-to-r from-[#F43676] to-[#e02a60] text-white py-3 rounded-xl font-semibold hover:shadow-lg hover:scale-[1.02] transition-all duration-200"
             >
               Login
             </button>
 
-            <p className="text-xs text-gray-500 text-center">
+            <p className="text-xs text-gray-500 text-center leading-relaxed">
               By joining or logging in, you accept{" "}
-              <span className="text-[#3650AD] cursor-pointer">
+              <span className="text-[#F43676] cursor-pointer hover:underline">
                 sosign.in Terms of Service
               </span>{" "}
               and{" "}
-              <span className="text-[#3650AD] cursor-pointer">
+              <span className="text-[#F43676] cursor-pointer hover:underline">
                 Privacy Policy
               </span>
               .
             </p>
 
-            <p className="text-sm text-center text-gray-600">
+            <p className="text-sm text-center text-gray-600 pt-2">
               Don&apos;t have an account?{" "}
               <span
-                className="text-[#3650AD] font-medium cursor-pointer"
+                className="text-[#F43676] font-semibold cursor-pointer hover:underline"
                 onClick={() => setIsLogin(false)}
               >
                 Sign up
@@ -226,26 +229,26 @@ function LoginContent() {
           <form className="space-y-4" onSubmit={handleSignupSubmit}>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
                   First Name
                 </label>
                 <input
                   type="text"
                   placeholder="First name"
-                  className="w-full border rounded-lg px-3 py-2 mt-1"
+                  className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-[#F43676] focus:outline-none transition-colors"
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
                   Last Name
                 </label>
                 <input
                   type="text"
                   placeholder="Last name"
-                  className="w-full border rounded-lg px-3 py-2 mt-1"
+                  className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-[#F43676] focus:outline-none transition-colors"
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
                 />
@@ -253,13 +256,13 @@ function LoginContent() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Designation
               </label>
               <input
                 type="text"
                 placeholder="Your designation"
-                className="w-full border rounded-lg px-3 py-2 mt-1"
+                className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-[#F43676] focus:outline-none transition-colors"
                 value={designation}
                 onChange={(e) => setDesignation(e.target.value)}
                 required
@@ -267,13 +270,13 @@ function LoginContent() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Mobile
               </label>
               <input
                 type="tel"
                 placeholder="Enter mobile number"
-                className="w-full border rounded-lg px-3 py-2 mt-1"
+                className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-[#F43676] focus:outline-none transition-colors"
                 value={mobile}
                 onChange={(e) => setMobile(e.target.value)}
                 required
@@ -281,13 +284,13 @@ function LoginContent() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Email
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Email Address
               </label>
               <input
                 type="email"
                 placeholder="Enter email"
-                className="w-full border rounded-lg px-3 py-2 mt-1"
+                className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-[#F43676] focus:outline-none transition-colors"
                 value={signupEmail}
                 onChange={(e) => setSignupEmail(e.target.value)}
                 required
@@ -295,59 +298,59 @@ function LoginContent() {
             </div>
 
             <div className="relative">
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Create Password
               </label>
               <input
                 type={showPassword ? "text" : "password"}
                 placeholder="Create password"
-                className="w-full border rounded-lg px-3 py-2 mt-1"
+                className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-[#F43676] focus:outline-none transition-colors"
                 value={createPassword}
                 onChange={(e) => setCreatePassword(e.target.value)}
                 required
               />
               <button
                 type="button"
-                className="absolute right-3 top-9 text-gray-500"
+                className="absolute right-4 top-11 text-gray-400 hover:text-[#F43676] transition-colors"
                 onClick={() => setShowPassword(!showPassword)}
               >
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
             </div>
 
             <div className="relative">
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Confirm Password
               </label>
               <input
                 type={showConfirmPassword ? "text" : "password"}
                 placeholder="Confirm password"
-                className="w-full border rounded-lg px-3 py-2 mt-1"
+                className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-[#F43676] focus:outline-none transition-colors"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
               />
               <button
                 type="button"
-                className="absolute right-3 top-9 text-gray-500"
+                className="absolute right-4 top-11 text-gray-400 hover:text-[#F43676] transition-colors"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
               >
-                {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
             </div>
 
             {signupError && (
-              <p className="text-red-500 text-sm text-center">{signupError}</p>
+              <p className="text-red-500 text-sm text-center bg-red-50 py-2 rounded-lg">{signupError}</p>
             )}
 
-            <button className="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition">
+            <button className="w-full bg-gradient-to-r from-[#F43676] to-[#e02a60] text-white py-3 rounded-xl font-semibold hover:shadow-lg hover:scale-[1.02] transition-all duration-200 mt-2">
               Sign Up
             </button>
 
-            <p className="text-sm text-center text-gray-600">
+            <p className="text-sm text-center text-gray-600 pt-2">
               Already have an account?{" "}
               <span
-                className="text-[#3650AD] font-medium cursor-pointer"
+                className="text-[#F43676] font-semibold cursor-pointer hover:underline"
                 onClick={() => setIsLogin(true)}
               >
                 Login
@@ -362,16 +365,17 @@ function LoginContent() {
 
 function LoginFallback() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-8">
-      <div className="w-full max-w-md bg-white shadow-lg rounded-2xl p-6">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-50 via-white to-pink-50 px-4 py-8">
+      <div className="w-full max-w-md bg-white shadow-2xl rounded-3xl p-8 border border-pink-100">
         <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 rounded w-3/4 mx-auto mb-4"></div>
-          <div className="h-10 bg-gray-200 rounded mb-4"></div>
-          <div className="h-4 bg-gray-200 rounded w-1/4 mx-auto mb-4"></div>
-          <div className="space-y-4">
-            <div className="h-10 bg-gray-200 rounded"></div>
-            <div className="h-10 bg-gray-200 rounded"></div>
-            <div className="h-10 bg-gray-200 rounded"></div>
+          <div className="h-8 bg-gray-200 rounded-xl w-3/4 mx-auto mb-4"></div>
+          <div className="h-4 bg-gray-200 rounded-lg w-1/2 mx-auto mb-6"></div>
+          <div className="h-12 bg-gray-200 rounded-xl mb-4"></div>
+          <div className="h-4 bg-gray-200 rounded-lg w-1/4 mx-auto mb-6"></div>
+          <div className="space-y-5">
+            <div className="h-12 bg-gray-200 rounded-xl"></div>
+            <div className="h-12 bg-gray-200 rounded-xl"></div>
+            <div className="h-12 bg-pink-100 rounded-xl"></div>
           </div>
         </div>
       </div>

@@ -105,7 +105,7 @@ export default function Banner() {
             description: petition.petitionDetails?.problem || petition.petitionDetails?.solution || "Support this important cause by signing the petition.",
             date: formatDate(petition.createdAt),
             comments: `${petition.numberOfSignatures || 0} Signatures`,
-            link: `/petitions/${petition._id}`,
+            link: `/currentpetitions/${petition._id}`,
           }));
 
           setHeroSlides(slides);

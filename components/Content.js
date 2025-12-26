@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { FaSearch, FaCalendarAlt, FaPlay, FaChevronRight, FaChevronLeft, FaSpinner } from "react-icons/fa";
+import { useAuth } from "../context/AuthContext";
 
 // Categories mapping for display labels
 const categoryLabels = {
@@ -36,19 +37,19 @@ const allCategories = [
   "Human Rights",
 ];
 
-// Tags
+
+// Tags - mapped to categories
 const tags = [
-  "Animal",
-  "Fashion",
-  "Food",
+  "Animals",
+  "Environment",
+  "Education",
   "Health",
-  "Music",
   "Politics",
-  "Race",
+  "Human Rights",
   "Sports",
-  "Tech",
   "Technology",
   "Travel",
+  "Lifestyle",
 ];
 
 export default function Content() {
@@ -64,6 +65,8 @@ export default function Content() {
     hasPrevPage: false,
   });
   const [recentPosts, setRecentPosts] = useState([]);
+  const [recentComments, setRecentComments] = useState([]);
+  const { user } = useAuth();
 
   const ITEMS_PER_PAGE = 6;
 
@@ -108,6 +111,47 @@ export default function Content() {
 
     fetchPetitions();
   }, [currentPage, searchQuery]);
+
+  // Fetch recent comments from the logged-in user
+  useEffect(() => {
+    const fetchRecentComments = async () => {
+      if (!user) {
+        setRecentComments([]);
+        return;
+      }
+
+      try {
+        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
+        const userInfo = JSON.parse(localStorage.getItem("user"));
+
+        if (!userInfo || !userInfo.token) {
+          setRecentComments([]);
+          return;
+        }
+
+        const response = await fetch(
+          `${backendUrl}/api/comments/user/recent?limit=4`,
+          {
+            headers: {
+              Authorization: `Bearer ${userInfo.token}`,
+            },
+          }
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          setRecentComments(data.comments || []);
+        } else {
+          setRecentComments([]);
+        }
+      } catch (err) {
+        console.error("Error fetching recent comments:", err);
+        setRecentComments([]);
+      }
+    };
+
+    fetchRecentComments();
+  }, [user]);
 
   // Handle search
   const handleSearch = (e) => {
@@ -389,11 +433,43 @@ export default function Content() {
                 <h3 className="text-xl font-bold text-[#1a1a2e]">Recent Comments</h3>
                 <span className="w-2 h-2 bg-[#F43676] rounded-full"></span>
               </div>
-              <p className="text-gray-500 text-sm">No comments to show.</p>
+              {user ? (
+                recentComments.length > 0 ? (
+                  <ul className="space-y-3">
+                    {recentComments.map((comment, index) => (
+                      <li key={index} className="border-b border-gray-100 pb-3 last:border-0 last:pb-0">
+                        <Link
+                          href={`/currentpetitions/${comment.petitionId}`}
+                          className="block hover:bg-pink-50 p-2 rounded-lg transition-colors"
+                        >
+                          <p className="text-gray-700 text-sm leading-relaxed line-clamp-2 mb-1">
+                            {comment.content}
+                          </p>
+                          <p className="text-xs text-gray-400">
+                            {new Date(comment.createdAt).toLocaleDateString('en-US', {
+                              month: 'short',
+                              day: 'numeric',
+                              year: 'numeric'
+                            })}
+                          </p>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-gray-500 text-sm">You haven't made any comments yet.</p>
+                )
+              ) : (
+                <p className="text-gray-500 text-sm">
+                  <Link href="/login" className="text-[#F43676] hover:underline">
+                    Login
+                  </Link> to see your recent comments.
+                </p>
+              )}
             </div>
 
             {/* Archives */}
-            <div className="bg-white rounded-3xl p-6 shadow-sm">
+            {/* <div className="bg-white rounded-3xl p-6 shadow-sm">
               <div className="flex items-center gap-2 mb-4">
                 <h3 className="text-xl font-bold text-[#1a1a2e]">Archives</h3>
                 <span className="w-2 h-2 bg-[#F43676] rounded-full"></span>
@@ -401,7 +477,7 @@ export default function Content() {
               <p className="text-gray-600">
                 {new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" })}
               </p>
-            </div>
+            </div> */}
 
             {/* Categories */}
             <div className="bg-white rounded-3xl p-6 shadow-sm">
@@ -469,15 +545,19 @@ export default function Content() {
                 <span className="w-2 h-2 bg-[#F43676] rounded-full"></span>
               </div>
               <div className="flex flex-wrap gap-2">
-                {tags.map((tag, index) => (
-                  <Link
-                    key={index}
-                    href={`/search?tag=${tag.toLowerCase()}`}
-                    className="px-4 py-2 bg-white border border-gray-200 rounded-full text-sm text-gray-600 hover:border-[#F43676] hover:text-[#F43676] transition-colors"
-                  >
-                    {tag}
-                  </Link>
-                ))}
+                {tags.map((tag, index) => {
+                  // Convert tag to category slug (lowercase with underscores for spaces)
+                  const categorySlug = tag.toLowerCase().replace(/\s+/g, '_');
+                  return (
+                    <Link
+                      key={index}
+                      href={`/category/${categorySlug}`}
+                      className="px-4 py-2 bg-white border border-gray-200 rounded-full text-sm text-gray-600 hover:border-[#F43676] hover:text-[#F43676] transition-colors"
+                    >
+                      {tag}
+                    </Link>
+                  );
+                })}
               </div>
             </div>
 

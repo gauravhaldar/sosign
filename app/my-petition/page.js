@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { FaChevronRight, FaPlus, FaLink, FaShare, FaTrash, FaTrophy } from "react-icons/fa";
 import { useAuth } from "../../context/AuthContext";
 import LoginModal from "../../components/LoginModal";
 
@@ -135,19 +136,19 @@ const MyPetitionsPage = () => {
         decisionMakers:
           petition.decisionMakers && petition.decisionMakers.length > 0
             ? petition.decisionMakers.map((dm) => ({
-                name: dm.name || "Unknown Decision Maker",
-                email: dm.email || "no-email@example.com",
-                organization: dm.organization || "",
-                phone: dm.phone || "",
-              }))
+              name: dm.name || "Unknown Decision Maker",
+              email: dm.email || "no-email@example.com",
+              organization: dm.organization || "",
+              phone: dm.phone || "",
+            }))
             : [
-                {
-                  name: "General Decision Makers",
-                  email: "contact@example.com",
-                  organization: "Government/Organization",
-                  phone: "",
-                },
-              ],
+              {
+                name: "General Decision Makers",
+                email: "contact@example.com",
+                organization: "Government/Organization",
+                phone: "",
+              },
+            ],
         issue:
           petition.petitionDetails?.problem || "No issue description provided",
         location: petition.country || "Location not specified",
@@ -316,156 +317,197 @@ const MyPetitionsPage = () => {
 
   return (
     <>
-      <div className="container mx-auto p-4 max-w-4xl">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold">My Petitions</h1>
-          <Link href="/start-petition">
-            <button className="bg-blue-500 hover:bg-[#3650AD] text-white font-bold py-2 px-4 rounded">
-              Create New Petition
-            </button>
-          </Link>
+      {/* Navigation Banner */}
+      <div className="bg-pink-100 border-b border-pink-200 py-8 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <h1 className="text-3xl font-bold text-[#1a1a2e]">My Petitions</h1>
+          <nav className="flex items-center gap-2 text-sm text-gray-600">
+            <Link href="/" className="hover:text-[#F43676] transition-colors">
+              Home
+            </Link>
+            <FaChevronRight className="text-gray-400 text-xs" />
+            <span className="text-[#1a1a2e] font-medium">My Petitions</span>
+          </nav>
         </div>
+      </div>
 
-        {petitions.length === 0 ? (
-          <p className="text-center text-lg">
-            You haven&apos;t created any petitions yet.
-          </p>
-        ) : (
-          <div className="space-y-8">
-            {petitions.map((petition) => (
-              <div
-                key={petition._id}
-                className="bg-white shadow-lg rounded-lg overflow-hidden"
-              >
-                {/* Petition Title as Heading */}
-                <div className="p-6 border-b">
-                  <h2 className="text-2xl font-bold text-gray-800">
-                    {petition.title}
-                  </h2>
-                  {/* Approval Status */}
-                  <div className="mt-2">
-                    {petition.approved ? (
-                      <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
-                        ✓ Approved
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
-                        ⏳ Pending Approval
-                      </span>
-                    )}
-                  </div>
-                </div>
+      {/* Main Content */}
+      <div className="min-h-screen bg-[#f0f2f5] py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-6xl mx-auto">
+          {/* Header with Create Button */}
+          <div className="flex justify-between items-center mb-8">
+            <div>
+              <h2 className="text-2xl font-bold text-[#1a1a2e]">Your Active Petitions</h2>
+              <p className="text-gray-500 mt-1">Manage and track your petitions</p>
+            </div>
+            <Link href="/start-petition">
+              <button className="bg-gradient-to-r from-[#F43676] to-[#e02a60] text-white font-semibold py-3 px-6 rounded-xl hover:shadow-lg hover:scale-105 transition-all duration-200 flex items-center gap-2">
+                <FaPlus />
+                Create New Petition
+              </button>
+            </Link>
+          </div>
 
-                {/* Petition Image */}
-                {petition.petitionDetails.image && (
-                  <div className="px-6 pt-4">
-                    <div className="w-full h-64 relative rounded-lg overflow-hidden">
-                      <Image
-                        src={petition.petitionDetails.image}
-                        alt={petition.title}
-                        fill
-                        className="object-cover"
-                      />
+          {petitions.length === 0 ? (
+            <div className="bg-white rounded-3xl p-12 text-center shadow-sm">
+              <div className="w-20 h-20 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <FaTrophy className="text-[#F43676] text-3xl" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-700 mb-2">No Petitions Yet</h3>
+              <p className="text-gray-500 mb-6">
+                You haven&apos;t created any petitions yet. Start making a difference today!
+              </p>
+              <Link href="/start-petition">
+                <button className="bg-gradient-to-r from-[#F43676] to-[#e02a60] text-white font-semibold py-3 px-6 rounded-xl hover:shadow-lg hover:scale-105 transition-all duration-200">
+                  Create Your First Petition
+                </button>
+              </Link>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              {petitions.map((petition) => (
+                <div
+                  key={petition._id}
+                  className="bg-white shadow-lg rounded-3xl overflow-hidden border border-pink-100 hover:shadow-xl transition-shadow duration-200"
+                >
+                  {/* Petition Title as Heading */}
+                  <div className="p-6 border-b border-pink-100 bg-gradient-to-r from-pink-50 to-white">
+                    <h2 className="text-2xl font-bold text-[#1a1a2e] mb-3">
+                      {petition.title}
+                    </h2>
+                    {/* Approval Status */}
+                    <div className="flex items-center gap-2">
+                      {petition.approved ? (
+                        <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold bg-green-100 text-green-700 border border-green-200">
+                          ✓ Approved
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold bg-yellow-100 text-yellow-700 border border-yellow-200">
+                          ⏳ Pending Approval
+                        </span>
+                      )}
                     </div>
                   </div>
-                )}
 
-                {/* Action Buttons Section - Separate Box */}
-                <div className="m-6 bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-                  <div className="flex gap-4">
-                    <button
-                      onClick={() => copyToClipboard(petition.slug)}
-                      className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded transition-colors"
-                    >
-                      Copy Link
-                    </button>
-                    <button
-                      onClick={() => sharePetition(petition)}
-                      className="flex-1 bg-blue-100 hover:bg-blue-200 text-blue-700 font-medium py-2 px-4 rounded transition-colors"
-                    >
-                      Share
-                    </button>
-                    <button
-                      onClick={() => deletePetition(petition._id)}
-                      className="flex-1 bg-red-100 hover:bg-red-200 text-red-700 font-medium py-2 px-4 rounded transition-colors"
-                    >
-                      Delete Petition
-                    </button>
+                  {/* Petition Image */}
+                  {petition.petitionDetails.image && (
+                    <div className="px-6 pt-6">
+                      <div className="w-full h-64 relative rounded-2xl overflow-hidden shadow-md">
+                        <Image
+                          src={petition.petitionDetails.image}
+                          alt={petition.title}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Action Buttons Section */}
+                  <div className="m-6 bg-pink-50 border border-pink-100 rounded-2xl p-5 shadow-sm">
+                    <h3 className="text-sm font-bold text-gray-700 mb-3">Quick Actions</h3>
+                    <div className="flex flex-wrap gap-3">
+                      <button
+                        onClick={() => copyToClipboard(petition.slug)}
+                        className="flex-1 min-w-[140px] bg-white hover:bg-pink-100 text-gray-700 font-semibold py-3 px-4 rounded-xl border border-pink-200 transition-all duration-200 flex items-center justify-center gap-2 hover:scale-105"
+                      >
+                        <FaLink className="text-[#F43676]" />
+                        Copy Link
+                      </button>
+                      <button
+                        onClick={() => sharePetition(petition)}
+                        className="flex-1 min-w-[140px] bg-gradient-to-r from-[#F43676] to-[#e02a60] hover:shadow-lg text-white font-semibold py-3 px-4 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 hover:scale-105"
+                      >
+                        <FaShare />
+                        Share
+                      </button>
+                      <button
+                        onClick={() => deletePetition(petition._id)}
+                        className="flex-1 min-w-[140px] bg-red-100 hover:bg-red-200 text-red-700 font-semibold py-3 px-4 rounded-xl border border-red-200 transition-all duration-200 flex items-center justify-center gap-2 hover:scale-105"
+                      >
+                        <FaTrash />
+                        Delete
+                      </button>
+                    </div>
                   </div>
-                </div>
 
-                {/* Petition Overview Section - Separate Box */}
-                <div className="m-6 bg-gray-50 border border-gray-200 rounded-lg p-6 shadow-sm">
-                  <h3 className="text-xl font-semibold mb-4 text-gray-800">
-                    Petition Overview
-                  </h3>
+                  {/* Petition Overview Section */}
+                  <div className="m-6 bg-gradient-to-br from-pink-50 to-white border border-pink-200 rounded-2xl p-6 shadow-sm">
+                    <h3 className="text-xl font-bold mb-6 text-[#1a1a2e] flex items-center gap-2">
+                      <div className="w-2 h-2 bg-[#F43676] rounded-full"></div>
+                      Petition Overview
+                    </h3>
 
-                  {/* Semi-circle design with signatures */}
-                  <div className="flex justify-center mb-6">
-                    <div className="relative">
-                      <div className="w-32 h-16 border-4 border-green-500 rounded-t-full border-b-0 flex items-end justify-center bg-gradient-to-t from-green-50 to-transparent">
-                        <div className="text-center pb-2">
-                          <div className="text-2xl font-bold text-green-600">
-                            {petition.numberOfSignatures || 0}
-                          </div>
-                          <div className="text-xs text-gray-600">
-                            Signatures
+                    {/* Signatures Display */}
+                    <div className="flex justify-center mb-6">
+                      <div className="relative">
+                        <div className="w-40 h-20 border-4 border-[#F43676] rounded-t-full border-b-0 flex items-end justify-center bg-gradient-to-t from-pink-100 to-transparent">
+                          <div className="text-center pb-2">
+                            <div className="text-3xl font-bold text-[#F43676]">
+                              {petition.numberOfSignatures || 0}
+                            </div>
+                            <div className="text-xs text-gray-600 font-semibold">
+                              Signatures
+                            </div>
                           </div>
                         </div>
                       </div>
                     </div>
-                  </div>
 
-                  {/* Goal Achievement Box */}
-                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-700 font-medium">
-                        Reached your goal?
-                      </span>
-                      <button
-                        onClick={() => declareVictory(petition._id)}
-                        disabled={declareVictoryLoading === petition._id}
-                        className={`${
-                          declareVictoryLoading === petition._id
-                            ? "bg-yellow-400 cursor-not-allowed"
-                            : "bg-yellow-500 hover:bg-yellow-600"
-                        } text-white font-bold py-2 px-4 rounded transition-colors`}
-                      >
-                        {declareVictoryLoading === petition._id ? (
-                          <span className="flex items-center">
-                            <svg
-                              className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
-                              xmlns="http://www.w3.org/2000/svg"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                            >
-                              <circle
-                                className="opacity-25"
-                                cx="12"
-                                cy="12"
-                                r="10"
-                                stroke="currentColor"
-                                strokeWidth="4"
-                              ></circle>
-                              <path
-                                className="opacity-75"
-                                fill="currentColor"
-                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                              ></path>
-                            </svg>
-                            Processing...
-                          </span>
-                        ) : (
-                          "Declare Victory"
-                        )}
-                      </button>
+                    {/* Goal Achievement Box */}
+                    <div className="bg-gradient-to-r from-yellow-50 to-orange-50 border-2 border-yellow-200 rounded-xl p-5">
+                      <div className="flex items-center justify-between flex-wrap gap-4">
+                        <div>
+                          <p className="text-gray-700 font-bold text-lg">Reached your goal?</p>
+                          <p className="text-gray-500 text-sm">Celebrate your success!</p>
+                        </div>
+                        <button
+                          onClick={() => declareVictory(petition._id)}
+                          disabled={declareVictoryLoading === petition._id}
+                          className={`${declareVictoryLoading === petition._id
+                              ? "bg-yellow-400 cursor-not-allowed"
+                              : "bg-gradient-to-r from-yellow-500 to-orange-500 hover:shadow-lg hover:scale-105"
+                            } text-white font-bold py-3 px-6 rounded-xl transition-all duration-200 flex items-center gap-2`}
+                        >
+                          {declareVictoryLoading === petition._id ? (
+                            <span className="flex items-center">
+                              <svg
+                                className="animate-spin -ml-1 mr-2 h-5 w-5 text-white"
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                              >
+                                <circle
+                                  className="opacity-25"
+                                  cx="12"
+                                  cy="12"
+                                  r="10"
+                                  stroke="currentColor"
+                                  strokeWidth="4"
+                                ></circle>
+                                <path
+                                  className="opacity-75"
+                                  fill="currentColor"
+                                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                ></path>
+                              </svg>
+                              Processing...
+                            </span>
+                          ) : (
+                            <>
+                              <FaTrophy />
+                              Declare Victory
+                            </>
+                          )}
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        )}
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Login Modal */}

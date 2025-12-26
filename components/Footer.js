@@ -2,46 +2,41 @@
 
 import Link from "next/link";
 import { FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn, FaYoutube, FaPinterestP, FaSearch, FaArrowUp } from "react-icons/fa";
-import { useState } from "react";
-
-// Recent posts data
-const recentPosts = [
-  {
-    id: 1,
-    title: "Top Luxury Ideas for High-End Home Exterior Decor",
-    author: "nikkuramani",
-    date: "February 26, 2024",
-    image: "https://picsum.photos/seed/post1/100/100",
-  },
-  {
-    id: 2,
-    title: "Discovering the Hidden Mysteries of Petra",
-    author: "nikkuramani",
-    date: "February 26, 2024",
-    image: "https://picsum.photos/seed/post2/100/100",
-  },
-  {
-    id: 3,
-    title: "Leading state of the art design history",
-    author: "nikkuramani",
-    date: "February 23, 2024",
-    image: "https://picsum.photos/seed/post3/100/100",
-  },
-];
+import { useState, useEffect } from "react";
 
 // Categories data
 const categories = [
+  "Animals",
   "Environment",
   "Education",
-  "Healthcare",
-  "Social",
-  "Community",
+  "Health",
+  "Politics",
+  "Human Rights",
   "Technology",
-  "Youth",
 ];
 
 export default function Footer() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [latestPetitions, setLatestPetitions] = useState([]);
+
+  // Fetch latest 3 petitions
+  useEffect(() => {
+    const fetchLatestPetitions = async () => {
+      try {
+        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
+        const response = await fetch(`${backendUrl}/api/petitions?limit=3&sort=newest`);
+
+        if (response.ok) {
+          const data = await response.json();
+          setLatestPetitions(data.petitions || []);
+        }
+      } catch (err) {
+        console.error("Error fetching latest petitions:", err);
+      }
+    };
+
+    fetchLatestPetitions();
+  }, []);
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -128,17 +123,21 @@ export default function Footer() {
         <div>
           <h3 className="text-xl font-bold mb-5">Categories</h3>
           <ul className="space-y-3">
-            {categories.map((category, index) => (
-              <li key={index}>
-                <Link
-                  href={`/search?category=${category.toLowerCase()}`}
-                  className="group flex items-center gap-2 text-gray-300 hover:text-[#F43676] transition-all duration-300 hover:translate-x-2"
-                >
-                  <span className="w-2 h-2 bg-[#F43676] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
-                  {category}
-                </Link>
-              </li>
-            ))}
+            {categories.map((category, index) => {
+              // Convert category to slug (lowercase with underscores for spaces)
+              const categorySlug = category.toLowerCase().replace(/\s+/g, '_');
+              return (
+                <li key={index}>
+                  <Link
+                    href={`/category/${categorySlug}`}
+                    className="group flex items-center gap-2 text-gray-300 hover:text-[#F43676] transition-all duration-300 hover:translate-x-2"
+                  >
+                    <span className="w-2 h-2 bg-[#F43676] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                    {category}
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
         </div>
 
@@ -191,38 +190,49 @@ export default function Footer() {
           </ul>
         </div>
 
-        {/* Archives / Recent Posts Section */}
+        {/* Latest Petitions Section */}
         <div>
-          <h3 className="text-xl font-bold mb-5">Archives</h3>
-          <p className="text-gray-300 mb-6">February 2024</p>
+          <h3 className="text-xl font-bold mb-5">Latest Petitions</h3>
 
           <div className="space-y-4">
-            {recentPosts.map((post) => (
-              <Link
-                key={post.id}
-                href="/blog"
-                className="flex gap-3 group"
-              >
-                <div className="w-16 h-16 rounded-lg overflow-hidden shrink-0">
-                  <img
-                    src={post.image}
-                    alt={post.title}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                  />
-                </div>
-                <div className="flex-1">
-                  <h4 className="text-sm font-semibold text-white group-hover:text-[#F43676] transition-colors leading-tight mb-1">
-                    {post.title}
-                  </h4>
-                  <p className="text-xs text-gray-400">
-                    by {post.author}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    {post.date}
-                  </p>
-                </div>
-              </Link>
-            ))}
+            {latestPetitions.length > 0 ? (
+              latestPetitions.map((petition) => (
+                <Link
+                  key={petition._id}
+                  href={`/currentpetitions/${petition._id}`}
+                  className="flex gap-3 group"
+                >
+                  <div className="w-16 h-16 rounded-lg overflow-hidden shrink-0 bg-gradient-to-br from-pink-100 to-gray-100">
+                    {petition.petitionDetails?.image ? (
+                      <img
+                        src={petition.petitionDetails.image}
+                        alt={petition.title}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-2xl">📝</div>
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="text-sm font-semibold text-white group-hover:text-[#F43676] transition-colors leading-tight mb-1 line-clamp-2">
+                      {petition.title}
+                    </h4>
+                    <p className="text-xs text-gray-400">
+                      {petition.numberOfSignatures || 0} signatures
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {new Date(petition.createdAt).toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric'
+                      })}
+                    </p>
+                  </div>
+                </Link>
+              ))
+            ) : (
+              <p className="text-gray-400 text-sm">Loading latest petitions...</p>
+            )}
           </div>
         </div>
       </div>

@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { FaChevronRight, FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn, FaYoutube, FaPinterestP, FaSearch, FaCalendarAlt, FaPlay } from "react-icons/fa";
+import { useAuth } from "@/context/AuthContext";
 import Footer from "@/components/Footer";
 
 // Sample blog posts data with categories
@@ -114,33 +115,103 @@ const categories = [
     "Travel",
 ];
 
-// Tags
+// Tags - mapped to categories
 const tags = [
-    "Animal",
-    "Fashion",
-    "Food",
+    "Animals",
+    "Environment",
+    "Education",
     "Health",
-    "Music",
     "Politics",
-    "Race",
+    "Human Rights",
     "Sports",
-    "Tech",
     "Technology",
     "Travel",
+    "Lifestyle",
 ];
 
 export default function CategoryPage() {
     const params = useParams();
     const [searchQuery, setSearchQuery] = useState("");
+    const [recentComments, setRecentComments] = useState([]);
+    const [petitions, setPetitions] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const { user } = useAuth();
 
     // Get category name from slug
     const categorySlug = params.categorySlug;
-    const categoryName = categorySlug ? categorySlug.charAt(0).toUpperCase() + categorySlug.slice(1) : "";
+    const categoryName = categorySlug
+        ? categorySlug.replace(/_/g, ' ').split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
+        : "";
 
-    // Filter posts by category
-    const filteredPosts = blogPosts.filter(post =>
-        post.categories.some(cat => cat.toLowerCase() === categorySlug?.toLowerCase())
-    );
+    // Fetch petitions by category
+    useEffect(() => {
+        const fetchPetitions = async () => {
+            setLoading(true);
+            try {
+                const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
+                // Convert slug back to category format (e.g., human_rights -> human rights)
+                const category = categorySlug?.replace(/_/g, ' ');
+                const response = await fetch(`${backendUrl}/api/petitions?category=${encodeURIComponent(category)}`);
+
+                if (response.ok) {
+                    const data = await response.json();
+                    setPetitions(data.petitions || []);
+                } else {
+                    setPetitions([]);
+                }
+            } catch (err) {
+                console.error("Error fetching petitions:", err);
+                setPetitions([]);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        if (categorySlug) {
+            fetchPetitions();
+        }
+    }, [categorySlug]);
+
+    // Fetch recent comments from the logged-in user
+    useEffect(() => {
+        const fetchRecentComments = async () => {
+            if (!user) {
+                setRecentComments([]);
+                return;
+            }
+
+            try {
+                const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
+                const userInfo = JSON.parse(localStorage.getItem("user"));
+
+                if (!userInfo || !userInfo.token) {
+                    setRecentComments([]);
+                    return;
+                }
+
+                const response = await fetch(
+                    `${backendUrl}/api/comments/user/recent?limit=4`,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${userInfo.token}`,
+                        },
+                    }
+                );
+
+                if (response.ok) {
+                    const data = await response.json();
+                    setRecentComments(data.comments || []);
+                } else {
+                    setRecentComments([]);
+                }
+            } catch (err) {
+                console.error("Error fetching recent comments:", err);
+                setRecentComments([]);
+            }
+        };
+
+        fetchRecentComments();
+    }, [user]);
 
     return (
         <>
@@ -166,87 +237,110 @@ export default function CategoryPage() {
                             {/* Main Content - Left Side */}
                             <div className="lg:w-2/3">
                                 <div className="bg-white rounded-3xl p-6 shadow-sm">
-                                    <div className="space-y-6">
-                                        {filteredPosts.length > 0 ? (
-                                            filteredPosts.map((post) => (
-                                                <div
-                                                    key={post.id}
-                                                    className={`relative bg-white rounded-3xl shadow-sm hover:shadow-md transition-shadow border border-gray-100 ${post.featured ? "ring-2 ring-[#F43676]" : ""
-                                                        }`}
-                                                >
-                                                    <Link href={`/category/${categorySlug}/${post.slug}`} className="flex flex-col sm:flex-row items-center">
-                                                        {/* Image */}
-                                                        <div className="sm:w-2/5 relative sm:-ml-6 my-4 sm:my-6">
-                                                            <div className="aspect-[4/3] rounded-2xl overflow-hidden shadow-lg">
-                                                                <img
-                                                                    src={post.image}
-                                                                    alt={post.title}
-                                                                    className="w-full h-full object-cover"
-                                                                />
-                                                            </div>
-                                                            {/* Feature Icon */}
-                                                            {post.featured && (
-                                                                <div className="absolute top-4 right-4 w-10 h-10 bg-[#F43676] rounded-full flex items-center justify-center shadow-md">
-                                                                    <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                                                    </svg>
+                                    {loading ? (
+                                        <div className="text-center py-12">
+                                            <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[#F43676] border-t-transparent"></div>
+                                            <p className="text-gray-600 mt-4">Loading petitions...</p>
+                                        </div>
+                                    ) : (
+                                        <div className="space-y-6">
+                                            {petitions.length > 0 ? (
+                                                petitions.map((petition) => (
+                                                    <div
+                                                        key={petition._id}
+                                                        className="relative bg-white rounded-3xl shadow-sm hover:shadow-md transition-shadow border border-gray-100"
+                                                    >
+                                                        <Link href={`/currentpetitions/${petition._id}`} className="flex flex-col sm:flex-row items-center">
+                                                            {/* Image */}
+                                                            <div className="sm:w-2/5 relative sm:-ml-6 my-4 sm:my-6">
+                                                                <div className="aspect-[4/3] rounded-2xl overflow-hidden shadow-lg bg-gradient-to-br from-pink-100 to-gray-100">
+                                                                    {petition.petitionDetails?.image ? (
+                                                                        <img
+                                                                            src={petition.petitionDetails.image}
+                                                                            alt={petition.title}
+                                                                            className="w-full h-full object-cover"
+                                                                        />
+                                                                    ) : (
+                                                                        <div className="w-full h-full flex items-center justify-center text-6xl">📝</div>
+                                                                    )}
                                                                 </div>
-                                                            )}
-                                                            {post.hasVideo && !post.featured && (
-                                                                <div className="absolute top-4 right-4 w-10 h-10 bg-black/50 rounded-full flex items-center justify-center">
-                                                                    <FaPlay className="text-white text-sm ml-0.5" />
+                                                                <div className="absolute top-4 right-4 bg-gradient-to-r from-[#F43676] to-[#e02a60] text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg">
+                                                                    {petition.numberOfSignatures || 0} ✍️
                                                                 </div>
-                                                            )}
-                                                        </div>
-
-                                                        {/* Content */}
-                                                        <div className="sm:w-3/5 p-6">
-                                                            {/* Category Tags */}
-                                                            <div className="flex flex-wrap gap-2 mb-3">
-                                                                {post.categories.map((category, idx) => (
-                                                                    <span
-                                                                        key={idx}
-                                                                        className="px-3 py-1 bg-[#fce4ec] text-[#F43676] rounded-full text-xs font-medium"
-                                                                    >
-                                                                        {category}
-                                                                    </span>
-                                                                ))}
                                                             </div>
 
-                                                            {/* Title */}
-                                                            <h3 className="text-xl font-bold text-[#1a1a2e] mb-3 leading-tight hover:text-[#F43676] transition-colors">
-                                                                {post.title}
-                                                            </h3>
+                                                            {/* Content */}
+                                                            <div className="sm:w-3/5 p-6">
+                                                                {/* Category Tag */}
+                                                                {petition.category && (
+                                                                    <div className="flex flex-wrap gap-2 mb-3">
+                                                                        <span className="px-3 py-1 bg-[#fce4ec] text-[#F43676] rounded-full text-xs font-medium">
+                                                                            {petition.category.charAt(0).toUpperCase() + petition.category.slice(1)}
+                                                                        </span>
+                                                                    </div>
+                                                                )}
 
-                                                            {/* Description */}
-                                                            <p className="text-gray-500 text-sm mb-4 leading-relaxed">
-                                                                {post.description}
-                                                            </p>
+                                                                {/* Title */}
+                                                                <h3 className="text-xl font-bold text-[#1a1a2e] mb-3 leading-tight hover:text-[#F43676] transition-colors">
+                                                                    {petition.title}
+                                                                </h3>
 
-                                                            {/* Author Info */}
-                                                            <div className="flex items-center gap-3 text-sm">
-                                                                <div className="w-8 h-8 rounded-full overflow-hidden">
-                                                                    <img
-                                                                        src={`https://ui-avatars.com/api/?name=${post.author}&background=random&size=32`}
-                                                                        alt={post.author}
-                                                                        className="w-full h-full object-cover"
-                                                                    />
+                                                                {/* Description */}
+                                                                <p className="text-gray-500 text-sm mb-4 leading-relaxed line-clamp-3">
+                                                                    {petition.petitionDetails?.description || "No description available."}
+                                                                </p>
+
+                                                                {/* Author Info */}
+                                                                <div className="flex items-center gap-3 text-sm">
+                                                                    <div className="w-8 h-8 rounded-full overflow-hidden">
+                                                                        {petition.petitionStarter?.user?.photoURL ? (
+                                                                            <img
+                                                                                src={petition.petitionStarter.user.photoURL}
+                                                                                alt={petition.petitionStarter.user.name || "User"}
+                                                                                className="w-full h-full object-cover"
+                                                                            />
+                                                                        ) : (
+                                                                            <img
+                                                                                src={`https://ui-avatars.com/api/?name=${petition.petitionStarter?.user?.name || petition.petitionStarter?.name || "Anonymous"}&background=random&size=32`}
+                                                                                alt="User"
+                                                                                className="w-full h-full object-cover"
+                                                                            />
+                                                                        )}
+                                                                    </div>
+                                                                    <div>
+                                                                        <p className="text-gray-700 font-medium">
+                                                                            {petition.petitionStarter?.user?.name || petition.petitionStarter?.name || "Anonymous"}
+                                                                        </p>
+                                                                        <p className="text-gray-400 text-xs">
+                                                                            {new Date(petition.createdAt).toLocaleDateString('en-US', {
+                                                                                month: 'long',
+                                                                                day: 'numeric',
+                                                                                year: 'numeric'
+                                                                            })}
+                                                                        </p>
+                                                                    </div>
                                                                 </div>
-                                                                <span className="text-gray-600 font-medium">{post.author}</span>
-                                                                <span className="text-gray-400">•</span>
-                                                                <span className="flex items-center gap-1 text-gray-400">
-                                                                    <FaCalendarAlt className="text-xs" />
-                                                                    {post.date}
-                                                                </span>
                                                             </div>
-                                                        </div>
+                                                        </Link>
+                                                    </div>
+                                                ))
+                                            ) : (
+                                                <div className="text-center py-16">
+                                                    <div className="w-24 h-24 mx-auto mb-6 bg-pink-100 rounded-full flex items-center justify-center">
+                                                        <span className="text-5xl">📋</span>
+                                                    </div>
+                                                    <h3 className="text-xl font-bold text-[#1a1a2e] mb-2">No petitions found</h3>
+                                                    <p className="text-gray-500 mb-6">There are currently no petitions in this category.</p>
+                                                    <Link
+                                                        href="/start-petition"
+                                                        className="inline-block px-6 py-3 bg-gradient-to-r from-[#F43676] to-[#e02a60] text-white font-medium rounded-full hover:shadow-lg transition-shadow"
+                                                    >
+                                                        Start a Petition
                                                     </Link>
                                                 </div>
-                                            ))
-                                        ) : (
-                                            <p className="text-gray-500 text-center py-12">No posts found in this category.</p>
-                                        )}
-                                    </div>
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 
@@ -298,17 +392,49 @@ export default function CategoryPage() {
                                         <h3 className="text-xl font-bold text-[#1a1a2e]">Recent Comments</h3>
                                         <span className="w-2 h-2 bg-[#F43676] rounded-full"></span>
                                     </div>
-                                    <p className="text-gray-500 text-sm">No comments to show.</p>
+                                    {user ? (
+                                        recentComments.length > 0 ? (
+                                            <ul className="space-y-3">
+                                                {recentComments.map((comment, index) => (
+                                                    <li key={index} className="border-b border-gray-100 pb-3 last:border-0 last:pb-0">
+                                                        <Link
+                                                            href={`/currentpetitions/${comment.petitionId}`}
+                                                            className="block hover:bg-pink-50 p-2 rounded-lg transition-colors"
+                                                        >
+                                                            <p className="text-gray-700 text-sm leading-relaxed line-clamp-2 mb-1">
+                                                                {comment.content}
+                                                            </p>
+                                                            <p className="text-xs text-gray-400">
+                                                                {new Date(comment.createdAt).toLocaleDateString('en-US', {
+                                                                    month: 'short',
+                                                                    day: 'numeric',
+                                                                    year: 'numeric'
+                                                                })}
+                                                            </p>
+                                                        </Link>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        ) : (
+                                            <p className="text-gray-500 text-sm">You haven't made any comments yet.</p>
+                                        )
+                                    ) : (
+                                        <p className="text-gray-500 text-sm">
+                                            <Link href="/login" className="text-[#F43676] hover:underline">
+                                                Login
+                                            </Link> to see your recent comments.
+                                        </p>
+                                    )}
                                 </div>
 
                                 {/* Archives */}
-                                <div className="bg-white rounded-3xl p-6 shadow-sm">
+                                {/* <div className="bg-white rounded-3xl p-6 shadow-sm">
                                     <div className="flex items-center gap-2 mb-4">
                                         <h3 className="text-xl font-bold text-[#1a1a2e]">Archives</h3>
                                         <span className="w-2 h-2 bg-[#F43676] rounded-full"></span>
                                     </div>
                                     <p className="text-gray-600">February 2024</p>
-                                </div>
+                                </div> */}
 
                                 {/* Categories */}
                                 <div className="bg-white rounded-3xl p-6 shadow-sm">
@@ -376,15 +502,19 @@ export default function CategoryPage() {
                                         <span className="w-2 h-2 bg-[#F43676] rounded-full"></span>
                                     </div>
                                     <div className="flex flex-wrap gap-2">
-                                        {tags.map((tag, index) => (
-                                            <Link
-                                                key={index}
-                                                href={`/search?tag=${tag.toLowerCase()}`}
-                                                className="px-4 py-2 bg-white border border-gray-200 rounded-full text-sm text-gray-600 hover:border-[#F43676] hover:text-[#F43676] transition-colors"
-                                            >
-                                                {tag}
-                                            </Link>
-                                        ))}
+                                        {tags.map((tag, index) => {
+                                            // Convert tag to category slug (lowercase with underscores for spaces)
+                                            const categorySlug = tag.toLowerCase().replace(/\s+/g, '_');
+                                            return (
+                                                <Link
+                                                    key={index}
+                                                    href={`/category/${categorySlug}`}
+                                                    className="px-4 py-2 bg-white border border-gray-200 rounded-full text-sm text-gray-600 hover:border-[#F43676] hover:text-[#F43676] transition-colors"
+                                                >
+                                                    {tag}
+                                                </Link>
+                                            );
+                                        })}
                                     </div>
                                 </div>
 
@@ -410,10 +540,10 @@ export default function CategoryPage() {
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                </section>
-            </main>
+                        </div >
+                    </div >
+                </section >
+            </main >
             <Footer />
         </>
     );
