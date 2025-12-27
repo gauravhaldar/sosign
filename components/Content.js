@@ -502,7 +502,7 @@ export default function Content() {
             {/* Recent Posts */}
             <div className="bg-white rounded-3xl p-6 shadow-sm">
               <div className="flex items-center gap-2 mb-4">
-                <h3 className="text-xl font-bold text-[#1a1a2e]">Recent Posts</h3>
+                <h3 className="text-xl font-bold text-[#1a1a2e]">Recent Petitions</h3>
                 <span className="w-2 h-2 bg-[#F43676] rounded-full"></span>
               </div>
               <ul className="space-y-3">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { FaChevronRight, FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn, FaYoutube, FaPinterestP, FaSearch } from "react-icons/fa";
@@ -62,14 +62,7 @@ Goodness acknowledgment flats up sympathize flabbergasted delightful. Holding up
   },
 ];
 
-// Recent posts for sidebar
-const recentPosts = [
-  { title: "Top Luxury Ideas for High-End Home Exterior Decor", slug: "top-luxury-ideas-high-end-home", image: "https://picsum.photos/seed/recent1/100/100" },
-  { title: "Discovering the Hidden Mysteries of Petra", slug: "discovering-hidden-mysteries-petra", image: "https://picsum.photos/seed/recent2/100/100" },
-  { title: "Leading state of the art design history", slug: "leading-state-art-design-history", image: "https://picsum.photos/seed/recent3/100/100" },
-  { title: "Rapid Aircraft Interior Design via Renderings", slug: "rapid-aircraft-interior-design", image: "https://picsum.photos/seed/recent4/100/100" },
-  { title: "Top color palettes in graphic design", slug: "top-color-palettes-graphic-design", image: "https://picsum.photos/seed/recent5/100/100" },
-];
+// Recent posts will be fetched from API
 
 // Categories
 const categories = [
@@ -105,6 +98,7 @@ export default function BlogDetailPage() {
   const [email, setEmail] = useState("");
   const [website, setWebsite] = useState("");
   const [saveInfo, setSaveInfo] = useState(false);
+  const [recentPetitions, setRecentPetitions] = useState([]);
 
   // Find the current post
   const post = blogPosts.find(p => p.slug === params.slug) || blogPosts[0];
@@ -119,6 +113,28 @@ export default function BlogDetailPage() {
     // Handle comment submission
     console.log({ comment, name, email, website, saveInfo });
   };
+
+  // Fetch recent petitions for sidebar
+  useEffect(() => {
+    const fetchRecentPetitions = async () => {
+      try {
+        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
+        const response = await fetch(`${backendUrl}/api/petitions?limit=5`);
+
+        if (response.ok) {
+          const data = await response.json();
+          setRecentPetitions(data.petitions || []);
+        } else {
+          setRecentPetitions([]);
+        }
+      } catch (err) {
+        console.error("Error fetching recent petitions:", err);
+        setRecentPetitions([]);
+      }
+    };
+
+    fetchRecentPetitions();
+  }, []);
 
   return (
     <>
@@ -418,24 +434,28 @@ export default function BlogDetailPage() {
                   </div>
                 </div>
 
-                {/* Recent Posts */}
+                {/* Recent Petitions */}
                 <div className="bg-white rounded-3xl p-6 shadow-sm">
                   <div className="flex items-center gap-2 mb-4">
-                    <h3 className="text-xl font-bold text-[#1a1a2e]">Recent Posts</h3>
+                    <h3 className="text-xl font-bold text-[#1a1a2e]">Recent Petitions</h3>
                     <span className="w-2 h-2 bg-[#F43676] rounded-full"></span>
                   </div>
-                  <ul className="space-y-3">
-                    {recentPosts.map((post, index) => (
-                      <li key={index} className="border-b border-gray-100 pb-3 last:border-0 last:pb-0">
-                        <Link
-                          href={`/blog/${post.slug}`}
-                          className="text-gray-600 hover:text-[#F43676] transition-colors text-sm leading-relaxed block"
-                        >
-                          {post.title}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
+                  {recentPetitions.length > 0 ? (
+                    <ul className="space-y-3">
+                      {recentPetitions.map((petition) => (
+                        <li key={petition._id} className="border-b border-gray-100 pb-3 last:border-0 last:pb-0">
+                          <Link
+                            href={`/currentpetitions/${petition._id}`}
+                            className="text-gray-600 hover:text-[#F43676] transition-colors text-sm leading-relaxed block"
+                          >
+                            {petition.title}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-gray-500 text-sm">No recent petitions available.</p>
+                  )}
                 </div>
 
                 {/* Recent Comments */}
