@@ -184,8 +184,21 @@ export default function StartPetitionPage() {
     aadharNumber: {
       required: true,
       minLength: 12,
-      maxLength: 14,
-      pattern: /^[2-9]{1}[0-9]{3}[\s-]?[0-9]{4}[\s-]?[0-9]{4}$/,
+      maxLength: 16,
+      // Custom validation - will be handled specially in validateField
+      pattern: null,
+      customValidator: (value) => {
+        // Strip all non-digit characters
+        const digitsOnly = value.replace(/\D/g, '');
+        // Must be exactly 12 digits and start with 2-9
+        if (digitsOnly.length !== 12) {
+          return { isValid: false, error: "Aadhar number must be exactly 12 digits" };
+        }
+        if (!/^[2-9]/.test(digitsOnly)) {
+          return { isValid: false, error: "Aadhar number cannot start with 0 or 1" };
+        }
+        return { isValid: true, error: null };
+      },
       message: "Please enter a valid 12-digit Aadhar number",
       example: "e.g., '2345 6789 0123' or '234567890123' (12 digits, cannot start with 0 or 1)"
     },
@@ -246,6 +259,11 @@ export default function StartPetitionPage() {
     // If not required and empty, it's valid
     if (!rules.required && trimmedValue === "") {
       return { isValid: true, error: null };
+    }
+
+    // Use custom validator if provided (takes priority over pattern and length checks)
+    if (rules.customValidator) {
+      return rules.customValidator(trimmedValue);
     }
 
     // Check min length
@@ -1182,10 +1200,23 @@ export default function StartPetitionPage() {
                         <input
                           type="text"
                           value={formData.starter.aadharNumber}
-                          onChange={(e) => handleInputChange("starter.aadharNumber", e.target.value)}
+                          onChange={(e) => {
+                            // Remove all non-digits
+                            let value = e.target.value.replace(/\D/g, '');
+                            // Limit to 12 digits
+                            value = value.slice(0, 12);
+                            // Format with spaces: XXXX XXXX XXXX
+                            if (value.length > 8) {
+                              value = value.slice(0, 4) + ' ' + value.slice(4, 8) + ' ' + value.slice(8);
+                            } else if (value.length > 4) {
+                              value = value.slice(0, 4) + ' ' + value.slice(4);
+                            }
+                            handleInputChange("starter.aadharNumber", value);
+                          }}
                           onBlur={() => markFieldTouched("aadharNumber")}
                           className={getInputProps("aadharNumber", formData.starter.aadharNumber).className}
                           placeholder="e.g., 2345 6789 0123 (12 digits)"
+                          maxLength={14}
                         />
                       </div>
                       <button
