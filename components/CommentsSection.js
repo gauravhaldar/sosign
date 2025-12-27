@@ -258,16 +258,16 @@ const CommentsSection = ({ petitionId }) => {
           prev.map((comment) =>
             comment._id === commentId
               ? {
-                  ...comment,
-                  likes: data.isLiked
-                    ? [
-                        ...(comment.likes || []),
-                        { user: { _id: user._id, name: user.name } },
-                      ]
-                    : (comment.likes || []).filter(
-                        (like) => like?.user?._id !== user._id
-                      ),
-                }
+                ...comment,
+                likes: data.isLiked
+                  ? [
+                    ...(comment.likes || []),
+                    { user: { _id: user._id, name: user.name } },
+                  ]
+                  : (comment.likes || []).filter(
+                    (like) => like?.user?._id !== user._id
+                  ),
+              }
               : comment
           )
         );
@@ -409,192 +409,208 @@ const CommentsSection = ({ petitionId }) => {
           </div>
         ) : (
           <AnimatePresence>
-            {comments.map((comment) => (
-              <motion.div
-                key={comment._id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                className="border border-gray-200 rounded-lg p-4"
-              >
-                {/* Comment Header */}
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-[#3650AD] rounded-full flex items-center justify-center text-white font-medium">
-                      {comment?.user?.name
-                        ? comment.user.name.charAt(0).toUpperCase()
-                        : "?"}
-                    </div>
-                    <div>
-                      <p className="font-medium text-gray-900">
-                        {comment?.user?.name || "Unknown User"}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        {comment?.user?.designation || "Citizen"} •{" "}
-                        {formatDate(comment.createdAt)}
-                        {comment.isEdited && (
-                          <span className="text-gray-400 ml-1">(edited)</span>
-                        )}
-                      </p>
-                    </div>
-                  </div>
-                  {user && user._id === comment?.user?._id && (
-                    <div className="flex space-x-2">
-                      <button
-                        onClick={() => {
-                          setEditingComment(comment._id);
-                          setEditContent(comment.content);
-                        }}
-                        className="text-blue-600 hover:text-blue-800 text-sm"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDeleteComment(comment._id)}
-                        className="text-red-600 hover:text-red-800 text-sm"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  )}
-                </div>
+            {comments
+              .filter((comment) => {
+                // Show approved comments to everyone
+                // Show unapproved comments only to the owner
+                const isOwner = user && user._id === comment?.user?._id;
+                return comment.isApproved || isOwner;
+              })
+              .map((comment) => {
+                const isOwner = user && user._id === comment?.user?._id;
 
-                {/* Comment Content */}
-                {editingComment === comment._id ? (
-                  <div className="space-y-3">
-                    <textarea
-                      value={editContent}
-                      onChange={(e) => setEditContent(e.target.value)}
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                      rows="3"
-                      maxLength="1000"
-                    />
-                    <div className="flex space-x-2">
-                      <button
-                        onClick={() => handleEditComment(comment._id)}
-                        className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700"
-                      >
-                        Save
-                      </button>
-                      <button
-                        onClick={() => {
-                          setEditingComment(null);
-                          setEditContent("");
-                        }}
-                        className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm hover:bg-gray-400"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <p className="text-gray-800 mb-3">{comment?.content || ""}</p>
-                )}
-
-                {/* Comment Actions */}
-                <div className="flex items-center space-x-4 text-sm">
-                  <button
-                    onClick={() => handleToggleLike(comment._id)}
-                    className={`flex items-center space-x-1 ${
-                      isLikedByUser(comment)
-                        ? "text-blue-600"
-                        : "text-gray-500 hover:text-blue-600"
-                    }`}
+                return (
+                  <motion.div
+                    key={comment._id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    className={`border border-gray-200 rounded-lg p-4 ${!comment.isApproved ? 'bg-yellow-50 border-yellow-200' : ''}`}
                   >
-                    <span>👍</span>
-                    <span>{(comment?.likes || []).length}</span>
-                  </button>
-                  <button
-                    onClick={() => {
-                      setReplyingTo(
-                        replyingTo === comment._id ? null : comment._id
-                      );
-                      setReplyContent("");
-                    }}
-                    className="text-gray-500 hover:text-blue-600"
-                  >
-                    Reply
-                  </button>
-                </div>
-
-                {/* Reply Form */}
-                {replyingTo === comment._id && (
-                  <div className="mt-4 pl-8 border-l-2 border-gray-200">
-                    <form
-                      onSubmit={(e) => {
-                        e.preventDefault();
-                        handleSubmitReply(comment._id);
-                      }}
-                      className="space-y-3"
-                    >
-                      <textarea
-                        value={replyContent}
-                        onChange={(e) => setReplyContent(e.target.value)}
-                        placeholder="Write a reply..."
-                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                        rows="2"
-                        maxLength="500"
-                      />
-                      <div className="flex space-x-2">
-                        <button
-                          type="submit"
-                          disabled={!replyContent.trim()}
-                          className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 disabled:opacity-50"
-                        >
-                          Reply
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setReplyingTo(null);
-                            setReplyContent("");
-                          }}
-                          className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm hover:bg-gray-400"
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    </form>
-                  </div>
-                )}
-
-                {/* Replies */}
-                {comment?.replies && comment.replies.length > 0 && (
-                  <div className="mt-4 pl-8 border-l-2 border-gray-200 space-y-3">
-                    {comment.replies.map((reply) => (
-                      <div
-                        key={reply._id}
-                        className="bg-gray-50 rounded-lg p-3"
-                      >
-                        <div className="flex items-center space-x-2 mb-2">
-                          <div className="w-6 h-6 bg-gray-400 rounded-full flex items-center justify-center text-white text-xs font-medium">
-                            {reply?.user?.name
-                              ? reply.user.name.charAt(0).toUpperCase()
-                              : "?"}
-                          </div>
-                          <div>
-                            <p className="font-medium text-sm text-gray-900">
-                              {reply?.user?.name || "Unknown User"}
-                            </p>
-                            <p className="text-xs text-gray-500">
-                              {formatDate(reply.createdAt)}
-                              {reply.isEdited && (
-                                <span className="text-gray-400 ml-1">
-                                  (edited)
-                                </span>
-                              )}
-                            </p>
-                          </div>
+                    {/* Comment Header */}
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-8 h-8 bg-[#3650AD] rounded-full flex items-center justify-center text-white font-medium">
+                          {comment?.user?.name
+                            ? comment.user.name.charAt(0).toUpperCase()
+                            : "?"}
                         </div>
-                        <p className="text-sm text-gray-800">
-                          {reply?.content || ""}
-                        </p>
+                        <div>
+                          <p className="font-medium text-gray-900">
+                            {comment?.user?.name || "Unknown User"}
+                          </p>
+                          <p className="text-sm text-gray-500">
+                            {comment?.user?.designation || "Citizen"} •{" "}
+                            {formatDate(comment.createdAt)}
+                            {comment.isEdited && (
+                              <span className="text-gray-400 ml-1">(edited)</span>
+                            )}
+                          </p>
+                        </div>
+                        {/* Pending Approval Badge */}
+                        {!comment.isApproved && (
+                          <span className="ml-2 px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded-full">
+                            ⏳ Pending Approval
+                          </span>
+                        )}
                       </div>
-                    ))}
-                  </div>
-                )}
-              </motion.div>
-            ))}
+                      {user && user._id === comment?.user?._id && (
+                        <div className="flex space-x-2">
+                          <button
+                            onClick={() => {
+                              setEditingComment(comment._id);
+                              setEditContent(comment.content);
+                            }}
+                            className="text-blue-600 hover:text-blue-800 text-sm"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleDeleteComment(comment._id)}
+                            className="text-red-600 hover:text-red-800 text-sm"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Comment Content */}
+                    {editingComment === comment._id ? (
+                      <div className="space-y-3">
+                        <textarea
+                          value={editContent}
+                          onChange={(e) => setEditContent(e.target.value)}
+                          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                          rows="3"
+                          maxLength="1000"
+                        />
+                        <div className="flex space-x-2">
+                          <button
+                            onClick={() => handleEditComment(comment._id)}
+                            className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700"
+                          >
+                            Save
+                          </button>
+                          <button
+                            onClick={() => {
+                              setEditingComment(null);
+                              setEditContent("");
+                            }}
+                            className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm hover:bg-gray-400"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-gray-800 mb-3">{comment?.content || ""}</p>
+                    )}
+
+                    {/* Comment Actions */}
+                    <div className="flex items-center space-x-4 text-sm">
+                      <button
+                        onClick={() => handleToggleLike(comment._id)}
+                        className={`flex items-center space-x-1 ${isLikedByUser(comment)
+                          ? "text-blue-600"
+                          : "text-gray-500 hover:text-blue-600"
+                          }`}
+                      >
+                        <span>👍</span>
+                        <span>{(comment?.likes || []).length}</span>
+                      </button>
+                      <button
+                        onClick={() => {
+                          setReplyingTo(
+                            replyingTo === comment._id ? null : comment._id
+                          );
+                          setReplyContent("");
+                        }}
+                        className="text-gray-500 hover:text-blue-600"
+                      >
+                        Reply
+                      </button>
+                    </div>
+
+                    {/* Reply Form */}
+                    {replyingTo === comment._id && (
+                      <div className="mt-4 pl-8 border-l-2 border-gray-200">
+                        <form
+                          onSubmit={(e) => {
+                            e.preventDefault();
+                            handleSubmitReply(comment._id);
+                          }}
+                          className="space-y-3"
+                        >
+                          <textarea
+                            value={replyContent}
+                            onChange={(e) => setReplyContent(e.target.value)}
+                            placeholder="Write a reply..."
+                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                            rows="2"
+                            maxLength="500"
+                          />
+                          <div className="flex space-x-2">
+                            <button
+                              type="submit"
+                              disabled={!replyContent.trim()}
+                              className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 disabled:opacity-50"
+                            >
+                              Reply
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setReplyingTo(null);
+                                setReplyContent("");
+                              }}
+                              className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm hover:bg-gray-400"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </form>
+                      </div>
+                    )}
+
+                    {/* Replies */}
+                    {comment?.replies && comment.replies.length > 0 && (
+                      <div className="mt-4 pl-8 border-l-2 border-gray-200 space-y-3">
+                        {comment.replies.map((reply) => (
+                          <div
+                            key={reply._id}
+                            className="bg-gray-50 rounded-lg p-3"
+                          >
+                            <div className="flex items-center space-x-2 mb-2">
+                              <div className="w-6 h-6 bg-gray-400 rounded-full flex items-center justify-center text-white text-xs font-medium">
+                                {reply?.user?.name
+                                  ? reply.user.name.charAt(0).toUpperCase()
+                                  : "?"}
+                              </div>
+                              <div>
+                                <p className="font-medium text-sm text-gray-900">
+                                  {reply?.user?.name || "Unknown User"}
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                  {formatDate(reply.createdAt)}
+                                  {reply.isEdited && (
+                                    <span className="text-gray-400 ml-1">
+                                      (edited)
+                                    </span>
+                                  )}
+                                </p>
+                              </div>
+                            </div>
+                            <p className="text-sm text-gray-800">
+                              {reply?.content || ""}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </motion.div>
+                );
+              })}
           </AnimatePresence>
         )}
 
