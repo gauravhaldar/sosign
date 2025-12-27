@@ -129,6 +129,7 @@ export const AuthProvider = ({ children }) => {
         profilePicture: updatedData.profilePicture,
         designation: updatedData.designation,
         mobileNumber: updatedData.mobileNumber,
+        socialLinks: updatedData.socialLinks,
       };
 
       setUser(newUserData);
