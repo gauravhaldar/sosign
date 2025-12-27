@@ -5,11 +5,11 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { useAuth } from "../context/AuthContext";
-import { 
-  FaUserCircle, 
-  FaFacebookF, 
-  FaTelegramPlane, 
-  FaInstagram, 
+import {
+  FaUserCircle,
+  FaFacebookF,
+  FaTelegramPlane,
+  FaInstagram,
   FaYoutube,
   FaSearch,
   FaMoon,
@@ -71,7 +71,7 @@ export default function Navbar() {
               </Link>
 
               {/* Start Campaign Dropdown */}
-              <div 
+              <div
                 className="relative"
                 onMouseEnter={() => setCampaignDropdown(true)}
                 onMouseLeave={() => setCampaignDropdown(false)}
@@ -112,7 +112,7 @@ export default function Navbar() {
               </div>
 
               {/* Pages Dropdown */}
-              <div 
+              <div
                 className="relative"
                 onMouseEnter={() => setPagesDropdown(true)}
                 onMouseLeave={() => setPagesDropdown(false)}
@@ -168,41 +168,41 @@ export default function Navbar() {
 
             {/* Social Icons - Hidden on mobile */}
             <div className="hidden md:flex items-center gap-2">
-              <a 
-                href="https://facebook.com" 
-                target="_blank" 
+              <a
+                href="https://facebook.com"
+                target="_blank"
                 rel="noopener noreferrer"
                 className="w-8 h-8 rounded-full bg-[#3b5998] flex items-center justify-center text-white hover:opacity-80 transition-opacity"
               >
                 <FaFacebookF className="text-xs" />
               </a>
-              <a 
-                href="https://twitter.com" 
-                target="_blank" 
+              <a
+                href="https://twitter.com"
+                target="_blank"
                 rel="noopener noreferrer"
                 className="w-8 h-8 rounded-full bg-black flex items-center justify-center text-white hover:opacity-80 transition-opacity"
               >
                 <FaXTwitter className="text-xs" />
               </a>
-              <a 
-                href="https://telegram.org" 
-                target="_blank" 
+              <a
+                href="https://telegram.org"
+                target="_blank"
                 rel="noopener noreferrer"
                 className="w-8 h-8 rounded-full bg-[#0088cc] flex items-center justify-center text-white hover:opacity-80 transition-opacity"
               >
                 <FaTelegramPlane className="text-xs" />
               </a>
-              <a 
-                href="https://instagram.com" 
-                target="_blank" 
+              <a
+                href="https://instagram.com"
+                target="_blank"
                 rel="noopener noreferrer"
                 className="w-8 h-8 rounded-full bg-gradient-to-br from-[#f9ce34] via-[#ee2a7b] to-[#6228d7] flex items-center justify-center text-white hover:opacity-80 transition-opacity"
               >
                 <FaInstagram className="text-xs" />
               </a>
-              <a 
-                href="https://youtube.com" 
-                target="_blank" 
+              <a
+                href="https://youtube.com"
+                target="_blank"
                 rel="noopener noreferrer"
                 className="w-8 h-8 rounded-full bg-[#FF0000] flex items-center justify-center text-white hover:opacity-80 transition-opacity"
               >
@@ -216,7 +216,7 @@ export default function Navbar() {
             </button> */}
 
             {/* Search Button */}
-            <Link 
+            <Link
               href="/search"
               className="w-8 h-8 rounded-full bg-[#F43676] flex items-center justify-center text-white hover:bg-[#e02a60] transition-colors"
             >
@@ -231,7 +231,18 @@ export default function Navbar() {
                   className="flex items-center gap-2 text-gray-700 font-medium text-sm hover:text-[#F43676] transition-colors duration-200 py-2 px-1"
                   whileHover={{ scale: 1.05 }}
                 >
-                  <FaUserCircle className="text-2xl text-[#F43676]" />
+                  {/* Profile Picture with fallback */}
+                  {user.profilePicture || user.photoURL ? (
+                    <img
+                      src={user.profilePicture || user.photoURL}
+                      alt={user.name || "Profile"}
+                      className="w-8 h-8 rounded-full border-2 border-[#F43676] object-cover"
+                    />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-r from-[#F43676] to-[#e02a60] flex items-center justify-center text-white text-xs font-bold border-2 border-[#F43676]">
+                      {(user.name || "U").charAt(0).toUpperCase()}
+                    </div>
+                  )}
                   <span className="hidden sm:inline">{user.name || "Profile"}</span>
                 </motion.button>
                 <AnimatePresence>
@@ -279,7 +290,7 @@ export default function Navbar() {
             )}
 
             {/* Mobile Menu Button */}
-            <button 
+            <button
               className="lg:hidden w-8 h-8 flex items-center justify-center text-gray-600"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             >
@@ -347,44 +358,44 @@ export default function Navbar() {
                 >
                   Contact
                 </Link>
-                
+
                 {/* Social Icons for Mobile */}
                 <div className="flex items-center gap-2 py-3 border-t border-gray-100 mt-2">
-                  <a 
-                    href="https://facebook.com" 
-                    target="_blank" 
+                  <a
+                    href="https://facebook.com"
+                    target="_blank"
                     rel="noopener noreferrer"
                     className="w-8 h-8 rounded-full bg-[#3b5998] flex items-center justify-center text-white"
                   >
                     <FaFacebookF className="text-xs" />
                   </a>
-                  <a 
-                    href="https://twitter.com" 
-                    target="_blank" 
+                  <a
+                    href="https://twitter.com"
+                    target="_blank"
                     rel="noopener noreferrer"
                     className="w-8 h-8 rounded-full bg-black flex items-center justify-center text-white"
                   >
                     <FaXTwitter className="text-xs" />
                   </a>
-                  <a 
-                    href="https://telegram.org" 
-                    target="_blank" 
+                  <a
+                    href="https://telegram.org"
+                    target="_blank"
                     rel="noopener noreferrer"
                     className="w-8 h-8 rounded-full bg-[#0088cc] flex items-center justify-center text-white"
                   >
                     <FaTelegramPlane className="text-xs" />
                   </a>
-                  <a 
-                    href="https://instagram.com" 
-                    target="_blank" 
+                  <a
+                    href="https://instagram.com"
+                    target="_blank"
                     rel="noopener noreferrer"
                     className="w-8 h-8 rounded-full bg-gradient-to-br from-[#f9ce34] via-[#ee2a7b] to-[#6228d7] flex items-center justify-center text-white"
                   >
                     <FaInstagram className="text-xs" />
                   </a>
-                  <a 
-                    href="https://youtube.com" 
-                    target="_blank" 
+                  <a
+                    href="https://youtube.com"
+                    target="_blank"
                     rel="noopener noreferrer"
                     className="w-8 h-8 rounded-full bg-[#FF0000] flex items-center justify-center text-white"
                   >

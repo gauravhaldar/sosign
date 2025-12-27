@@ -3,9 +3,10 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { FaChevronRight, FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn, FaYoutube, FaPinterestP, FaSearch, FaCalendarAlt, FaPlay } from "react-icons/fa";
+import { FaChevronRight, FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn, FaYoutube, FaPinterestP, FaSearch, FaCalendarAlt, FaPlay, FaPen } from "react-icons/fa";
 import { useAuth } from "@/context/AuthContext";
 import Footer from "@/components/Footer";
+import ProfileEditModal from "@/components/ProfileEditModal";
 
 // Sample blog posts data with categories
 const blogPosts = [
@@ -129,6 +130,7 @@ export default function CategoryPage() {
     const [recentPetitions, setRecentPetitions] = useState([]);
     const [petitions, setPetitions] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [showProfileModal, setShowProfileModal] = useState(false);
     const { user } = useAuth();
 
     // Get category name from slug
@@ -480,40 +482,51 @@ export default function CategoryPage() {
                                 </div>
 
                                 {/* Author Card */}
-                                <div className="bg-white rounded-3xl p-6 shadow-sm text-center">
-                                    <div className="w-24 h-24 rounded-full overflow-hidden mx-auto mb-4 border-4 border-gray-100">
-                                        <img
-                                            src="https://picsum.photos/seed/author/200/200"
-                                            alt="John Doe"
-                                            className="w-full h-full object-cover"
-                                        />
+                                {user ? (
+                                    <div className="bg-white rounded-3xl p-6 shadow-sm text-center relative">
+                                        <button
+                                            onClick={() => setShowProfileModal(true)}
+                                            className="absolute top-4 right-4 w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-[#F43676] hover:text-white transition-colors text-gray-600"
+                                            title="Edit Profile"
+                                        >
+                                            <FaPen className="text-xs" />
+                                        </button>
+                                        <div className="w-24 h-24 rounded-full overflow-hidden mx-auto mb-4 border-4 border-gray-100">
+                                            <img
+                                                src={
+                                                    user.profilePicture ||
+                                                    user.photoURL ||
+                                                    `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || "User")}&background=random&size=200`
+                                                }
+                                                alt={user.name}
+                                                className="w-full h-full object-cover"
+                                            />
+                                        </div>
+                                        <h4 className="text-xl font-bold text-[#1a1a2e] mb-2">{user.name}</h4>
+                                        {user.designation && (
+                                            <p className="text-[#F43676] text-sm font-medium mb-2">{user.designation}</p>
+                                        )}
+                                        <p className="text-gray-500 text-sm leading-relaxed">
+                                            {user.bio || "Click the edit button to add your bio!"}
+                                        </p>
                                     </div>
-                                    <h4 className="text-xl font-bold text-[#1a1a2e] mb-2">John Doe</h4>
-                                    <p className="text-gray-500 text-sm leading-relaxed mb-4">
-                                        John Doe is a versatile writer with a passion for storytelling. With a background in literature and a love for exploring diverse themes, his words captivate and resonate with readers across genres.
-                                    </p>
-                                    {/* Social Icons */}
-                                    <div className="flex justify-center gap-2">
-                                        <a href="#" className="w-10 h-10 rounded-full bg-[#3b5998] text-white flex items-center justify-center hover:opacity-80 transition-opacity">
-                                            <FaFacebookF className="text-sm" />
-                                        </a>
-                                        <a href="#" className="w-10 h-10 rounded-full bg-[#1da1f2] text-white flex items-center justify-center hover:opacity-80 transition-opacity">
-                                            <FaTwitter className="text-sm" />
-                                        </a>
-                                        <a href="#" className="w-10 h-10 rounded-full bg-gradient-to-br from-[#f09433] via-[#e6683c] to-[#bc1888] text-white flex items-center justify-center hover:opacity-80 transition-opacity">
-                                            <FaInstagram className="text-sm" />
-                                        </a>
-                                        <a href="#" className="w-10 h-10 rounded-full bg-[#0077b5] text-white flex items-center justify-center hover:opacity-80 transition-opacity">
-                                            <FaLinkedinIn className="text-sm" />
-                                        </a>
-                                        <a href="#" className="w-10 h-10 rounded-full bg-[#ff0000] text-white flex items-center justify-center hover:opacity-80 transition-opacity">
-                                            <FaYoutube className="text-sm" />
-                                        </a>
-                                        <a href="#" className="w-10 h-10 rounded-full bg-[#bd081c] text-white flex items-center justify-center hover:opacity-80 transition-opacity">
-                                            <FaPinterestP className="text-sm" />
-                                        </a>
+                                ) : (
+                                    <div className="bg-white rounded-3xl p-6 shadow-sm text-center">
+                                        <div className="w-24 h-24 rounded-full overflow-hidden mx-auto mb-4 border-4 border-gray-100 bg-gradient-to-br from-pink-100 to-gray-100 flex items-center justify-center">
+                                            <span className="text-4xl">👤</span>
+                                        </div>
+                                        <h4 className="text-xl font-bold text-[#1a1a2e] mb-2">Welcome!</h4>
+                                        <p className="text-gray-500 text-sm leading-relaxed mb-4">
+                                            Sign in to customize your profile.
+                                        </p>
+                                        <Link
+                                            href="/login"
+                                            className="inline-block px-6 py-2 bg-[#F43676] text-white font-medium rounded-full hover:bg-[#e02a60] transition-colors"
+                                        >
+                                            Sign In
+                                        </Link>
                                     </div>
-                                </div>
+                                )}
 
                                 {/* Tags */}
                                 <div className="bg-white rounded-3xl p-6 shadow-sm">
@@ -565,6 +578,10 @@ export default function CategoryPage() {
                 </section >
             </main >
             <Footer />
+            <ProfileEditModal
+                isOpen={showProfileModal}
+                onClose={() => setShowProfileModal(false)}
+            />
         </>
     );
 }

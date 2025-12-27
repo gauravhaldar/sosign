@@ -15,14 +15,14 @@ export const AuthProvider = ({ children }) => {
       const storedUser = localStorage.getItem('user');
       if (storedUser) {
         const userData = JSON.parse(storedUser);
-        
+
         // Check if token exists and is not expired
         if (userData.token) {
           try {
             // Decode the JWT token to check expiration
             const tokenPayload = JSON.parse(atob(userData.token.split('.')[1]));
             const currentTime = Date.now() / 1000;
-            
+
             if (tokenPayload.exp && tokenPayload.exp < currentTime) {
               // Token is expired, clear it
               console.log('Token expired, clearing user data');
@@ -103,6 +103,43 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('user');
   };
 
+  // Function to update user profile
+  const updateProfile = async (formData) => {
+    try {
+      const storedUser = JSON.parse(localStorage.getItem('user'));
+      if (!storedUser?.token) {
+        throw new Error('Not authenticated');
+      }
+
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000';
+      const response = await axios.put(`${backendUrl}/api/users/profile`, formData, {
+        headers: {
+          'Authorization': `Bearer ${storedUser.token}`,
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      const updatedData = response.data;
+
+      // Merge updated data with existing user data
+      const newUserData = {
+        ...storedUser,
+        name: updatedData.name,
+        bio: updatedData.bio,
+        profilePicture: updatedData.profilePicture,
+        designation: updatedData.designation,
+        mobileNumber: updatedData.mobileNumber,
+      };
+
+      setUser(newUserData);
+      localStorage.setItem('user', JSON.stringify(newUserData));
+      return updatedData;
+    } catch (error) {
+      console.error('Profile update failed:', error.response?.data?.message || error.message);
+      throw new Error(error.response?.data?.message || 'Profile update failed');
+    }
+  };
+
   const googleLogin = async (googleUser) => {
     try {
       const response = await axios.post('/api/users/google-auth', {
@@ -127,10 +164,11 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, signup, loading, googleLogin, clearUser }}>
+    <AuthContext.Provider value={{ user, setUser, login, logout, signup, loading, googleLogin, clearUser, updateProfile }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
 export const useAuth = () => useContext(AuthContext);
+
