@@ -204,10 +204,10 @@ export default function Banner() {
                   />
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-gray-800 font-bold text-sm whitespace-nowrap">
+                  <span className="text-[#002050] font-bold text-sm whitespace-nowrap">
                     {story.title}
                   </span>
-                  <span className="text-gray-500 font-semibold text-xs flex items-center gap-1">
+                  <span className="text-[#302d55] font-semibold text-xs flex items-center gap-1">
                     <span className="text-[#F43676]">•</span> {story.date}
                   </span>
                 </div>
@@ -228,10 +228,10 @@ export default function Banner() {
                   />
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-gray-800 font-bold text-sm whitespace-nowrap">
+                  <span className="text-[#002050] font-bold text-sm whitespace-nowrap">
                     {story.title}
                   </span>
-                  <span className="text-gray-500 font-semibold text-xs flex items-center gap-1">
+                  <span className="text-[#302d55] font-semibold text-xs flex items-center gap-1">
                     <span className="text-[#F43676]">•</span> {story.date}
                   </span>
                 </div>
@@ -319,33 +319,33 @@ export default function Banner() {
                   </div>
 
                   {/* Title */}
-                  <h1 className="text-lg sm:text-xl lg:text-2xl xl:text-3xl font-bold text-[#1a1a2e] mb-3 sm:mb-4 leading-tight line-clamp-2">
+                  <h1 className="text-lg sm:text-xl lg:text-2xl xl:text-3xl font-bold text-[#002050] mb-3 sm:mb-4 leading-tight line-clamp-2">
                     {heroSlides[currentSlide]?.title}
                   </h1>
 
                   {/* Description */}
-                  <p className="text-gray-500 text-sm sm:text-base mb-4 sm:mb-6 leading-relaxed line-clamp-3">
+                  <p className="text-[#302d55] text-sm sm:text-base mb-4 sm:mb-6 leading-relaxed line-clamp-3">
                     {heroSlides[currentSlide]?.description}
                   </p>
 
                   {/* Continue Reading Link */}
                   <Link
                     href={heroSlides[currentSlide]?.link || "/currentpetitions"}
-                    className="inline-flex items-center gap-2 text-gray-800 font-semibold hover:text-[#F43676] transition-colors mb-4 sm:mb-6 group text-sm sm:text-base"
+                    className="inline-flex items-center gap-2 text-[#002050] font-semibold hover:text-[#F43676] transition-colors mb-4 sm:mb-6 group text-sm sm:text-base"
                   >
                     Continue Reading
                     <FaChevronRight className="text-xs group-hover:translate-x-1 transition-transform" />
                   </Link>
 
                   {/* Date and Signatures */}
-                  <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-gray-400 text-xs sm:text-sm">
+                  <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-[#302d55] text-xs sm:text-sm">
                     <span className="flex items-center gap-2">
-                      <FaCalendarAlt className="text-gray-400" />
+                      <FaCalendarAlt className="text-[#302d55]" />
                       {heroSlides[currentSlide]?.date}
                     </span>
                     <span className="text-[#F43676] hidden sm:inline">•</span>
                     <span className="flex items-center gap-2">
-                      <FaComment className="text-gray-400" />
+                      <FaComment className="text-[#302d55]" />
                       {heroSlides[currentSlide]?.comments}
                     </span>
                   </div>

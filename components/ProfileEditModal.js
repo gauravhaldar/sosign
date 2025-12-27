@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { FaTimes, FaCamera, FaSpinner, FaPhone } from "react-icons/fa";
+import { FaTimes, FaCamera, FaSpinner, FaPhone, FaFacebookF, FaInstagram, FaYoutube, FaLinkedinIn } from "react-icons/fa";
+import { FaXTwitter } from "react-icons/fa6";
 import { useAuth } from "@/context/AuthContext";
 
 export default function ProfileEditModal({ isOpen, onClose }) {
@@ -16,6 +17,15 @@ export default function ProfileEditModal({ isOpen, onClose }) {
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
     const fileInputRef = useRef(null);
+
+    // Social links state
+    const [socialLinks, setSocialLinks] = useState({
+        facebook: user?.socialLinks?.facebook || "",
+        twitter: user?.socialLinks?.twitter || "",
+        linkedin: user?.socialLinks?.linkedin || "",
+        instagram: user?.socialLinks?.instagram || "",
+        youtube: user?.socialLinks?.youtube || "",
+    });
 
     if (!isOpen) return null;
 
@@ -32,6 +42,13 @@ export default function ProfileEditModal({ isOpen, onClose }) {
         }
     };
 
+    const handleSocialLinkChange = (platform, value) => {
+        setSocialLinks(prev => ({
+            ...prev,
+            [platform]: value
+        }));
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsLoading(true);
@@ -44,6 +61,7 @@ export default function ProfileEditModal({ isOpen, onClose }) {
             formData.append("bio", bio);
             formData.append("designation", designation);
             formData.append("mobileNumber", mobileNumber);
+            formData.append("socialLinks", JSON.stringify(socialLinks));
             if (profilePicture) {
                 formData.append("profilePicture", profilePicture);
             }
@@ -71,7 +89,7 @@ export default function ProfileEditModal({ isOpen, onClose }) {
             <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
                 {/* Header */}
                 <div className="flex items-center justify-between p-6 border-b border-gray-100">
-                    <h2 className="text-2xl font-bold text-[#1a1a2e]">Edit Profile</h2>
+                    <h2 className="text-2xl font-bold text-[#002050]">Edit Profile</h2>
                     <button
                         onClick={onClose}
                         className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
@@ -112,7 +130,7 @@ export default function ProfileEditModal({ isOpen, onClose }) {
 
                     {/* Name */}
                     <div>
-                        <label className="block text-sm font-semibold text-[#1a1a2e] mb-2">
+                        <label className="block text-sm font-semibold text-[#002050] mb-2">
                             Name
                         </label>
                         <input
@@ -126,7 +144,7 @@ export default function ProfileEditModal({ isOpen, onClose }) {
 
                     {/* Designation */}
                     <div>
-                        <label className="block text-sm font-semibold text-[#1a1a2e] mb-2">
+                        <label className="block text-sm font-semibold text-[#002050] mb-2">
                             Designation
                         </label>
                         <input
@@ -140,7 +158,7 @@ export default function ProfileEditModal({ isOpen, onClose }) {
 
                     {/* Mobile Number */}
                     <div>
-                        <label className="block text-sm font-semibold text-[#1a1a2e] mb-2">
+                        <label className="block text-sm font-semibold text-[#002050] mb-2">
                             Mobile Number
                         </label>
                         <div className="relative">
@@ -157,7 +175,7 @@ export default function ProfileEditModal({ isOpen, onClose }) {
 
                     {/* Bio */}
                     <div>
-                        <label className="block text-sm font-semibold text-[#1a1a2e] mb-2">
+                        <label className="block text-sm font-semibold text-[#002050] mb-2">
                             Bio <span className="text-gray-400 font-normal">({bio.length}/500)</span>
                         </label>
                         <textarea
@@ -167,6 +185,84 @@ export default function ProfileEditModal({ isOpen, onClose }) {
                             className="w-full px-4 py-3 border border-gray-200 rounded-xl outline-none focus:border-[#F43676] transition-colors resize-none"
                             placeholder="Tell us about yourself and your passion for change..."
                         />
+                    </div>
+
+                    {/* Social Links Section */}
+                    <div>
+                        <label className="block text-sm font-semibold text-[#002050] mb-3">
+                            Social Media Links
+                        </label>
+                        <div className="space-y-3">
+                            {/* Facebook */}
+                            <div className="relative">
+                                <div className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-[#3b5998] flex items-center justify-center">
+                                    <FaFacebookF className="text-white text-xs" />
+                                </div>
+                                <input
+                                    type="url"
+                                    value={socialLinks.facebook}
+                                    onChange={(e) => handleSocialLinkChange("facebook", e.target.value)}
+                                    className="w-full pl-16 pr-4 py-3 border border-gray-200 rounded-xl outline-none focus:border-[#F43676] transition-colors"
+                                    placeholder="Facebook profile URL"
+                                />
+                            </div>
+
+                            {/* Twitter/X */}
+                            <div className="relative">
+                                <div className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black flex items-center justify-center">
+                                    <FaXTwitter className="text-white text-xs" />
+                                </div>
+                                <input
+                                    type="url"
+                                    value={socialLinks.twitter}
+                                    onChange={(e) => handleSocialLinkChange("twitter", e.target.value)}
+                                    className="w-full pl-16 pr-4 py-3 border border-gray-200 rounded-xl outline-none focus:border-[#F43676] transition-colors"
+                                    placeholder="Twitter/X profile URL"
+                                />
+                            </div>
+
+                            {/* LinkedIn */}
+                            <div className="relative">
+                                <div className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-[#0077b5] flex items-center justify-center">
+                                    <FaLinkedinIn className="text-white text-xs" />
+                                </div>
+                                <input
+                                    type="url"
+                                    value={socialLinks.linkedin}
+                                    onChange={(e) => handleSocialLinkChange("linkedin", e.target.value)}
+                                    className="w-full pl-16 pr-4 py-3 border border-gray-200 rounded-xl outline-none focus:border-[#F43676] transition-colors"
+                                    placeholder="LinkedIn profile URL"
+                                />
+                            </div>
+
+                            {/* Instagram */}
+                            <div className="relative">
+                                <div className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-gradient-to-br from-[#f9ce34] via-[#ee2a7b] to-[#6228d7] flex items-center justify-center">
+                                    <FaInstagram className="text-white text-xs" />
+                                </div>
+                                <input
+                                    type="url"
+                                    value={socialLinks.instagram}
+                                    onChange={(e) => handleSocialLinkChange("instagram", e.target.value)}
+                                    className="w-full pl-16 pr-4 py-3 border border-gray-200 rounded-xl outline-none focus:border-[#F43676] transition-colors"
+                                    placeholder="Instagram profile URL"
+                                />
+                            </div>
+
+                            {/* YouTube */}
+                            <div className="relative">
+                                <div className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-[#FF0000] flex items-center justify-center">
+                                    <FaYoutube className="text-white text-xs" />
+                                </div>
+                                <input
+                                    type="url"
+                                    value={socialLinks.youtube}
+                                    onChange={(e) => handleSocialLinkChange("youtube", e.target.value)}
+                                    className="w-full pl-16 pr-4 py-3 border border-gray-200 rounded-xl outline-none focus:border-[#F43676] transition-colors"
+                                    placeholder="YouTube channel URL"
+                                />
+                            </div>
+                        </div>
                     </div>
 
                     {/* Error/Success Messages */}

@@ -76,7 +76,7 @@ export default function Navbar() {
                 onMouseEnter={() => setCampaignDropdown(true)}
                 onMouseLeave={() => setCampaignDropdown(false)}
               >
-                <button className="flex items-center gap-1 text-gray-600 font-semibold text-base hover:text-[#F43676] transition-colors duration-200">
+                <button className="flex items-center gap-1 text-[#302d55] font-semibold text-base hover:text-[#F43676] transition-colors duration-200">
                   Start Campaign
                   <FaChevronDown className="text-sm" />
                 </button>
@@ -90,19 +90,19 @@ export default function Navbar() {
                     >
                       <Link
                         href="/start-petition"
-                        className="block px-4 py-2 text-gray-700 text-sm hover:bg-gray-50 hover:text-[#F43676] transition-colors"
+                        className="block px-4 py-2 text-[#302d55] text-sm hover:bg-gray-50 hover:text-[#F43676] transition-colors"
                       >
                         Start a Petition
                       </Link>
                       <Link
                         href="/my-petition"
-                        className="block px-4 py-2 text-gray-700 text-sm hover:bg-gray-50 hover:text-[#F43676] transition-colors"
+                        className="block px-4 py-2 text-[#302d55] text-sm hover:bg-gray-50 hover:text-[#F43676] transition-colors"
                       >
                         My Petitions
                       </Link>
                       <Link
                         href="/currentpetitions"
-                        className="block px-4 py-2 text-gray-700 text-sm hover:bg-gray-50 hover:text-[#F43676] transition-colors"
+                        className="block px-4 py-2 text-[#302d55] text-sm hover:bg-gray-50 hover:text-[#F43676] transition-colors"
                       >
                         Current Petitions
                       </Link>
@@ -117,7 +117,7 @@ export default function Navbar() {
                 onMouseEnter={() => setPagesDropdown(true)}
                 onMouseLeave={() => setPagesDropdown(false)}
               >
-                <button className="flex items-center gap-1 text-gray-600 font-semibold text-base hover:text-[#F43676] transition-colors duration-200">
+                <button className="flex items-center gap-1 text-[#302d55] font-semibold text-base hover:text-[#F43676] transition-colors duration-200">
                   Pages
                   <FaChevronDown className="text-sm" />
                 </button>
@@ -131,25 +131,25 @@ export default function Navbar() {
                     >
                       <Link
                         href="/about"
-                        className="block px-4 py-2 text-gray-700 text-sm hover:bg-gray-50 hover:text-[#F43676] transition-colors"
+                        className="block px-4 py-2 text-[#302d55] text-sm hover:bg-gray-50 hover:text-[#F43676] transition-colors"
                       >
                         About Us
                       </Link>
                       <Link
                         href="/successfulpetitions"
-                        className="block px-4 py-2 text-gray-700 text-sm hover:bg-gray-50 hover:text-[#F43676] transition-colors"
+                        className="block px-4 py-2 text-[#302d55] text-sm hover:bg-gray-50 hover:text-[#F43676] transition-colors"
                       >
                         Success Stories
                       </Link>
                       <Link
                         href="/blog"
-                        className="block px-4 py-2 text-gray-700 text-sm hover:bg-gray-50 hover:text-[#F43676] transition-colors"
+                        className="block px-4 py-2 text-[#302d55] text-sm hover:bg-gray-50 hover:text-[#F43676] transition-colors"
                       >
                         Blog
                       </Link>
                       <Link
                         href="/guides"
-                        className="block px-4 py-2 text-gray-700 text-sm hover:bg-gray-50 hover:text-[#F43676] transition-colors"
+                        className="block px-4 py-2 text-[#302d55] text-sm hover:bg-gray-50 hover:text-[#F43676] transition-colors"
                       >
                         Guides
                       </Link>
@@ -160,53 +160,83 @@ export default function Navbar() {
 
               <Link
                 href="/contact"
-                className="text-gray-600 font-semibold text-base hover:text-[#F43676] transition-colors duration-200"
+                className="text-[#302d55] font-semibold text-base hover:text-[#F43676] transition-colors duration-200"
               >
                 Contact
               </Link>
             </div>
 
             {/* Social Icons - Hidden on mobile */}
-            <div className="hidden md:flex items-center gap-2">
+            <div className="hidden md:flex items-center gap-3">
+              {/* Facebook */}
               <a
                 href="https://facebook.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-8 h-8 rounded-full bg-[#3b5998] flex items-center justify-center text-white hover:opacity-80 transition-opacity"
+                className="group w-9 h-9 rounded-full border border-gray-200 bg-white flex items-center justify-center"
               >
-                <FaFacebookF className="text-xs" />
+                <div className="relative w-4 h-4 overflow-hidden">
+                  <div className="flex flex-col items-center transition-transform duration-300 group-hover:-translate-y-4">
+                    <FaFacebookF className="text-sm text-[#3d3d5c] h-4 flex items-center justify-center" />
+                    <FaFacebookF className="text-sm text-[#F43676] h-4 flex items-center justify-center" />
+                  </div>
+                </div>
               </a>
+              {/* Twitter/X */}
               <a
                 href="https://twitter.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-8 h-8 rounded-full bg-black flex items-center justify-center text-white hover:opacity-80 transition-opacity"
+                className="group w-9 h-9 rounded-full border border-gray-200 bg-white flex items-center justify-center"
               >
-                <FaXTwitter className="text-xs" />
+                <div className="relative w-4 h-4 overflow-hidden">
+                  <div className="flex flex-col items-center transition-transform duration-300 group-hover:-translate-y-4">
+                    <FaXTwitter className="text-sm text-[#3d3d5c] h-4 flex items-center justify-center" />
+                    <FaXTwitter className="text-sm text-[#F43676] h-4 flex items-center justify-center" />
+                  </div>
+                </div>
               </a>
+              {/* Telegram */}
               <a
                 href="https://telegram.org"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-8 h-8 rounded-full bg-[#0088cc] flex items-center justify-center text-white hover:opacity-80 transition-opacity"
+                className="group w-9 h-9 rounded-full border border-gray-200 bg-white flex items-center justify-center"
               >
-                <FaTelegramPlane className="text-xs" />
+                <div className="relative w-4 h-4 overflow-hidden">
+                  <div className="flex flex-col items-center transition-transform duration-300 group-hover:-translate-y-4">
+                    <FaTelegramPlane className="text-sm text-[#3d3d5c] h-4 flex items-center justify-center" />
+                    <FaTelegramPlane className="text-sm text-[#F43676] h-4 flex items-center justify-center" />
+                  </div>
+                </div>
               </a>
+              {/* Instagram */}
               <a
                 href="https://instagram.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-8 h-8 rounded-full bg-gradient-to-br from-[#f9ce34] via-[#ee2a7b] to-[#6228d7] flex items-center justify-center text-white hover:opacity-80 transition-opacity"
+                className="group w-9 h-9 rounded-full border border-gray-200 bg-white flex items-center justify-center"
               >
-                <FaInstagram className="text-xs" />
+                <div className="relative w-4 h-4 overflow-hidden">
+                  <div className="flex flex-col items-center transition-transform duration-300 group-hover:-translate-y-4">
+                    <FaInstagram className="text-sm text-[#3d3d5c] h-4 flex items-center justify-center" />
+                    <FaInstagram className="text-sm text-[#F43676] h-4 flex items-center justify-center" />
+                  </div>
+                </div>
               </a>
+              {/* YouTube */}
               <a
                 href="https://youtube.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-8 h-8 rounded-full bg-[#FF0000] flex items-center justify-center text-white hover:opacity-80 transition-opacity"
+                className="group w-9 h-9 rounded-full border border-gray-200 bg-white flex items-center justify-center"
               >
-                <FaYoutube className="text-xs" />
+                <div className="relative w-4 h-4 overflow-hidden">
+                  <div className="flex flex-col items-center transition-transform duration-300 group-hover:-translate-y-4">
+                    <FaYoutube className="text-sm text-[#3d3d5c] h-4 flex items-center justify-center" />
+                    <FaYoutube className="text-sm text-[#F43676] h-4 flex items-center justify-center" />
+                  </div>
+                </div>
               </a>
             </div>
 
@@ -228,7 +258,7 @@ export default function Navbar() {
               <div className="relative">
                 <motion.button
                   onClick={toggleDropdown}
-                  className="flex items-center gap-2 text-gray-700 font-medium text-sm hover:text-[#F43676] transition-colors duration-200 py-2 px-1"
+                  className="flex items-center gap-2 text-[#302d55] font-medium text-sm hover:text-[#F43676] transition-colors duration-200 py-2 px-1"
                   whileHover={{ scale: 1.05 }}
                 >
                   {/* Profile Picture with fallback */}
@@ -255,21 +285,21 @@ export default function Navbar() {
                     >
                       <Link
                         href="/my-profile"
-                        className="block px-4 py-2 text-gray-700 text-sm hover:bg-gray-50 hover:text-[#F43676] transition-colors"
+                        className="block px-4 py-2 text-[#302d55] text-sm hover:bg-gray-50 hover:text-[#F43676] transition-colors"
                         onClick={() => setDropdownOpen(false)}
                       >
                         My Profile
                       </Link>
                       <Link
                         href="/my-petition"
-                        className="block px-4 py-2 text-gray-700 text-sm hover:bg-gray-50 hover:text-[#F43676] transition-colors"
+                        className="block px-4 py-2 text-[#302d55] text-sm hover:bg-gray-50 hover:text-[#F43676] transition-colors"
                         onClick={() => setDropdownOpen(false)}
                       >
                         My Petitions
                       </Link>
                       <button
                         onClick={handleLogout}
-                        className="block w-full text-left px-4 py-2 text-gray-700 text-sm hover:bg-gray-50 hover:text-[#F43676] transition-colors"
+                        className="block w-full text-left px-4 py-2 text-[#302d55] text-sm hover:bg-gray-50 hover:text-[#F43676] transition-colors"
                       >
                         Logout
                       </button>
@@ -291,7 +321,7 @@ export default function Navbar() {
 
             {/* Mobile Menu Button */}
             <button
-              className="lg:hidden w-8 h-8 flex items-center justify-center text-gray-600"
+              className="lg:hidden w-8 h-8 flex items-center justify-center text-[#302d55]"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             >
               {mobileMenuOpen ? <FaTimes className="text-xl" /> : <FaBars className="text-xl" />}
@@ -318,88 +348,118 @@ export default function Navbar() {
                 </Link>
                 <Link
                   href="/start-petition"
-                  className="text-gray-600 font-medium text-sm py-2 hover:text-[#F43676]"
+                  className="text-[#302d55] font-medium text-sm py-2 hover:text-[#F43676]"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Start a Petition
                 </Link>
                 <Link
                   href="/my-petition"
-                  className="text-gray-600 font-medium text-sm py-2 hover:text-[#F43676]"
+                  className="text-[#302d55] font-medium text-sm py-2 hover:text-[#F43676]"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   My Petitions
                 </Link>
                 <Link
                   href="/currentpetitions"
-                  className="text-gray-600 font-medium text-sm py-2 hover:text-[#F43676]"
+                  className="text-[#302d55] font-medium text-sm py-2 hover:text-[#F43676]"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Current Petitions
                 </Link>
                 <Link
                   href="/successfulpetitions"
-                  className="text-gray-600 font-medium text-sm py-2 hover:text-[#F43676]"
+                  className="text-[#302d55] font-medium text-sm py-2 hover:text-[#F43676]"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Success Stories
                 </Link>
                 <Link
                   href="/about"
-                  className="text-gray-600 font-medium text-sm py-2 hover:text-[#F43676]"
+                  className="text-[#302d55] font-medium text-sm py-2 hover:text-[#F43676]"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   About Us
                 </Link>
                 <Link
                   href="/contact"
-                  className="text-gray-600 font-medium text-sm py-2 hover:text-[#F43676]"
+                  className="text-[#302d55] font-medium text-sm py-2 hover:text-[#F43676]"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Contact
                 </Link>
 
                 {/* Social Icons for Mobile */}
-                <div className="flex items-center gap-2 py-3 border-t border-gray-100 mt-2">
+                <div className="flex items-center gap-3 py-3 border-t border-gray-100 mt-2">
+                  {/* Facebook */}
                   <a
                     href="https://facebook.com"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-8 h-8 rounded-full bg-[#3b5998] flex items-center justify-center text-white"
+                    className="group w-9 h-9 rounded-full border border-gray-200 bg-white flex items-center justify-center"
                   >
-                    <FaFacebookF className="text-xs" />
+                    <div className="relative w-4 h-4 overflow-hidden">
+                      <div className="flex flex-col items-center transition-transform duration-300 group-hover:-translate-y-4">
+                        <FaFacebookF className="text-sm text-[#3d3d5c] h-4 flex items-center justify-center" />
+                        <FaFacebookF className="text-sm text-[#F43676] h-4 flex items-center justify-center" />
+                      </div>
+                    </div>
                   </a>
+                  {/* Twitter/X */}
                   <a
                     href="https://twitter.com"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-8 h-8 rounded-full bg-black flex items-center justify-center text-white"
+                    className="group w-9 h-9 rounded-full border border-gray-200 bg-white flex items-center justify-center"
                   >
-                    <FaXTwitter className="text-xs" />
+                    <div className="relative w-4 h-4 overflow-hidden">
+                      <div className="flex flex-col items-center transition-transform duration-300 group-hover:-translate-y-4">
+                        <FaXTwitter className="text-sm text-[#3d3d5c] h-4 flex items-center justify-center" />
+                        <FaXTwitter className="text-sm text-[#F43676] h-4 flex items-center justify-center" />
+                      </div>
+                    </div>
                   </a>
+                  {/* Telegram */}
                   <a
                     href="https://telegram.org"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-8 h-8 rounded-full bg-[#0088cc] flex items-center justify-center text-white"
+                    className="group w-9 h-9 rounded-full border border-gray-200 bg-white flex items-center justify-center"
                   >
-                    <FaTelegramPlane className="text-xs" />
+                    <div className="relative w-4 h-4 overflow-hidden">
+                      <div className="flex flex-col items-center transition-transform duration-300 group-hover:-translate-y-4">
+                        <FaTelegramPlane className="text-sm text-[#3d3d5c] h-4 flex items-center justify-center" />
+                        <FaTelegramPlane className="text-sm text-[#F43676] h-4 flex items-center justify-center" />
+                      </div>
+                    </div>
                   </a>
+                  {/* Instagram */}
                   <a
                     href="https://instagram.com"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-8 h-8 rounded-full bg-gradient-to-br from-[#f9ce34] via-[#ee2a7b] to-[#6228d7] flex items-center justify-center text-white"
+                    className="group w-9 h-9 rounded-full border border-gray-200 bg-white flex items-center justify-center"
                   >
-                    <FaInstagram className="text-xs" />
+                    <div className="relative w-4 h-4 overflow-hidden">
+                      <div className="flex flex-col items-center transition-transform duration-300 group-hover:-translate-y-4">
+                        <FaInstagram className="text-sm text-[#3d3d5c] h-4 flex items-center justify-center" />
+                        <FaInstagram className="text-sm text-[#F43676] h-4 flex items-center justify-center" />
+                      </div>
+                    </div>
                   </a>
+                  {/* YouTube */}
                   <a
                     href="https://youtube.com"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-8 h-8 rounded-full bg-[#FF0000] flex items-center justify-center text-white"
+                    className="group w-9 h-9 rounded-full border border-gray-200 bg-white flex items-center justify-center"
                   >
-                    <FaYoutube className="text-xs" />
+                    <div className="relative w-4 h-4 overflow-hidden">
+                      <div className="flex flex-col items-center transition-transform duration-300 group-hover:-translate-y-4">
+                        <FaYoutube className="text-sm text-[#3d3d5c] h-4 flex items-center justify-center" />
+                        <FaYoutube className="text-sm text-[#F43676] h-4 flex items-center justify-center" />
+                      </div>
+                    </div>
                   </a>
                 </div>
               </div>

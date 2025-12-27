@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { FaSearch, FaCalendarAlt, FaPlay, FaChevronRight, FaChevronLeft, FaSpinner, FaPen } from "react-icons/fa";
+import { FaSearch, FaCalendarAlt, FaPlay, FaChevronRight, FaChevronLeft, FaSpinner, FaPen, FaFacebookF, FaInstagram, FaYoutube, FaLinkedinIn } from "react-icons/fa";
+import { FaXTwitter } from "react-icons/fa6";
 import { useAuth } from "../context/AuthContext";
 import ProfileEditModal from "./ProfileEditModal";
 
@@ -239,8 +240,8 @@ export default function Content() {
               {/* Empty State */}
               {!loading && !error && petitions.length === 0 && (
                 <div className="bg-white rounded-3xl p-10 text-center shadow-sm">
-                  <h3 className="text-xl font-bold text-gray-700 mb-2">No petitions found</h3>
-                  <p className="text-gray-500">
+                  <h3 className="text-xl font-bold text-[#002050] mb-2">No petitions found</h3>
+                  <p className="text-[#302d55]">
                     {searchQuery
                       ? `No results for "${searchQuery}". Try a different search term.`
                       : "There are no active petitions at the moment."}
@@ -313,12 +314,12 @@ export default function Content() {
                           </div>
 
                           {/* Title */}
-                          <h3 className="text-xl font-bold text-[#1a1a2e] mb-3 leading-tight hover:text-[#F43676] transition-colors">
+                          <h3 className="text-xl font-bold text-[#002050] mb-3 leading-tight hover:text-[#F43676] transition-colors">
                             {petition.title}
                           </h3>
 
                           {/* Description */}
-                          <p className="text-gray-500 text-sm mb-4 leading-relaxed line-clamp-2">
+                          <p className="text-[#302d55] text-sm mb-4 leading-relaxed line-clamp-2">
                             {petition.petitionDetails?.problem?.substring(0, 150)}
                             {petition.petitionDetails?.problem?.length > 150 ? "..." : ""}
                           </p>
@@ -333,7 +334,7 @@ export default function Content() {
                                 className="w-full h-full object-cover"
                               />
                             </div>
-                            <span className="text-gray-600 font-medium">
+                            <span className="text-[#302d55] font-medium">
                               {petition.petitionStarter?.name || "Anonymous"}
                             </span>
                             <span className="text-gray-400">•</span>
@@ -410,7 +411,7 @@ export default function Content() {
               {/* Search Box */}
               <div className="bg-white rounded-3xl p-6 shadow-sm">
                 <div className="flex items-center gap-2 mb-4">
-                  <h3 className="text-xl font-bold text-[#1a1a2e]">Search</h3>
+                  <h3 className="text-xl font-bold text-[#002050]">Search</h3>
                   <span className="w-2 h-2 bg-[#F43676] rounded-full"></span>
                 </div>
                 <form onSubmit={handleSearch} className="flex">
@@ -433,7 +434,7 @@ export default function Content() {
               {/* Recent Comments */}
               <div className="bg-white rounded-3xl p-6 shadow-sm">
                 <div className="flex items-center gap-2 mb-4">
-                  <h3 className="text-xl font-bold text-[#1a1a2e]">Recent Comments</h3>
+                  <h3 className="text-xl font-bold text-[#002050]">Recent Comments</h3>
                   <span className="w-2 h-2 bg-[#F43676] rounded-full"></span>
                 </div>
                 {user ? (
@@ -445,7 +446,7 @@ export default function Content() {
                             href={`/currentpetitions/${comment.petitionId}`}
                             className="block hover:bg-pink-50 p-2 rounded-lg transition-colors"
                           >
-                            <p className="text-gray-700 text-sm leading-relaxed line-clamp-2 mb-1">
+                            <p className="text-[#302d55] text-sm leading-relaxed line-clamp-2 mb-1">
                               {comment.content}
                             </p>
                             <p className="text-xs text-gray-400">
@@ -460,10 +461,10 @@ export default function Content() {
                       ))}
                     </ul>
                   ) : (
-                    <p className="text-gray-500 text-sm">You haven't made any comments yet.</p>
+                    <p className="text-[#302d55] text-sm">You haven't made any comments yet.</p>
                   )
                 ) : (
-                  <p className="text-gray-500 text-sm">
+                  <p className="text-[#302d55] text-sm">
                     <Link href="/login" className="text-[#F43676] hover:underline">
                       Login
                     </Link> to see your recent comments.
@@ -485,7 +486,7 @@ export default function Content() {
               {/* Categories */}
               <div className="bg-white rounded-3xl p-6 shadow-sm">
                 <div className="flex items-center gap-2 mb-4">
-                  <h3 className="text-xl font-bold text-[#1a1a2e]">Categories</h3>
+                  <h3 className="text-xl font-bold text-[#002050]">Categories</h3>
                   <span className="w-2 h-2 bg-[#F43676] rounded-full"></span>
                 </div>
                 <ul className="space-y-3">
@@ -493,7 +494,7 @@ export default function Content() {
                     <li key={index} className="border-b border-gray-100 pb-2 last:border-0 last:pb-0">
                       <Link
                         href={`/category/${category.toLowerCase().replace(" ", "_")}`}
-                        className="text-gray-600 hover:text-[#F43676] transition-colors"
+                        className="text-[#302d55] hover:text-[#F43676] transition-colors"
                       >
                         {category}
                       </Link>
@@ -505,7 +506,7 @@ export default function Content() {
               {/* Recent Posts */}
               <div className="bg-white rounded-3xl p-6 shadow-sm">
                 <div className="flex items-center gap-2 mb-4">
-                  <h3 className="text-xl font-bold text-[#1a1a2e]">Recent Petitions</h3>
+                  <h3 className="text-xl font-bold text-[#002050]">Recent Petitions</h3>
                   <span className="w-2 h-2 bg-[#F43676] rounded-full"></span>
                 </div>
                 <ul className="space-y-3">
@@ -514,14 +515,14 @@ export default function Content() {
                       <li key={index} className="border-b border-gray-100 pb-2 last:border-0 last:pb-0">
                         <Link
                           href={`/currentpetitions/${post.slug}`}
-                          className="text-gray-600 hover:text-[#F43676] transition-colors text-sm leading-relaxed block"
+                          className="text-[#302d55] hover:text-[#F43676] transition-colors text-sm leading-relaxed block"
                         >
                           {post.title}
                         </Link>
                       </li>
                     ))
                   ) : (
-                    <li className="text-gray-500 text-sm">No recent posts</li>
+                    <li className="text-[#302d55] text-sm">No recent posts</li>
                   )}
                 </ul>
               </div>
@@ -547,21 +548,77 @@ export default function Content() {
                       className="w-full h-full object-cover"
                     />
                   </div>
-                  <h4 className="text-xl font-bold text-[#1a1a2e] mb-2">{user.name}</h4>
+                  <h4 className="text-xl font-bold text-[#002050] mb-2">{user.name}</h4>
                   {user.designation && (
                     <p className="text-[#F43676] text-sm font-medium mb-2">{user.designation}</p>
                   )}
-                  <p className="text-gray-500 text-sm leading-relaxed">
+                  <p className="text-[#302d55] text-sm leading-relaxed mb-4">
                     {user.bio || "Click the edit button to add your bio and tell others about yourself!"}
                   </p>
+
+                  {/* Social Media Icons */}
+                  {user.socialLinks && Object.values(user.socialLinks).some(link => link) && (
+                    <div className="flex items-center justify-center gap-2 pt-2">
+                      {user.socialLinks.facebook && (
+                        <a
+                          href={user.socialLinks.facebook}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="w-10 h-10 rounded-full bg-[#3b5998] flex items-center justify-center text-white hover:opacity-80 transition-opacity"
+                        >
+                          <FaFacebookF className="text-sm" />
+                        </a>
+                      )}
+                      {user.socialLinks.twitter && (
+                        <a
+                          href={user.socialLinks.twitter}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="w-10 h-10 rounded-full bg-[#1DA1F2] flex items-center justify-center text-white hover:opacity-80 transition-opacity"
+                        >
+                          <FaXTwitter className="text-sm" />
+                        </a>
+                      )}
+                      {user.socialLinks.instagram && (
+                        <a
+                          href={user.socialLinks.instagram}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="w-10 h-10 rounded-full bg-gradient-to-br from-[#f9ce34] via-[#ee2a7b] to-[#6228d7] flex items-center justify-center text-white hover:opacity-80 transition-opacity"
+                        >
+                          <FaInstagram className="text-sm" />
+                        </a>
+                      )}
+                      {user.socialLinks.linkedin && (
+                        <a
+                          href={user.socialLinks.linkedin}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="w-10 h-10 rounded-full bg-[#0077b5] flex items-center justify-center text-white hover:opacity-80 transition-opacity"
+                        >
+                          <FaLinkedinIn className="text-sm" />
+                        </a>
+                      )}
+                      {user.socialLinks.youtube && (
+                        <a
+                          href={user.socialLinks.youtube}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="w-10 h-10 rounded-full bg-[#FF0000] flex items-center justify-center text-white hover:opacity-80 transition-opacity"
+                        >
+                          <FaYoutube className="text-sm" />
+                        </a>
+                      )}
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="bg-white rounded-3xl p-6 shadow-sm text-center">
                   <div className="w-24 h-24 rounded-full overflow-hidden mx-auto mb-4 border-4 border-gray-100 bg-gradient-to-br from-pink-100 to-gray-100 flex items-center justify-center">
                     <span className="text-4xl">👤</span>
                   </div>
-                  <h4 className="text-xl font-bold text-[#1a1a2e] mb-2">Welcome!</h4>
-                  <p className="text-gray-500 text-sm leading-relaxed mb-4">
+                  <h4 className="text-xl font-bold text-[#002050] mb-2">Welcome!</h4>
+                  <p className="text-[#302d55] text-sm leading-relaxed mb-4">
                     Sign in to customize your profile and join the community.
                   </p>
                   <Link
@@ -576,7 +633,7 @@ export default function Content() {
               {/* Tags */}
               <div className="bg-white rounded-3xl p-6 shadow-sm">
                 <div className="flex items-center gap-2 mb-4">
-                  <h3 className="text-xl font-bold text-[#1a1a2e]">Tags</h3>
+                  <h3 className="text-xl font-bold text-[#002050]">Tags</h3>
                   <span className="w-2 h-2 bg-[#F43676] rounded-full"></span>
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -587,7 +644,7 @@ export default function Content() {
                       <Link
                         key={index}
                         href={`/category/${categorySlug}`}
-                        className="px-4 py-2 bg-white border border-gray-200 rounded-full text-sm text-gray-600 hover:border-[#F43676] hover:text-[#F43676] transition-colors"
+                        className="px-4 py-2 bg-white border border-gray-200 rounded-full text-sm text-[#302d55] hover:border-[#F43676] hover:text-[#F43676] transition-colors"
                       >
                         {tag}
                       </Link>
@@ -599,7 +656,7 @@ export default function Content() {
               {/* Ads */}
               <div className="bg-white rounded-3xl p-6 shadow-sm">
                 <div className="flex items-center gap-2 mb-4">
-                  <h3 className="text-xl font-bold text-[#1a1a2e]">Ads</h3>
+                  <h3 className="text-xl font-bold text-[#002050]">Ads</h3>
                   <span className="w-2 h-2 bg-[#F43676] rounded-full"></span>
                 </div>
                 <div className="rounded-2xl overflow-hidden">
