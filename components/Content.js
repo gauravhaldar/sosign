@@ -473,11 +473,22 @@ export default function Content() {
                         <li key={index} className="border-b border-gray-100 pb-3 last:border-0 last:pb-0">
                           <Link
                             href={`/currentpetitions/${comment.petitionId}`}
-                            className="block hover:bg-pink-50 p-2 rounded-lg transition-colors"
+                            className="block hover:bg-pink-50 p-2 rounded-lg transition-colors group"
                           >
+                            {/* Petition Title */}
+                            {comment.petitionTitle && (
+                              <p className="text-xs text-gray-500 mb-1">
+                                <span className="font-medium">On:</span>{" "}
+                                <span className="text-[#F43676] group-hover:underline line-clamp-1">
+                                  {comment.petitionTitle}
+                                </span>
+                              </p>
+                            )}
+                            {/* Comment Content */}
                             <p className="text-[#302d55] text-sm leading-relaxed line-clamp-2 mb-1">
-                              {comment.content}
+                              &ldquo;{comment.content}&rdquo;
                             </p>
+                            {/* Date */}
                             <p className="text-xs text-gray-400">
                               {new Date(comment.createdAt).toLocaleDateString('en-US', {
                                 month: 'short',
@@ -490,7 +501,7 @@ export default function Content() {
                       ))}
                     </ul>
                   ) : (
-                    <p className="text-[#302d55] text-sm">You haven't made any comments yet.</p>
+                    <p className="text-[#302d55] text-sm">You haven&apos;t made any comments yet.</p>
                   )
                 ) : (
                   <p className="text-[#302d55] text-sm">
