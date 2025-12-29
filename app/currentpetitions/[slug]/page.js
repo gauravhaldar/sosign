@@ -25,6 +25,20 @@ export default function PetitionDetailPage() {
     loading: true,
   });
 
+  // Download request states
+  const [downloadStatus, setDownloadStatus] = useState({
+    hasRequest: false,
+    status: null, // pending, approved, rejected
+    canRequest: true,
+    canDownload: false,
+    loading: true,
+  });
+  const [showDownloadModal, setShowDownloadModal] = useState(false);
+  const [downloadReason, setDownloadReason] = useState("");
+  const [downloadLoading, setDownloadLoading] = useState(false);
+  const [downloadError, setDownloadError] = useState(null);
+  const [downloadSuccess, setDownloadSuccess] = useState(false);
+
   const { user, loading: authLoading } = useAuth();
   const searchParams = useSearchParams();
 
@@ -100,6 +114,143 @@ export default function PetitionDetailPage() {
 
     checkSignatureStatus();
   }, [user, petition]);
+
+  // Check download request status
+  useEffect(() => {
+    const checkDownloadStatus = async () => {
+      if (!user || !petition || !petition._id) {
+        setDownloadStatus((prev) => ({ ...prev, loading: false }));
+        return;
+      }
+
+      try {
+        setDownloadStatus((prev) => ({ ...prev, loading: true }));
+        const userInfo = JSON.parse(localStorage.getItem("user"));
+        const response = await fetch(
+          `/api/download-requests/check/${petition._id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${userInfo.token}`,
+            },
+          }
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          setDownloadStatus({
+            hasRequest: data.hasRequest,
+            status: data.status,
+            canRequest: data.canRequest,
+            canDownload: data.canDownload,
+            loading: false,
+          });
+        } else {
+          setDownloadStatus((prev) => ({ ...prev, loading: false }));
+        }
+      } catch (error) {
+        console.error("Failed to check download status:", error);
+        setDownloadStatus((prev) => ({ ...prev, loading: false }));
+      }
+    };
+
+    checkDownloadStatus();
+  }, [user, petition]);
+
+  // Handle download request
+  const handleRequestDownload = async () => {
+    if (!user) {
+      setShowLoginModal(true);
+      return;
+    }
+
+    if (!downloadReason.trim()) {
+      setDownloadError("Please provide a reason for your download request.");
+      return;
+    }
+
+    try {
+      setDownloadLoading(true);
+      setDownloadError(null);
+
+      const userInfo = JSON.parse(localStorage.getItem("user"));
+      const response = await fetch("/api/download-requests", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${userInfo.token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          petitionId: petition._id,
+          reason: downloadReason.trim(),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to submit download request");
+      }
+
+      setDownloadSuccess(true);
+      setDownloadStatus({
+        hasRequest: true,
+        status: "pending",
+        canRequest: false,
+        canDownload: false,
+        loading: false,
+      });
+      setShowDownloadModal(false);
+      setDownloadReason("");
+
+      setTimeout(() => setDownloadSuccess(false), 5000);
+    } catch (err) {
+      setDownloadError(err.message);
+    } finally {
+      setDownloadLoading(false);
+    }
+  };
+
+  // Handle actual download
+  const handleDownloadPetition = async () => {
+    try {
+      setDownloadLoading(true);
+      setDownloadError(null);
+
+      const userInfo = JSON.parse(localStorage.getItem("user"));
+      const response = await fetch(
+        `/api/download-requests/download/${petition._id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${userInfo.token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.message || "Failed to download petition data");
+      }
+
+      const data = await response.json();
+
+      // Create a downloadable file
+      const blob = new Blob([JSON.stringify(data, null, 2)], {
+        type: "application/json",
+      });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `petition-${petition._id}-data.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      setDownloadError(err.message);
+    } finally {
+      setDownloadLoading(false);
+    }
+  };
 
   const handleSignPetition = async () => {
     // Check if user is authenticated
@@ -510,6 +661,154 @@ export default function PetitionDetailPage() {
             })()}
           </div>
         </div>
+
+        {/* Download Petition Data Section */}
+        <div className="mt-8 bg-white rounded-2xl p-6 shadow-lg">
+          <p className="font-bold text-[#1a1a2e] mb-4 flex items-center gap-2">
+            <span className="text-[#F43676]">📥</span> Download Petition Data
+          </p>
+
+          {/* Success Message */}
+          {downloadSuccess && (
+            <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg mb-4">
+              <p className="font-medium">✓ Download request submitted successfully!</p>
+              <p className="text-sm">Please wait for admin approval. You will be able to download once approved.</p>
+            </div>
+          )}
+
+          {/* Error Message */}
+          {downloadError && (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-4">
+              <p className="font-medium">Error: {downloadError}</p>
+              <button
+                onClick={() => setDownloadError(null)}
+                className="text-sm underline mt-1"
+              >
+                Dismiss
+              </button>
+            </div>
+          )}
+
+          <p className="text-gray-600 text-sm mb-4">
+            Download a complete data file of this petition including all signatures, comments, and details.
+            This requires admin approval.
+          </p>
+
+          {!user ? (
+            <div className="bg-gray-50 p-4 rounded-lg text-center">
+              <p className="text-gray-600 mb-3">You need to be logged in to request petition data.</p>
+              <button
+                onClick={() => setShowLoginModal(true)}
+                className="px-5 py-2.5 bg-[#3650AD] text-white rounded-lg font-medium hover:bg-[#2a3f8a] transition-colors"
+              >
+                Login to Request
+              </button>
+            </div>
+          ) : downloadStatus.loading ? (
+            <div className="text-center py-4">
+              <p className="text-gray-500">Checking download status...</p>
+            </div>
+          ) : downloadStatus.canDownload ? (
+            <div className="space-y-3">
+              <div className="bg-green-50 border border-green-200 p-4 rounded-lg">
+                <p className="text-green-800 font-medium">✓ Your download request has been approved!</p>
+                <p className="text-green-600 text-sm">You can now download the petition data.</p>
+              </div>
+              <button
+                onClick={handleDownloadPetition}
+                disabled={downloadLoading}
+                className="w-full md:w-auto px-6 py-3 bg-gradient-to-r from-[#3650AD] to-[#F43676] text-white rounded-lg font-semibold hover:opacity-90 transition-all transform hover:-translate-y-0.5 shadow-lg disabled:opacity-50"
+              >
+                {downloadLoading ? "Downloading..." : "📥 Download Petition Data (JSON)"}
+              </button>
+            </div>
+          ) : downloadStatus.hasRequest && downloadStatus.status === "pending" ? (
+            <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
+              <p className="text-yellow-800 font-medium">⏳ Your download request is pending</p>
+              <p className="text-yellow-600 text-sm">Please wait for admin approval. Check back later.</p>
+            </div>
+          ) : downloadStatus.hasRequest && downloadStatus.status === "rejected" ? (
+            <div className="space-y-3">
+              <div className="bg-red-50 border border-red-200 p-4 rounded-lg">
+                <p className="text-red-800 font-medium">✗ Your previous request was rejected</p>
+                <p className="text-red-600 text-sm">You can submit a new request with a different reason.</p>
+              </div>
+              <button
+                onClick={() => setShowDownloadModal(true)}
+                className="px-5 py-2.5 bg-[#3650AD] text-white rounded-lg font-medium hover:bg-[#2a3f8a] transition-colors"
+              >
+                Request Again
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => setShowDownloadModal(true)}
+              className="px-5 py-2.5 bg-[#3650AD] text-white rounded-lg font-medium hover:bg-[#2a3f8a] transition-colors"
+            >
+              Request Download Permission
+            </button>
+          )}
+        </div>
+
+        {/* Download Request Modal */}
+        {showDownloadModal && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl w-full max-w-md shadow-xl">
+              <div className="p-6 border-b border-gray-100">
+                <h3 className="text-xl font-bold text-[#1a1a2e]">Request Download Permission</h3>
+                <p className="text-gray-500 text-sm mt-1">
+                  Your request will be reviewed by an admin before you can download.
+                </p>
+              </div>
+
+              <div className="p-6 space-y-4">
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <p className="text-sm text-gray-500">Petition</p>
+                  <p className="font-medium text-[#1a1a2e]">{petition.title}</p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Why do you need this data? <span className="text-red-500">*</span>
+                  </label>
+                  <textarea
+                    value={downloadReason}
+                    onChange={(e) => setDownloadReason(e.target.value)}
+                    placeholder="Please explain your reason for requesting this petition data (e.g., research, journalism, advocacy)..."
+                    className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#3650AD] focus:border-transparent resize-none"
+                    rows={4}
+                    maxLength={500}
+                  />
+                  <p className="text-xs text-gray-400 mt-1">{downloadReason.length}/500 characters</p>
+                </div>
+
+                {downloadError && (
+                  <p className="text-red-500 text-sm">{downloadError}</p>
+                )}
+              </div>
+
+              <div className="p-6 border-t border-gray-100 flex gap-3 justify-end">
+                <button
+                  onClick={() => {
+                    setShowDownloadModal(false);
+                    setDownloadReason("");
+                    setDownloadError(null);
+                  }}
+                  className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleRequestDownload}
+                  disabled={downloadLoading || !downloadReason.trim()}
+                  className="px-4 py-2 bg-[#3650AD] text-white rounded-lg font-medium hover:bg-[#2a3f8a] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {downloadLoading ? "Submitting..." : "Submit Request"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Comments Section */}
         {petition && petition._id && (
