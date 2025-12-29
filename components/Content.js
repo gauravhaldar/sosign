@@ -135,7 +135,7 @@ export default function Content() {
         }
 
         const response = await fetch(
-          `${backendUrl}/api/comments/user/recent?limit=4`,
+          `${backendUrl}/api/comments/user/recent?limit=3`,
           {
             headers: {
               Authorization: `Bearer ${userInfo.token}`,
@@ -462,9 +462,19 @@ export default function Content() {
 
               {/* Recent Comments */}
               <div className="bg-white rounded-3xl p-6 shadow-sm">
-                <div className="flex items-center gap-2 mb-4">
-                  <h3 className="text-xl font-bold text-[#002050]">Recent Comments</h3>
-                  <span className="w-2 h-2 bg-[#F43676] rounded-full"></span>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-xl font-bold text-[#002050]">Recent Comments</h3>
+                    <span className="w-2 h-2 bg-[#F43676] rounded-full"></span>
+                  </div>
+                  {user && recentComments.length > 0 && (
+                    <Link
+                      href="/my-comments"
+                      className="text-sm text-[#F43676] hover:underline font-medium"
+                    >
+                      View All
+                    </Link>
+                  )}
                 </div>
                 {user ? (
                   recentComments.length > 0 ? (
