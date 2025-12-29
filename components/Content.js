@@ -355,8 +355,10 @@ export default function Content() {
                           <div className="flex items-center gap-3 text-sm">
                             <div className="w-8 h-8 rounded-full overflow-hidden">
                               <img
-                                src={`https://ui-avatars.com/api/?name=${petition.petitionStarter?.name || "Anonymous"
-                                  }&background=random&size=32`}
+                                src={
+                                  petition.petitionStarter?.user?.profilePicture ||
+                                  `https://ui-avatars.com/api/?name=${encodeURIComponent(petition.petitionStarter?.name || "Anonymous")}&background=random&size=32`
+                                }
                                 alt={petition.petitionStarter?.name || "Anonymous"}
                                 className="w-full h-full object-cover"
                               />
