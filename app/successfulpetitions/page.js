@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
+import { FaSearch, FaSpinner, FaChevronRight } from 'react-icons/fa';
 import SuccessfulPetitionsData from "../../components/SuccessfulPetitionsData";
 
 export default function SuccessfulPetitionsPage() {
@@ -10,11 +12,75 @@ export default function SuccessfulPetitionsPage() {
     location: '',
     sort: 'newest'
   });
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchSuggestions, setSearchSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [suggestionsLoading, setSuggestionsLoading] = useState(false);
+  const searchRef = useRef(null);
+  const router = useRouter();
 
   // Reset page when filters change
   const handleFilterChange = (newFilters) => {
     setFilters(newFilters);
     setCurrentPage(1); // Reset to first page when filters change
+  };
+
+  // Handle search submission
+  const handleSearch = (e) => {
+    e.preventDefault();
+    // For now, just close suggestions - full search filtering can be added later
+    setShowSuggestions(false);
+  };
+
+  // Fetch search suggestions with debounce
+  useEffect(() => {
+    const fetchSuggestions = async () => {
+      if (searchQuery.length < 2) {
+        setSearchSuggestions([]);
+        setShowSuggestions(false);
+        return;
+      }
+
+      setSuggestionsLoading(true);
+      try {
+        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
+        const response = await fetch(
+          `${backendUrl}/api/successful-petitions?search=${encodeURIComponent(searchQuery)}&limit=5`
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          setSearchSuggestions(data.successfulPetitions || []);
+          setShowSuggestions(true);
+        }
+      } catch (err) {
+        console.error("Error fetching suggestions:", err);
+      } finally {
+        setSuggestionsLoading(false);
+      }
+    };
+
+    const debounceTimer = setTimeout(fetchSuggestions, 300);
+    return () => clearTimeout(debounceTimer);
+  }, [searchQuery]);
+
+  // Close suggestions when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (searchRef.current && !searchRef.current.contains(event.target)) {
+        setShowSuggestions(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Handle suggestion click
+  const handleSuggestionClick = (petitionId) => {
+    setShowSuggestions(false);
+    setSearchQuery("");
+    router.push(`/successfulpetitions/${petitionId}`);
   };
 
   return (
@@ -35,7 +101,7 @@ export default function SuccessfulPetitionsPage() {
       <div className="bg-white border-b">
         <div className="max-w-6xl mx-auto px-6 py-6">
           <div className="flex flex-wrap gap-4 items-center justify-between">
-            <div className="flex flex-wrap gap-4">
+            <div className="flex flex-wrap gap-4 flex-1">
               {/* Category Filter */}
               <select
                 value={filters.category}
@@ -54,14 +120,77 @@ export default function SuccessfulPetitionsPage() {
                 <option value="Other">Other</option>
               </select>
 
-              {/* Location Filter */}
-              <input
-                type="text"
-                placeholder="Filter by location..."
-                value={filters.location}
-                onChange={(e) => handleFilterChange({ ...filters, location: e.target.value })}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
+              {/* Search with Suggestions */}
+              <div ref={searchRef} className="relative flex-1 min-w-[250px]">
+                <form onSubmit={handleSearch} className="flex">
+                  <input
+                    type="text"
+                    placeholder="Search by title..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onFocus={() => searchQuery.length >= 2 && setShowSuggestions(true)}
+                    className="flex-1 px-4 py-2 border border-gray-300 rounded-l-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                  <button
+                    type="submit"
+                    className="px-4 py-2 bg-[#F43676] text-white rounded-r-lg hover:bg-[#e02a60] transition-colors"
+                  >
+                    <FaSearch />
+                  </button>
+                </form>
+
+                {/* Suggestions Dropdown */}
+                {showSuggestions && (searchSuggestions.length > 0 || suggestionsLoading) && (
+                  <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg z-50 overflow-hidden">
+                    {suggestionsLoading ? (
+                      <div className="px-4 py-3 text-center text-gray-500">
+                        <FaSpinner className="animate-spin inline mr-2" />
+                        Searching...
+                      </div>
+                    ) : (
+                      searchSuggestions.map((petition) => (
+                        <button
+                          key={petition._id}
+                          type="button"
+                          onClick={() => handleSuggestionClick(petition._id)}
+                          className="w-full px-4 py-3 text-left hover:bg-green-50 border-b border-gray-100 last:border-b-0 transition-colors group"
+                        >
+                          <div className="flex items-center gap-3">
+                            {petition.image && (
+                              <img
+                                src={petition.image}
+                                alt=""
+                                className="w-10 h-10 rounded-lg object-cover flex-shrink-0"
+                              />
+                            )}
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium text-gray-800 group-hover:text-green-600 transition-colors line-clamp-1">
+                                {petition.petitionTitle}
+                              </p>
+                              <p className="text-xs text-gray-500">
+                                {petition.location} • {petition.totalSignatures?.toLocaleString() || 0} signatures
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-2 flex-shrink-0">
+                              <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">Success</span>
+                              <FaChevronRight className="text-gray-400 group-hover:text-green-600" />
+                            </div>
+                          </div>
+                        </button>
+                      ))
+                    )}
+                    {!suggestionsLoading && searchSuggestions.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={handleSearch}
+                        className="w-full px-4 py-2 text-center text-sm text-[#F43676] hover:bg-pink-50 font-medium transition-colors"
+                      >
+                        See all results for "{searchQuery}"
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Sort Options */}
@@ -118,3 +247,4 @@ export default function SuccessfulPetitionsPage() {
     </div>
   );
 }
+

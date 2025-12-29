@@ -17,18 +17,27 @@ export async function GET(request, { params }) {
         );
 
         if (!response.ok) {
-            const data = await response.json();
-            return NextResponse.json(data, { status: response.status });
+            // Try to parse error as JSON
+            try {
+                const data = await response.json();
+                return NextResponse.json(data, { status: response.status });
+            } catch {
+                return NextResponse.json(
+                    { message: "Failed to download petition data" },
+                    { status: response.status }
+                );
+            }
         }
 
-        const data = await response.json();
+        // Get the PDF as array buffer
+        const pdfBuffer = await response.arrayBuffer();
 
-        // Return as downloadable JSON
-        return new NextResponse(JSON.stringify(data, null, 2), {
+        // Return as downloadable PDF
+        return new NextResponse(pdfBuffer, {
             status: 200,
             headers: {
-                "Content-Type": "application/json",
-                "Content-Disposition": `attachment; filename="petition-${petitionId}-data.json"`,
+                "Content-Type": "application/pdf",
+                "Content-Disposition": `attachment; filename="petition-${petitionId}-data.pdf"`,
             },
         });
     } catch (error) {

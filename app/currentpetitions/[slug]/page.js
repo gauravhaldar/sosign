@@ -231,16 +231,14 @@ export default function PetitionDetailPage() {
         throw new Error(data.message || "Failed to download petition data");
       }
 
-      const data = await response.json();
+      // Get the PDF blob from the response
+      const blob = await response.blob();
 
-      // Create a downloadable file
-      const blob = new Blob([JSON.stringify(data, null, 2)], {
-        type: "application/json",
-      });
+      // Create a download link for the PDF
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `petition-${petition._id}-data.json`;
+      link.download = `petition-${petition._id}-data.pdf`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -719,7 +717,7 @@ export default function PetitionDetailPage() {
                 disabled={downloadLoading}
                 className="w-full md:w-auto px-6 py-3 bg-gradient-to-r from-[#3650AD] to-[#F43676] text-white rounded-lg font-semibold hover:opacity-90 transition-all transform hover:-translate-y-0.5 shadow-lg disabled:opacity-50"
               >
-                {downloadLoading ? "Downloading..." : "📥 Download Petition Data (JSON)"}
+                {downloadLoading ? "Downloading..." : "📥 Download Petition Data (PDF)"}
               </button>
             </div>
           ) : downloadStatus.hasRequest && downloadStatus.status === "pending" ? (

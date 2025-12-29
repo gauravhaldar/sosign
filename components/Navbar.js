@@ -40,10 +40,10 @@ export default function Navbar() {
       initial={{ y: -80, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
-      className="w-full bg-white shadow-sm border-b border-gray-100 sticky top-0 z-50"
+      className="w-full bg-white border-b border-gray-200 sticky top-0 z-50"
     >
       <div className="max-w-[95%] xl:max-w-[90%] mx-auto px-2 sm:px-3 lg:px-4">
-        <div className="flex justify-between h-24 items-center">
+        <div className="flex justify-between h-[105px] items-center">
           {/* Left side: Logo Only */}
           <div className="flex items-center">
             <motion.div whileHover={{ scale: 1.05 }}>
@@ -51,9 +51,9 @@ export default function Navbar() {
                 <Image
                   src="/log.png"
                   alt="SOSIGN Logo"
-                  width={140}
-                  height={45}
-                  className="h-10 w-auto"
+                  width={170}
+                  height={55}
+                  className="h-14 w-auto"
                 />
               </Link>
             </motion.div>
@@ -65,7 +65,7 @@ export default function Navbar() {
             <div className="hidden lg:flex items-center gap-8">
               <Link
                 href="/"
-                className="text-[#F43676] font-semibold text-base hover:text-[#F43676] transition-colors duration-200"
+                className="text-[#F43676] font-semibold text-base hover:text-[#F43676] transition-all duration-200 border-b-2 border-[#F43676] pb-1"
               >
                 Home
               </Link>
@@ -76,7 +76,7 @@ export default function Navbar() {
                 onMouseEnter={() => setCampaignDropdown(true)}
                 onMouseLeave={() => setCampaignDropdown(false)}
               >
-                <button className="flex items-center gap-1 text-[#302d55] font-semibold text-base hover:text-[#F43676] transition-colors duration-200">
+                <button className="flex items-center gap-1 text-[#302d55] font-semibold text-base hover:text-[#F43676] transition-all duration-200 border-b-2 border-transparent hover:border-[#F43676] pb-1">
                   Start Campaign
                   <FaChevronDown className="text-sm" />
                 </button>
@@ -117,7 +117,7 @@ export default function Navbar() {
                 onMouseEnter={() => setPagesDropdown(true)}
                 onMouseLeave={() => setPagesDropdown(false)}
               >
-                <button className="flex items-center gap-1 text-[#302d55] font-semibold text-base hover:text-[#F43676] transition-colors duration-200">
+                <button className="flex items-center gap-1 text-[#302d55] font-semibold text-base hover:text-[#F43676] transition-all duration-200 border-b-2 border-transparent hover:border-[#F43676] pb-1">
                   Pages
                   <FaChevronDown className="text-sm" />
                 </button>
@@ -160,7 +160,7 @@ export default function Navbar() {
 
               <Link
                 href="/contact"
-                className="text-[#302d55] font-semibold text-base hover:text-[#F43676] transition-colors duration-200"
+                className="text-[#302d55] font-semibold text-base hover:text-[#F43676] transition-all duration-200 border-b-2 border-transparent hover:border-[#F43676] pb-1"
               >
                 Contact
               </Link>
@@ -246,12 +246,12 @@ export default function Navbar() {
             </button> */}
 
             {/* Search Button */}
-            <Link
+            {/* <Link
               href="/search"
               className="w-8 h-8 rounded-full bg-[#F43676] flex items-center justify-center text-white hover:bg-[#e02a60] transition-colors"
             >
               <FaSearch className="text-xs" />
-            </Link>
+            </Link> */}
 
             {/* Login Button or User Profile */}
             {user ? (

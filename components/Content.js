@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { FaSearch, FaCalendarAlt, FaPlay, FaChevronRight, FaChevronLeft, FaSpinner, FaPen, FaFacebookF, FaInstagram, FaYoutube, FaLinkedinIn } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
 import { useAuth } from "../context/AuthContext";
@@ -71,6 +72,11 @@ export default function Content() {
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [ads, setAds] = useState([]);
   const [adsLoading, setAdsLoading] = useState(true);
+  const [searchSuggestions, setSearchSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [suggestionsLoading, setSuggestionsLoading] = useState(false);
+  const searchRef = useRef(null);
+  const router = useRouter();
   const { user } = useAuth();
 
   const ITEMS_PER_PAGE = 6;
@@ -187,6 +193,58 @@ export default function Content() {
   const handleSearch = (e) => {
     e.preventDefault();
     setCurrentPage(1); // Reset to first page when searching
+    setShowSuggestions(false);
+  };
+
+  // Fetch search suggestions with debounce
+  useEffect(() => {
+    const fetchSuggestions = async () => {
+      if (searchQuery.length < 2) {
+        setSearchSuggestions([]);
+        setShowSuggestions(false);
+        return;
+      }
+
+      setSuggestionsLoading(true);
+      try {
+        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
+        const response = await fetch(
+          `${backendUrl}/api/petitions?search=${encodeURIComponent(searchQuery)}&limit=5`
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          setSearchSuggestions(data.petitions || []);
+          setShowSuggestions(true);
+        }
+      } catch (err) {
+        console.error("Error fetching suggestions:", err);
+      } finally {
+        setSuggestionsLoading(false);
+      }
+    };
+
+    const debounceTimer = setTimeout(fetchSuggestions, 300);
+    return () => clearTimeout(debounceTimer);
+  }, [searchQuery]);
+
+  // Close suggestions when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (searchRef.current && !searchRef.current.contains(event.target)) {
+        setShowSuggestions(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Handle suggestion click
+  const handleSuggestionClick = (petitionId) => {
+    setShowSuggestions(false);
+    setSearchQuery("");
+    router.push(`/currentpetitions/${petitionId}`);
   };
 
   // Handle page change
@@ -438,25 +496,76 @@ export default function Content() {
             {/* Sidebar - Right Side */}
             <div className="lg:w-1/3 space-y-6">
               {/* Search Box */}
-              <div className="bg-white rounded-3xl p-6 shadow-sm">
+              <div className="bg-white rounded-3xl p-6 shadow-sm" ref={searchRef}>
                 <div className="flex items-center gap-2 mb-4">
                   <h3 className="text-xl font-bold text-[#002050]">Search</h3>
                   <span className="w-2 h-2 bg-[#F43676] rounded-full"></span>
                 </div>
-                <form onSubmit={handleSearch} className="flex">
-                  <input
-                    type="text"
-                    placeholder="Search petitions..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="flex-1 px-4 py-3 border border-gray-200 rounded-l-lg outline-none focus:border-[#F43676] transition-colors"
-                  />
-                  <button
-                    type="submit"
-                    className="px-5 py-3 bg-[#F43676] text-white rounded-r-lg hover:bg-[#e02a60] transition-colors"
-                  >
-                    Search
-                  </button>
+                <form onSubmit={handleSearch} className="relative">
+                  <div className="flex">
+                    <input
+                      type="text"
+                      placeholder="Search petitions..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onFocus={() => searchQuery.length >= 2 && setShowSuggestions(true)}
+                      className="flex-1 px-4 py-3 border border-gray-200 rounded-l-lg outline-none focus:border-[#F43676] transition-colors"
+                    />
+                    <button
+                      type="submit"
+                      className="px-5 py-3 bg-[#F43676] text-white rounded-r-lg hover:bg-[#e02a60] transition-colors"
+                    >
+                      Search
+                    </button>
+                  </div>
+
+                  {/* Suggestions Dropdown */}
+                  {showSuggestions && (searchSuggestions.length > 0 || suggestionsLoading) && (
+                    <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg z-50 overflow-hidden">
+                      {suggestionsLoading ? (
+                        <div className="px-4 py-3 text-center text-gray-500">
+                          <FaSpinner className="animate-spin inline mr-2" />
+                          Searching...
+                        </div>
+                      ) : (
+                        searchSuggestions.map((petition) => (
+                          <button
+                            key={petition._id}
+                            type="button"
+                            onClick={() => handleSuggestionClick(petition._id)}
+                            className="w-full px-4 py-3 text-left hover:bg-pink-50 border-b border-gray-100 last:border-b-0 transition-colors group"
+                          >
+                            <div className="flex items-center gap-3">
+                              {petition.petitionDetails?.image && (
+                                <img
+                                  src={petition.petitionDetails.image}
+                                  alt=""
+                                  className="w-10 h-10 rounded-lg object-cover flex-shrink-0"
+                                />
+                              )}
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium text-[#1a1a2e] group-hover:text-[#F43676] transition-colors line-clamp-1">
+                                  {petition.title}
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                  {petition.numberOfSignatures || 0} signatures
+                                </p>
+                              </div>
+                              <FaChevronRight className="text-gray-400 group-hover:text-[#F43676] flex-shrink-0" />
+                            </div>
+                          </button>
+                        ))
+                      )}
+                      {!suggestionsLoading && searchSuggestions.length > 0 && (
+                        <button
+                          type="submit"
+                          className="w-full px-4 py-2 text-center text-sm text-[#F43676] hover:bg-pink-50 font-medium transition-colors"
+                        >
+                          See all results for "{searchQuery}"
+                        </button>
+                      )}
+                    </div>
+                  )}
                 </form>
               </div>
 

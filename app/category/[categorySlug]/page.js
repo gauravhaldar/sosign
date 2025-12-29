@@ -147,7 +147,7 @@ export default function CategoryPage() {
                 const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
                 // Convert slug back to category format (e.g., human_rights -> human rights)
                 const category = categorySlug?.replace(/_/g, ' ');
-                const response = await fetch(`${backendUrl}/api/petitions?category=${encodeURIComponent(category)}`);
+                const response = await fetch(`${backendUrl}/api/petitions?category=${encodeURIComponent(category)}${searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : ""}`);
 
                 if (response.ok) {
                     const data = await response.json();
@@ -166,7 +166,13 @@ export default function CategoryPage() {
         if (categorySlug) {
             fetchPetitions();
         }
-    }, [categorySlug]);
+    }, [categorySlug, searchQuery]);
+
+    // Handle search form submit
+    const handleSearch = (e) => {
+        e.preventDefault();
+        // The useEffect will trigger automatically when searchQuery changes
+    };
 
     // Fetch recent petitions for sidebar (across all categories)
     useEffect(() => {
@@ -370,18 +376,21 @@ export default function CategoryPage() {
                                         <h3 className="text-xl font-bold text-[#1a1a2e]">Search</h3>
                                         <span className="w-2 h-2 bg-[#F43676] rounded-full"></span>
                                     </div>
-                                    <div className="flex">
+                                    <form onSubmit={handleSearch} className="flex">
                                         <input
                                             type="text"
-                                            placeholder="Search..."
+                                            placeholder="Search in this category..."
                                             value={searchQuery}
                                             onChange={(e) => setSearchQuery(e.target.value)}
                                             className="flex-1 px-4 py-3 border border-gray-200 rounded-l-lg outline-none focus:border-[#F43676] transition-colors"
                                         />
-                                        <button className="px-5 py-3 bg-[#F43676] text-white rounded-r-lg hover:bg-[#e02a60] transition-colors">
+                                        <button
+                                            type="submit"
+                                            className="px-5 py-3 bg-[#F43676] text-white rounded-r-lg hover:bg-[#e02a60] transition-colors"
+                                        >
                                             <FaSearch />
                                         </button>
-                                    </div>
+                                    </form>
                                 </div>
 
                                 {/* Recent Posts */}

@@ -157,9 +157,9 @@ export default function Banner() {
   if (!mounted) return null;
 
   return (
-    <section className="bg-[#f0f2f5] mt px-8 sm:px-16 lg:px-24 pt-6">
+    <section className="bg-[#f0f2f5] mt px-4 sm:px-8 lg:px-12 pt-6">
       {/* Top Stories Ticker Bar */}
-      <div className="bg-white shadow-sm border border-gray-200 rounded-lg overflow-hidden flex items-stretch">
+      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden flex items-stretch">
         {/* Top Stories Label */}
         <div className="flex items-center gap-2 bg-[#F43676] text-white px-5 shrink-0">
           <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
@@ -167,7 +167,7 @@ export default function Banner() {
         </div>
 
         {/* Scrolling News Ticker - Infinite Seamless Loop */}
-        <div className="flex-1 overflow-hidden relative py-3 px-4">
+        <div className="flex-1 overflow-hidden relative py-1 px-4">
           <style jsx>{`
             @keyframes ticker-scroll {
               0% {
