@@ -63,6 +63,28 @@ const CommentsSection = ({ petitionId }) => {
     }
   }, [petitionId]);
 
+  // Scroll to specific comment if hash is present in URL
+  useEffect(() => {
+    if (!loading && comments.length > 0) {
+      const hash = window.location.hash;
+      if (hash && hash.startsWith('#comment-')) {
+        const commentId = hash.replace('#comment-', '');
+        const commentElement = document.getElementById(`comment-${commentId}`);
+        if (commentElement) {
+          // Wait a bit for the page to fully render
+          setTimeout(() => {
+            commentElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            // Add highlight effect
+            commentElement.classList.add('ring-2', 'ring-[#F43676]', 'ring-offset-2');
+            setTimeout(() => {
+              commentElement.classList.remove('ring-2', 'ring-[#F43676]', 'ring-offset-2');
+            }, 3000);
+          }, 300);
+        }
+      }
+    }
+  }, [loading, comments]);
+
   // Submit new comment
   const handleSubmitComment = async (e) => {
     e.preventDefault();
@@ -422,10 +444,11 @@ const CommentsSection = ({ petitionId }) => {
                 return (
                   <motion.div
                     key={comment._id}
+                    id={`comment-${comment._id}`}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -20 }}
-                    className={`border border-gray-200 rounded-lg p-4 ${!comment.isApproved ? 'bg-yellow-50 border-yellow-200' : ''}`}
+                    className={`border border-gray-200 rounded-lg p-4 transition-all duration-300 ${!comment.isApproved ? 'bg-yellow-50 border-yellow-200' : ''}`}
                   >
                     {/* Comment Header */}
                     <div className="flex items-center justify-between mb-3">

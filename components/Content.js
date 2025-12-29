@@ -472,7 +472,7 @@ export default function Content() {
                       {recentComments.map((comment, index) => (
                         <li key={index} className="border-b border-gray-100 pb-3 last:border-0 last:pb-0">
                           <Link
-                            href={`/currentpetitions/${comment.petitionId}`}
+                            href={`/currentpetitions/${comment.petitionId}#comment-${comment._id}`}
                             className="block hover:bg-pink-50 p-2 rounded-lg transition-colors group"
                           >
                             {/* Petition Title */}
