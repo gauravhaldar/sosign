@@ -1,80 +1,394 @@
 "use client";
 
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Link from "next/link";
 import Image from "next/image";
+import { FaSearch, FaCalendarAlt, FaUser, FaArrowRight, FaChevronLeft, FaChevronRight, FaBookOpen, FaTags, FaFire } from 'react-icons/fa';
 import { posts } from '../../components/BlogPostsData';
 
 export default function BlogPage() {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [filteredPosts, setFilteredPosts] = useState(posts);
+  const postsPerPage = 6;
+
+  // Filter posts based on search query
+  useEffect(() => {
+    if (searchQuery.trim() === '') {
+      setFilteredPosts(posts);
+    } else {
+      const query = searchQuery.toLowerCase();
+      setFilteredPosts(
+        posts.filter(
+          post =>
+            post.title.toLowerCase().includes(query) ||
+            post.author.toLowerCase().includes(query) ||
+            post.content.toLowerCase().includes(query)
+        )
+      );
+    }
+    setCurrentPage(1);
+  }, [searchQuery]);
+
+  // Pagination
+  const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
+  const startIndex = (currentPage - 1) * postsPerPage;
+  const currentPosts = filteredPosts.slice(startIndex, startIndex + postsPerPage);
+
+  // Featured post is the first post
+  const featuredPost = posts[0];
+
+  // Get unique authors
+  const uniqueAuthors = [...new Set(posts.map(post => post.author))];
+
   return (
-    <div className="max-w-6xl mx-auto py-12 px-4 md:px-6 lg:px-8 bg-white shadow-lg rounded-xl mt-8 mb-12">
-      <h1 className="text-4xl md:text-5xl font-regular mb-10 text-center text-gray-900 leading-tight">
-        Sosign Blog
-      </h1>
+    <section className="bg-[#f0f2f5] min-h-screen py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto">
+        {/* Hero Header */}
+        <div className="relative bg-gradient-to-r from-[#002050] to-[#1a3a6e] rounded-3xl p-8 md:p-12 mb-10 overflow-hidden">
+          {/* Decorative elements */}
+          <div className="absolute top-0 right-0 w-64 h-64 bg-[#F43676]/20 rounded-full -translate-y-32 translate-x-32 blur-3xl"></div>
+          <div className="absolute bottom-0 left-0 w-48 h-48 bg-[#F43676]/10 rounded-full translate-y-24 -translate-x-24 blur-2xl"></div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div className="md:col-span-2 space-y-8">
-          {/* Search Bar */}
-          <div className="mb-8">
-            <input
-              type="text"
-              placeholder="Type and hit enter..."
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none transition"
-            />
-          </div>
-
-          {/* Blog Posts */}
-          {posts.map((post, index) => (
-            <div key={index} className="bg-gray-50 p-6 rounded-2xl shadow-sm border border-gray-200">
-              {post.image && (
-                <Image
-                  src={post.image}
-                  alt={post.title}
-                  width={500}
-                  height={300}
-                  className="w-full h-48 object-cover rounded-xl mb-4"
-                />
-              )}
-              <h2 className="text-2xl font-semibold mb-2 text-gray-800">{post.title}</h2>
-              <p className="text-sm text-gray-500 mb-4">
-                {post.date} by <span className="font-medium">{post.author}</span>
-              </p>
-              <p className="text-gray-700 leading-relaxed mb-4">
-                {post.content}
-              </p>
-              {post.link && (
-                <Link href={post.link} className="text-blue-600 hover:underline font-semibold">
-                  Read more
-                </Link>
-              )}
+          <div className="relative z-10 text-center">
+            <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full mb-4">
+              <FaBookOpen className="text-[#F43676]" />
+              <span className="text-white/90 text-sm font-medium">Inspiring Stories & Updates</span>
             </div>
-          ))}
-
-          {/* Posts Navigation */}
-          <div className="flex justify-between mt-8">
-            <button className="bg-blue-600 text-white px-6 py-2 rounded-full font-medium hover:bg-blue-700 transition">
-              Older posts
-            </button>
-            <button className="bg-blue-600 text-white px-6 py-2 rounded-full font-medium hover:bg-blue-700 transition">
-              New updates
-            </button>
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4">
+              Sosign <span className="text-[#F43676]">Blog</span>
+            </h1>
+            <p className="text-white/80 text-lg max-w-2xl mx-auto">
+              Discover inspiring stories of change, learn about social movements, and stay updated on the causes that matter.
+            </p>
           </div>
         </div>
 
-        {/* Sidebar */}
-        <div className="space-y-6">
-          <h3 className="text-xl font-semibold text-gray-800">Recent Posts</h3>
-          <ul className="space-y-3">
-            {posts.map((post, index) => (
-              <li key={index}>
-                <Link href={post.link || '#'} className="text-gray-700 hover:text-blue-600 hover:underline transition">
-                  {post.title}
+        {/* Featured Post */}
+        <div className="mb-10">
+          <div className="flex items-center gap-2 mb-6">
+            <FaFire className="text-[#F43676] text-xl" />
+            <h2 className="text-2xl font-bold text-[#002050]">Featured Story</h2>
+            <span className="w-2 h-2 bg-[#F43676] rounded-full animate-pulse"></span>
+          </div>
+
+          <Link href={featuredPost.link || '#'} className="block group">
+            <div className="relative bg-white rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500">
+              <div className="flex flex-col lg:flex-row">
+                {/* Image */}
+                <div className="lg:w-3/5 relative overflow-hidden">
+                  <div className="aspect-[16/10] lg:aspect-[16/9]">
+                    <Image
+                      src={featuredPost.image}
+                      alt={featuredPost.title}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-700"
+                    />
+                  </div>
+                  {/* Overlay gradient */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+                  {/* Featured badge */}
+                  <div className="absolute top-4 left-4 bg-[#F43676] text-white px-4 py-2 rounded-full text-sm font-semibold flex items-center gap-2 shadow-lg">
+                    <FaFire className="text-yellow-300" />
+                    Featured
+                  </div>
+                </div>
+
+                {/* Content */}
+                <div className="lg:w-2/5 p-8 flex flex-col justify-center">
+                  <div className="flex items-center gap-3 text-sm text-gray-500 mb-4">
+                    <span className="flex items-center gap-1">
+                      <FaCalendarAlt className="text-[#F43676]" />
+                      {featuredPost.date}
+                    </span>
+                    <span className="text-gray-300">|</span>
+                    <span className="flex items-center gap-1">
+                      <FaUser className="text-[#F43676]" />
+                      {featuredPost.author}
+                    </span>
+                  </div>
+
+                  <h3 className="text-2xl lg:text-3xl font-bold text-[#002050] mb-4 leading-tight group-hover:text-[#F43676] transition-colors">
+                    {featuredPost.title}
+                  </h3>
+
+                  <p className="text-[#302d55] leading-relaxed mb-6 line-clamp-3">
+                    {featuredPost.content || "Discover the inspiring story behind this movement and how it's changing lives across the nation."}
+                  </p>
+
+                  <div className="flex items-center gap-2 text-[#F43676] font-semibold group-hover:gap-4 transition-all">
+                    <span>Read Full Story</span>
+                    <FaArrowRight className="group-hover:translate-x-1 transition-transform" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Link>
+        </div>
+
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Main Content */}
+          <div className="lg:w-2/3">
+            {/* Section Header */}
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-2">
+                <h2 className="text-2xl font-bold text-[#002050]">Latest Articles</h2>
+                <span className="w-2 h-2 bg-[#F43676] rounded-full"></span>
+              </div>
+              <span className="text-sm text-[#302d55]">
+                {filteredPosts.length} articles found
+              </span>
+            </div>
+
+            {/* Blog Posts Grid */}
+            {currentPosts.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                {currentPosts.map((post, index) => (
+                  <Link
+                    key={index}
+                    href={post.link || '#'}
+                    className="group"
+                  >
+                    <article className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 h-full flex flex-col">
+                      {/* Image */}
+                      <div className="relative overflow-hidden">
+                        <div className="aspect-[16/10]">
+                          <Image
+                            src={post.image}
+                            alt={post.title}
+                            fill
+                            className="object-cover group-hover:scale-110 transition-transform duration-500"
+                          />
+                        </div>
+                        {/* Date badge */}
+                        <div className="absolute bottom-4 left-4 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-full text-xs font-medium text-[#002050] shadow-md">
+                          {post.date}
+                        </div>
+                      </div>
+
+                      {/* Content */}
+                      <div className="p-6 flex-1 flex flex-col">
+                        <div className="flex items-center gap-2 text-sm text-[#F43676] font-medium mb-3">
+                          <FaUser className="text-xs" />
+                          <span>{post.author}</span>
+                        </div>
+
+                        <h3 className="text-lg font-bold text-[#002050] mb-3 leading-tight group-hover:text-[#F43676] transition-colors line-clamp-2 flex-1">
+                          {post.title}
+                        </h3>
+
+                        {post.content && (
+                          <p className="text-[#302d55] text-sm leading-relaxed mb-4 line-clamp-2">
+                            {post.content}
+                          </p>
+                        )}
+
+                        <div className="flex items-center gap-2 text-[#F43676] text-sm font-semibold mt-auto">
+                          <span>Read more</span>
+                          <FaArrowRight className="text-xs group-hover:translate-x-1 transition-transform" />
+                        </div>
+                      </div>
+                    </article>
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              <div className="bg-white rounded-3xl p-10 text-center shadow-sm">
+                <div className="text-6xl mb-4">📝</div>
+                <h3 className="text-xl font-bold text-[#002050] mb-2">No articles found</h3>
+                <p className="text-[#302d55]">
+                  Try a different search term or browse all articles.
+                </p>
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="mt-4 px-6 py-2 bg-[#F43676] text-white rounded-full font-medium hover:bg-[#e02a60] transition-colors"
+                >
+                  Clear Search
+                </button>
+              </div>
+            )}
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center gap-2 mt-8">
+                <button
+                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                  className={`w-10 h-10 rounded-full flex items-center justify-center border transition-colors ${currentPage === 1
+                      ? 'bg-gray-100 text-gray-300 cursor-not-allowed border-gray-100'
+                      : 'bg-white text-gray-600 hover:bg-gray-100 border-gray-200'
+                    }`}
+                >
+                  <FaChevronLeft className="text-sm" />
+                </button>
+
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                  <button
+                    key={page}
+                    onClick={() => setCurrentPage(page)}
+                    className={`w-10 h-10 rounded-full font-medium flex items-center justify-center transition-colors ${page === currentPage
+                        ? 'bg-[#F43676] text-white'
+                        : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
+                      }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+
+                <button
+                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                  disabled={currentPage === totalPages}
+                  className={`w-10 h-10 rounded-full flex items-center justify-center border transition-colors ${currentPage === totalPages
+                      ? 'bg-gray-100 text-gray-300 cursor-not-allowed border-gray-100'
+                      : 'bg-white text-gray-600 hover:bg-gray-100 border-gray-200'
+                    }`}
+                >
+                  <FaChevronRight className="text-sm" />
+                </button>
+              </div>
+            )}
+
+            {/* Results info */}
+            {filteredPosts.length > 0 && (
+              <p className="text-center text-gray-500 text-sm mt-4">
+                Showing {startIndex + 1} - {Math.min(startIndex + postsPerPage, filteredPosts.length)} of {filteredPosts.length} articles
+              </p>
+            )}
+          </div>
+
+          {/* Sidebar */}
+          <div className="lg:w-1/3 space-y-6">
+            {/* Search Box */}
+            <div className="bg-white rounded-3xl p-6 shadow-sm">
+              <div className="flex items-center gap-2 mb-4">
+                <h3 className="text-xl font-bold text-[#002050]">Search</h3>
+                <span className="w-2 h-2 bg-[#F43676] rounded-full"></span>
+              </div>
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search articles..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-4 pr-12 py-3 border border-gray-200 rounded-xl outline-none focus:border-[#F43676] focus:ring-2 focus:ring-[#F43676]/20 transition-all"
+                />
+                <FaSearch className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400" />
+              </div>
+            </div>
+
+            {/* About Blog */}
+            <div className="bg-gradient-to-br from-[#002050] to-[#1a3a6e] rounded-3xl p-6 shadow-sm text-white relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-[#F43676]/20 rounded-full -translate-y-16 translate-x-16 blur-2xl"></div>
+              <div className="relative z-10">
+                <div className="flex items-center gap-2 mb-4">
+                  <h3 className="text-xl font-bold">About Our Blog</h3>
+                  <span className="w-2 h-2 bg-[#F43676] rounded-full"></span>
+                </div>
+                <p className="text-white/80 leading-relaxed mb-4">
+                  Welcome to the Sosign Blog! Here we share inspiring stories, updates on successful petitions, and tips on how you can make a difference in your community.
+                </p>
+                <Link
+                  href="/start-petition"
+                  className="inline-flex items-center gap-2 bg-[#F43676] text-white px-5 py-2.5 rounded-full font-medium hover:bg-[#e02a60] transition-colors"
+                >
+                  <span>Start a Petition</span>
+                  <FaArrowRight className="text-sm" />
                 </Link>
-              </li>
-            ))}
-          </ul>
+              </div>
+            </div>
+
+            {/* Recent Posts */}
+            <div className="bg-white rounded-3xl p-6 shadow-sm">
+              <div className="flex items-center gap-2 mb-4">
+                <h3 className="text-xl font-bold text-[#002050]">Recent Posts</h3>
+                <span className="w-2 h-2 bg-[#F43676] rounded-full"></span>
+              </div>
+              <ul className="space-y-4">
+                {posts.slice(0, 5).map((post, index) => (
+                  <li key={index} className="group">
+                    <Link
+                      href={post.link || '#'}
+                      className="flex items-start gap-3 p-2 rounded-xl hover:bg-pink-50 transition-colors"
+                    >
+                      <div className="relative w-16 h-16 rounded-xl overflow-hidden flex-shrink-0">
+                        <Image
+                          src={post.image}
+                          alt={post.title}
+                          fill
+                          className="object-cover group-hover:scale-110 transition-transform duration-300"
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-sm font-semibold text-[#002050] line-clamp-2 group-hover:text-[#F43676] transition-colors leading-tight">
+                          {post.title}
+                        </h4>
+                        <p className="text-xs text-gray-500 mt-1">{post.date}</p>
+                      </div>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Authors */}
+            <div className="bg-white rounded-3xl p-6 shadow-sm">
+              <div className="flex items-center gap-2 mb-4">
+                <h3 className="text-xl font-bold text-[#002050]">Contributors</h3>
+                <span className="w-2 h-2 bg-[#F43676] rounded-full"></span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {uniqueAuthors.map((author, index) => (
+                  <span
+                    key={index}
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-pink-50 to-purple-50 text-[#302d55] rounded-full text-sm font-medium border border-pink-100 hover:border-[#F43676] hover:text-[#F43676] transition-colors cursor-pointer"
+                  >
+                    <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#F43676] to-purple-500 flex items-center justify-center text-white text-xs font-bold">
+                      {author.charAt(0)}
+                    </div>
+                    {author}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Tags/Topics */}
+            <div className="bg-white rounded-3xl p-6 shadow-sm">
+              <div className="flex items-center gap-2 mb-4">
+                <FaTags className="text-[#F43676]" />
+                <h3 className="text-xl font-bold text-[#002050]">Popular Topics</h3>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {['Change', 'Inspiration', 'Stories', 'Community', 'Action', 'Hope', 'Voice', 'Impact'].map((tag, index) => (
+                  <span
+                    key={index}
+                    className="px-4 py-2 bg-gray-100 text-[#302d55] rounded-full text-sm font-medium hover:bg-[#F43676] hover:text-white transition-colors cursor-pointer"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Newsletter CTA */}
+            <div className="bg-gradient-to-br from-[#F43676] to-[#e02a60] rounded-3xl p-6 shadow-lg text-white relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -translate-y-12 translate-x-12"></div>
+              <div className="absolute bottom-0 left-0 w-16 h-16 bg-white/10 rounded-full translate-y-8 -translate-x-8"></div>
+              <div className="relative z-10">
+                <h3 className="text-xl font-bold mb-2">Stay Updated!</h3>
+                <p className="text-white/90 text-sm mb-4">
+                  Get the latest stories and updates delivered straight to your inbox.
+                </p>
+                <Link
+                  href="/signup"
+                  className="inline-block w-full text-center bg-white text-[#F43676] px-5 py-3 rounded-xl font-semibold hover:bg-gray-100 transition-colors"
+                >
+                  Join Our Community
+                </Link>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 }

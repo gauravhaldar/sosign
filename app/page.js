@@ -9,6 +9,7 @@ import Video from "@/components/Video";
 import FeaturedTopic from "@/components/FeaturedTopic";
 import Content from "@/components/Content";
 import YouHave from "@/components/YouHave";
+import SuccessStories from "@/components/SuccessStories";
 import Footer from "@/components/Footer";
 
 export default function Home() {
@@ -23,6 +24,7 @@ export default function Home() {
       {/* <FeaturedTopic /> */}
       <Content />
       <YouHave />
+      <SuccessStories />
       <Footer />
     </>
   );
