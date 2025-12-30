@@ -32,12 +32,16 @@ export default function PetitionDetailPage() {
     canRequest: true,
     canDownload: false,
     loading: true,
+    requestedFields: [],
+    approvedFields: [],
   });
   const [showDownloadModal, setShowDownloadModal] = useState(false);
   const [downloadReason, setDownloadReason] = useState("");
   const [downloadLoading, setDownloadLoading] = useState(false);
   const [downloadError, setDownloadError] = useState(null);
   const [downloadSuccess, setDownloadSuccess] = useState(false);
+  const [requestedFields, setRequestedFields] = useState([]);
+  const [availableFields, setAvailableFields] = useState([]);
 
   const { user, loading: authLoading } = useAuth();
   const searchParams = useSearchParams();
@@ -143,7 +147,17 @@ export default function PetitionDetailPage() {
             canRequest: data.canRequest,
             canDownload: data.canDownload,
             loading: false,
+            requestedFields: data.requestedFields || [],
+            approvedFields: data.approvedFields || [],
           });
+          // Set available fields for the checkbox UI
+          if (data.availableFields) {
+            setAvailableFields(data.availableFields);
+            // Pre-select all fields by default if user hasn't made a request yet
+            if (!data.hasRequest || data.canRequest) {
+              setRequestedFields(data.availableFields);
+            }
+          }
         } else {
           setDownloadStatus((prev) => ({ ...prev, loading: false }));
         }
@@ -168,6 +182,11 @@ export default function PetitionDetailPage() {
       return;
     }
 
+    if (requestedFields.length === 0) {
+      setDownloadError("Please select at least one data field to request.");
+      return;
+    }
+
     try {
       setDownloadLoading(true);
       setDownloadError(null);
@@ -182,6 +201,7 @@ export default function PetitionDetailPage() {
         body: JSON.stringify({
           petitionId: petition._id,
           reason: downloadReason.trim(),
+          requestedFields: requestedFields,
         }),
       });
 
@@ -198,6 +218,8 @@ export default function PetitionDetailPage() {
         canRequest: false,
         canDownload: false,
         loading: false,
+        requestedFields: requestedFields,
+        approvedFields: [],
       });
       setShowDownloadModal(false);
       setDownloadReason("");
@@ -711,6 +733,31 @@ export default function PetitionDetailPage() {
               <div className="bg-green-50 border border-green-200 p-4 rounded-lg">
                 <p className="text-green-800 font-medium">✓ Your download request has been approved!</p>
                 <p className="text-green-600 text-sm">You can now download the petition data.</p>
+                {downloadStatus.approvedFields && downloadStatus.approvedFields.length > 0 && (
+                  <div className="mt-3">
+                    <p className="text-green-700 text-xs font-medium mb-1">Approved data fields:</p>
+                    <div className="flex flex-wrap gap-1">
+                      {downloadStatus.approvedFields.map((field) => {
+                        const fieldLabels = {
+                          petitionDetails: "Petition Details",
+                          petitionStarter: "Petition Starter",
+                          decisionMakers: "Decision Makers",
+                          statistics: "Statistics",
+                          signatures: "Signatures List",
+                          comments: "Comments List",
+                        };
+                        return (
+                          <span
+                            key={field}
+                            className="px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded"
+                          >
+                            {fieldLabels[field] || field}
+                          </span>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </div>
               <button
                 onClick={handleDownloadPetition}
@@ -751,7 +798,7 @@ export default function PetitionDetailPage() {
         {/* Download Request Modal */}
         {showDownloadModal && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl w-full max-w-md shadow-xl">
+            <div className="bg-white rounded-2xl w-full max-w-md shadow-xl max-h-[90vh] overflow-y-auto">
               <div className="p-6 border-b border-gray-100">
                 <h3 className="text-xl font-bold text-[#1a1a2e]">Request Download Permission</h3>
                 <p className="text-gray-500 text-sm mt-1">
@@ -763,6 +810,63 @@ export default function PetitionDetailPage() {
                 <div className="bg-gray-50 rounded-lg p-4">
                   <p className="text-sm text-gray-500">Petition</p>
                   <p className="font-medium text-[#1a1a2e]">{petition.title}</p>
+                </div>
+
+                {/* Data Fields Selection */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Select data you need <span className="text-red-500">*</span>
+                  </label>
+                  <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+                    {/* Select All */}
+                    <label className="flex items-center gap-2 cursor-pointer pb-2 border-b border-gray-200">
+                      <input
+                        type="checkbox"
+                        checked={requestedFields.length === availableFields.length}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setRequestedFields(availableFields);
+                          } else {
+                            setRequestedFields([]);
+                          }
+                        }}
+                        className="w-4 h-4 text-[#3650AD] border-gray-300 rounded focus:ring-[#3650AD]"
+                      />
+                      <span className="text-sm font-medium text-gray-700">Select All</span>
+                    </label>
+
+                    {/* Individual Fields */}
+                    {availableFields.map((field) => {
+                      const fieldLabels = {
+                        petitionDetails: "Petition Details (title, problem, solution, country, categories)",
+                        petitionStarter: "Petition Starter Info (name, location)",
+                        decisionMakers: "Decision Makers List",
+                        statistics: "Statistics (signature count, comment count)",
+                        signatures: "Full Signatures List (names, emails, dates)",
+                        comments: "Full Comments List (user info, comments)",
+                      };
+                      return (
+                        <label key={field} className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={requestedFields.includes(field)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setRequestedFields([...requestedFields, field]);
+                              } else {
+                                setRequestedFields(requestedFields.filter(f => f !== field));
+                              }
+                            }}
+                            className="w-4 h-4 text-[#3650AD] border-gray-300 rounded focus:ring-[#3650AD]"
+                          />
+                          <span className="text-sm text-gray-600">{fieldLabels[field] || field}</span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                  <p className="text-xs text-gray-400 mt-1">
+                    {requestedFields.length}/{availableFields.length} fields selected
+                  </p>
                 </div>
 
                 <div>
@@ -798,7 +902,7 @@ export default function PetitionDetailPage() {
                 </button>
                 <button
                   onClick={handleRequestDownload}
-                  disabled={downloadLoading || !downloadReason.trim()}
+                  disabled={downloadLoading || !downloadReason.trim() || requestedFields.length === 0}
                   className="px-4 py-2 bg-[#3650AD] text-white rounded-lg font-medium hover:bg-[#2a3f8a] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {downloadLoading ? "Submitting..." : "Submit Request"}
