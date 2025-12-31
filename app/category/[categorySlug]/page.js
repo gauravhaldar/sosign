@@ -447,7 +447,7 @@ export default function CategoryPage() {
                                                 ))}
                                             </ul>
                                         ) : (
-                                            <p className="text-gray-500 text-sm">You haven't made any comments yet.</p>
+                                            <p className="text-gray-500 text-sm">You haven&apos;t made any comments yet.</p>
                                         )
                                     ) : (
                                         <p className="text-gray-500 text-sm">

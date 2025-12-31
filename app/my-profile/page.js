@@ -189,7 +189,7 @@ const MyProfilePage = () => {
                       </button>
                     </div>
                     <p className="text-sm text-gray-500 mt-3 text-center">
-                      Share this code with others. When they sign petitions using your code, you'll be credited!
+                      Share this code with others. When they sign petitions using your code, you&apos;ll be credited!
                     </p>
                   </div>
                 )}

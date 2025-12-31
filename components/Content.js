@@ -561,7 +561,7 @@ export default function Content() {
                           type="submit"
                           className="w-full px-4 py-2 text-center text-sm text-[#F43676] hover:bg-pink-50 font-medium transition-colors"
                         >
-                          See all results for "{searchQuery}"
+                          See all results for &quot;{searchQuery}&quot;
                         </button>
                       )}
                     </div>
