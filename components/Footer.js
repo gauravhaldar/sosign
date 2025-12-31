@@ -23,7 +23,7 @@ export default function Footer() {
   useEffect(() => {
     const fetchLatestPetitions = async () => {
       try {
-        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
+        const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
         const response = await fetch(`${backendUrl}/api/petitions?limit=3&sort=newest`);
 
         if (response.ok) {

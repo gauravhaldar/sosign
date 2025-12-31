@@ -5,7 +5,7 @@ export async function GET(request, { params }) {
         const { petitionId } = await params;
         const authHeader = request.headers.get("authorization");
 
-        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
+        const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
         const response = await fetch(
             `${backendUrl}/api/download-requests/check/${petitionId}`,
