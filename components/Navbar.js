@@ -226,7 +226,7 @@ export default function Navbar() {
               </a>
               {/* YouTube */}
               <a
-                href="https://youtube.com"
+                href="https://www.youtube.com/@sosign-in"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="group w-9 h-9 rounded-full border border-gray-200 bg-white flex items-center justify-center"

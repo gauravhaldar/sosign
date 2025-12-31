@@ -101,7 +101,7 @@ export default function Footer() {
               <FaLinkedinIn /> LinkedIn
             </a>
             <a
-              href="https://youtube.com"
+              href="https://www.youtube.com/@sosign-in"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2 px-4 py-2 bg-[#FF0000] rounded-lg text-sm font-medium hover:opacity-90 transition-opacity"
