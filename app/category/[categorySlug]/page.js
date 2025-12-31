@@ -144,7 +144,7 @@ export default function CategoryPage() {
         const fetchPetitions = async () => {
             setLoading(true);
             try {
-                const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
+                const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
                 // Convert slug back to category format (e.g., human_rights -> human rights)
                 const category = categorySlug?.replace(/_/g, ' ');
                 const response = await fetch(`${backendUrl}/api/petitions?category=${encodeURIComponent(category)}${searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : ""}`);
@@ -178,7 +178,7 @@ export default function CategoryPage() {
     useEffect(() => {
         const fetchRecentPetitions = async () => {
             try {
-                const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
+                const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
                 const response = await fetch(`${backendUrl}/api/petitions?limit=5`);
 
                 if (response.ok) {
@@ -205,7 +205,7 @@ export default function CategoryPage() {
             }
 
             try {
-                const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
+                const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
                 const userInfo = JSON.parse(localStorage.getItem("user"));
 
                 if (!userInfo || !userInfo.token) {

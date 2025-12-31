@@ -11,7 +11,7 @@ export default function SuccessStories() {
     useEffect(() => {
         const fetchSuccessfulPetitions = async () => {
             try {
-                const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
+                const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
                 // Fetch successful petitions sorted by most signatures
                 const response = await fetch(`${backendUrl}/api/successful-petitions?sort=signatures&limit=4`);
 

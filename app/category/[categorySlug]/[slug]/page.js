@@ -151,7 +151,7 @@ export default function CategoryPostPage() {
     useEffect(() => {
         const fetchRecentPetitions = async () => {
             try {
-                const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
+                const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
                 const response = await fetch(`${backendUrl}/api/petitions?limit=5`);
 
                 if (response.ok) {
@@ -178,7 +178,7 @@ export default function CategoryPostPage() {
             }
 
             try {
-                const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
+                const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
                 const userInfo = JSON.parse(localStorage.getItem("user"));
 
                 if (!userInfo || !userInfo.token) {

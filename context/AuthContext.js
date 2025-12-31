@@ -111,7 +111,7 @@ export const AuthProvider = ({ children }) => {
         throw new Error('Not authenticated');
       }
 
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000';
+      const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
       const response = await axios.put(`${backendUrl}/api/users/profile`, formData, {
         headers: {
           'Authorization': `Bearer ${storedUser.token}`,

@@ -87,7 +87,7 @@ export default function Content() {
       setLoading(true);
       setError(null);
       try {
-        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
+        const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
         const response = await fetch(
           `${backendUrl}/api/petitions?page=${currentPage}&limit=${ITEMS_PER_PAGE}${searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : ""}`
         );
@@ -132,7 +132,7 @@ export default function Content() {
       }
 
       try {
-        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
+        const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
         const userInfo = JSON.parse(localStorage.getItem("user"));
 
         if (!userInfo || !userInfo.token) {
@@ -169,7 +169,7 @@ export default function Content() {
     const fetchAds = async () => {
       setAdsLoading(true);
       try {
-        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+        const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
         const response = await fetch(`${backendUrl}/api/ads/active?position=sidebar`);
 
         if (response.ok) {
@@ -207,7 +207,7 @@ export default function Content() {
 
       setSuggestionsLoading(true);
       try {
-        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
+        const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
         const response = await fetch(
           `${backendUrl}/api/petitions?search=${encodeURIComponent(searchQuery)}&limit=5`
         );
@@ -834,7 +834,7 @@ export default function Content() {
                         className="block group"
                         onClick={async () => {
                           try {
-                            const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+                            const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
                             await fetch(`${backendUrl}/api/ads/${ad._id}/click`, { method: "POST" });
                           } catch (err) {
                             console.error("Error tracking click:", err);
