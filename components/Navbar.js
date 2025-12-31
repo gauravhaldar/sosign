@@ -170,7 +170,7 @@ export default function Navbar() {
             <div className="hidden md:flex items-center gap-3">
               {/* Facebook */}
               <a
-                href="https://facebook.com"
+                href="https://www.facebook.com/sosign.in/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="group w-9 h-9 rounded-full border border-gray-200 bg-white flex items-center justify-center"

@@ -69,7 +69,7 @@ export default function Footer() {
           {/* Social Media Buttons */}
           <div className="flex flex-wrap gap-2">
             <a
-              href="https://facebook.com"
+              href="https://www.facebook.com/sosign.in/"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2 px-4 py-2 bg-[#3b5998] rounded-lg text-sm font-medium hover:opacity-90 transition-opacity"
