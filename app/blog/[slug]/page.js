@@ -3,142 +3,139 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { FaChevronRight, FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn, FaYoutube, FaPinterestP, FaSearch } from "react-icons/fa";
-import Navbar from "@/components/Navbar";
+import Image from "next/image";
+import { FaChevronRight, FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn, FaYoutube, FaPinterestP, FaSearch, FaSpinner, FaCalendarAlt, FaUser, FaBookOpen, FaArrowLeft } from "react-icons/fa";
 import Footer from "@/components/Footer";
-
-// Sample blog posts data
-const blogPosts = [
-  {
-    id: 1,
-    slug: "discovering-hidden-mysteries-petra",
-    title: "Discovering the Hidden Mysteries of Petra",
-    categories: ["Animals", "Lifestyle"],
-    author: "nikkuramani",
-    date: "February 26, 2024",
-    image: "https://picsum.photos/seed/blog1/1200/700",
-    content: `Its some of the time her conduct are placated. Do tuning in am enthusiasm gracious complaint collected. Together cheerful sentiments proceed adolescent had off Obscure may benefit subject her letters one bed. Child a long time clamor yen in forty. Uproarious in this in both hold. My entrance me is transfer lone ranger keep in mind connection.
-
-## 1 - Choose a sustainable travel destination
-
-Goodness acknowledgment flats up sympathize dumbfounded delightful. Holding up him unused enduring towards. Proceeding despairing particularly so to. Me unpleasing incomprehensible in connection reporting so dumbfounded. What inquire leaf may nor upon entryway. Tended stay my do stairs. Goodness grinning genial am so gone by sincere in workplaces hearted.
-
-Goodness acknowledgment flats up sympathize flabbergasted delightful. Holding up him modern enduring towards. Proceeding despairing particularly so to. Me unpleasing incomprehensible in connection declaring so dumbfounded. What inquire leaf may nor upon entryway. Tended stay my do stairs. Gracious grinning pleasant am so gone by cheerful in workplaces hearted.`,
-    galleryImages: [
-      "https://picsum.photos/seed/gallery1/800/500",
-      "https://picsum.photos/seed/gallery2/800/500",
-    ],
-    quote: {
-      text: "Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem.",
-      author: "John Doe"
-    },
-    tags: ["Animal", "Fashion", "Food", "Health", "Music", "Politics", "Race", "Sports", "Tech", "Technology", "Travel", "Western Foods"],
-  },
-  {
-    id: 2,
-    slug: "top-luxury-ideas-high-end-home",
-    title: "Top Luxury Ideas for High-End Home Exterior Decor",
-    categories: ["Interior", "Lifestyle"],
-    author: "nikkuramani",
-    date: "February 26, 2024",
-    image: "https://picsum.photos/seed/blog2/1200/700",
-    content: `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.`,
-    galleryImages: [],
-    quote: null,
-    tags: ["Interior", "Lifestyle", "Home"],
-  },
-  {
-    id: 3,
-    slug: "leading-state-art-design-history",
-    title: "Leading state of the art design history",
-    categories: ["Interior", "Lifestyle"],
-    author: "nikkuramani",
-    date: "February 23, 2024",
-    image: "https://picsum.photos/seed/blog3/1200/700",
-    content: `The world of advanced outline has come a long way, with a wealthy history that has changed the...`,
-    galleryImages: [],
-    quote: null,
-    tags: ["Design", "History", "Art"],
-  },
-];
-
-// Recent posts will be fetched from API
 
 // Categories
 const categories = [
-  "Animals",
-  "Game",
-  "Interior",
-  "Lifestyle",
-  "Sports",
-  "Technology",
-  "Travel",
+  "General",
+  "Change",
+  "Inspiration",
+  "Stories",
+  "Community",
+  "Action",
+  "Impact",
 ];
 
 // Tags
 const tags = [
-  "Animal",
-  "Fashion",
-  "Food",
-  "Health",
-  "Music",
-  "Politics",
-  "Race",
-  "Sports",
-  "Tech",
-  "Technology",
-  "Travel",
+  "Change",
+  "Inspiration",
+  "Stories",
+  "Community",
+  "Action",
+  "Hope",
+  "Voice",
+  "Impact",
 ];
 
 export default function BlogDetailPage() {
   const params = useParams();
+  const [blog, setBlog] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [recentBlogs, setRecentBlogs] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [comment, setComment] = useState("");
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [website, setWebsite] = useState("");
-  const [saveInfo, setSaveInfo] = useState(false);
-  const [recentPetitions, setRecentPetitions] = useState([]);
 
-  // Find the current post
-  const post = blogPosts.find(p => p.slug === params.slug) || blogPosts[0];
-
-  // Find previous and next posts
-  const currentIndex = blogPosts.findIndex(p => p.slug === params.slug);
-  const prevPost = currentIndex > 0 ? blogPosts[currentIndex - 1] : null;
-  const nextPost = currentIndex < blogPosts.length - 1 ? blogPosts[currentIndex + 1] : null;
-
-  const handleSubmitComment = (e) => {
-    e.preventDefault();
-    // Handle comment submission
-    console.log({ comment, name, email, website, saveInfo });
-  };
-
-  // Fetch recent petitions for sidebar
+  // Fetch blog by slug
   useEffect(() => {
-    const fetchRecentPetitions = async () => {
+    const fetchBlog = async () => {
+      setLoading(true);
       try {
         const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-        const response = await fetch(`${backendUrl}/api/petitions?limit=5`);
+        const res = await fetch(`${backendUrl}/api/blogs/${params.slug}`);
 
-        if (response.ok) {
-          const data = await response.json();
-          setRecentPetitions(data.petitions || []);
-        } else {
-          setRecentPetitions([]);
+        if (!res.ok) {
+          if (res.status === 404) {
+            throw new Error("Blog not found");
+          }
+          throw new Error("Failed to fetch blog");
         }
+
+        const data = await res.json();
+        setBlog(data);
       } catch (err) {
-        console.error("Error fetching recent petitions:", err);
-        setRecentPetitions([]);
+        console.error("Error fetching blog:", err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchRecentPetitions();
+    if (params.slug) {
+      fetchBlog();
+    }
+  }, [params.slug]);
+
+  // Fetch recent blogs for sidebar
+  useEffect(() => {
+    const fetchRecentBlogs = async () => {
+      try {
+        const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+        const res = await fetch(`${backendUrl}/api/blogs?limit=5`);
+
+        if (res.ok) {
+          const data = await res.json();
+          setRecentBlogs(data.blogs || []);
+        }
+      } catch (err) {
+        console.error("Error fetching recent blogs:", err);
+      }
+    };
+
+    fetchRecentBlogs();
   }, []);
+
+  // Format date
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  };
+
+  if (loading) {
+    return (
+      <>
+        <main className="bg-[#f0f2f5] min-h-screen py-12 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-7xl mx-auto flex items-center justify-center py-20">
+            <FaSpinner className="animate-spin text-4xl text-[#F43676]" />
+            <span className="ml-3 text-lg text-gray-600">Loading blog...</span>
+          </div>
+        </main>
+        <Footer />
+      </>
+    );
+  }
+
+  if (error || !blog) {
+    return (
+      <>
+        <main className="bg-[#f0f2f5] min-h-screen py-12 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-7xl mx-auto">
+            <div className="bg-white rounded-3xl p-10 text-center shadow-sm">
+              <div className="text-6xl mb-4">📝</div>
+              <h3 className="text-xl font-bold text-[#002050] mb-2">Blog Not Found</h3>
+              <p className="text-[#302d55] mb-6">{error || "The blog you're looking for doesn't exist."}</p>
+              <Link
+                href="/blog"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-[#F43676] text-white rounded-full font-medium hover:bg-[#e02a60] transition-colors"
+              >
+                <FaArrowLeft className="text-sm" />
+                Back to Blog
+              </Link>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </>
+    );
+  }
 
   return (
     <>
-      {/* <Navbar /> */}
       <main className="bg-[#f0f2f5] min-h-screen">
         {/* Breadcrumb */}
         <div className="bg-pink-100 border-x border-b border-pink-200 py-4 px-4 sm:px-6 lg:px-8">
@@ -148,11 +145,11 @@ export default function BlogDetailPage() {
                 Home
               </Link>
               <FaChevronRight className="text-gray-400 text-xs" />
-              <Link href={`/search?category=${post.categories[0]?.toLowerCase()}`} className="text-gray-600 hover:text-[#F43676] transition-colors">
-                {post.categories[0]}
+              <Link href="/blog" className="text-gray-600 hover:text-[#F43676] transition-colors">
+                Blog
               </Link>
               <FaChevronRight className="text-gray-400 text-xs" />
-              <span className="text-[#1a1a2e] font-medium">{post.title}</span>
+              <span className="text-[#002050] font-medium line-clamp-1">{blog.title}</span>
             </nav>
           </div>
         </div>
@@ -164,263 +161,113 @@ export default function BlogDetailPage() {
               {/* Main Content - Left Side */}
               <div className="lg:w-2/3">
                 {/* Featured Image */}
-                <div className="rounded-3xl overflow-hidden mb-8 shadow-lg">
-                  <img
-                    src={post.image}
-                    alt={post.title}
-                    className="w-full h-auto object-cover"
-                  />
+                <div className="rounded-3xl overflow-hidden mb-8 shadow-lg relative aspect-[16/9]">
+                  {blog.image ? (
+                    <Image
+                      src={blog.image}
+                      alt={blog.title}
+                      fill
+                      className="object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-[#F43676] to-[#002050] flex items-center justify-center">
+                      <FaBookOpen className="text-white text-6xl opacity-50" />
+                    </div>
+                  )}
+                </div>
+
+                {/* Article Header */}
+                <div className="mb-8">
+                  {/* Category */}
+                  {blog.category && (
+                    <span className="inline-block px-4 py-1.5 bg-[#F43676] text-white rounded-full text-sm font-medium mb-4">
+                      {blog.category}
+                    </span>
+                  )}
+
+                  <h1 className="text-3xl md:text-4xl font-bold text-[#002050] mb-4 leading-tight">
+                    {blog.title}
+                  </h1>
+
+                  <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500">
+                    <span className="flex items-center gap-2">
+                      <FaCalendarAlt className="text-[#F43676]" />
+                      {formatDate(blog.createdAt)}
+                    </span>
+                    <span className="text-gray-300">|</span>
+                    <span className="flex items-center gap-2">
+                      <FaUser className="text-[#F43676]" />
+                      {blog.author}
+                    </span>
+                  </div>
                 </div>
 
                 {/* Article Content */}
                 <article className="prose prose-lg max-w-none">
-                  <p className="text-gray-600 leading-relaxed mb-8">
-                    Its some of the time her conduct are placated. Do tuning in am enthusiasm gracious complaint collected. Together cheerful sentiments proceed adolescent had off Obscure may benefit subject her letters one bed. Child a long time clamor yen in forty. Uproarious in this in both hold. My entrance me is transfer lone ranger keep in mind connection.
-                  </p>
-
-                  <h2 className="text-2xl font-bold text-[#1a1a2e] mb-4">
-                    1 - Choose a sustainable travel destination
-                  </h2>
-
-                  <p className="text-gray-600 leading-relaxed mb-6">
-                    Goodness acknowledgment flats up sympathize dumbfounded delightful. Holding up him unused enduring towards. Proceeding despairing particularly so to. Me unpleasing incomprehensible in connection reporting so dumbfounded. What inquire leaf may nor upon entryway. Tended stay my do stairs. Goodness grinning genial am so gone by sincere in workplaces hearted.
-                  </p>
-
-                  <p className="text-gray-600 leading-relaxed mb-8">
-                    Goodness acknowledgment flats up sympathize flabbergasted delightful. Holding up him modern enduring towards. Proceeding despairing particularly so to. Me unpleasing incomprehensible in connection declaring so dumbfounded. What inquire leaf may nor upon entryway. Tended stay my do stairs. Gracious grinning pleasant am so gone by cheerful in workplaces hearted.
-                  </p>
-
-                  {/* Image with Caption */}
-                  <div className="mb-8">
-                    <div className="rounded-2xl overflow-hidden">
-                      <img
-                        src="https://picsum.photos/seed/caption1/900/500"
-                        alt="Caption image"
-                        className="w-full h-auto object-cover"
-                      />
-                      <div className="bg-black/60 text-white text-center py-4 -mt-14 relative">
-                        <p className="text-lg font-medium">Caption can be used to add info</p>
-                      </div>
-                    </div>
+                  <div
+                    className="text-gray-600 leading-relaxed whitespace-pre-wrap"
+                    style={{ lineHeight: '1.8' }}
+                  >
+                    {blog.content}
                   </div>
-
-                  <p className="text-gray-600 leading-relaxed mb-8">
-                    One who does not do any work except to get some benefit from it. Do not be angry with pain in scolding. In happiness he wants to become hairy with pain in the hope that reproduction will not occur. Unless they are blinded by lust, they do not move forward; The culprits are those who abandon their duties and soften their hearts, that is, their hard work.
-                  </p>
-
-                  <h2 className="text-2xl font-bold text-[#1a1a2e] mb-4">
-                    2 - Investigation Prior to Reservation
-                  </h2>
-
-                  <p className="text-gray-600 leading-relaxed mb-6">
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-                  </p>
-
-                  {/* Blockquote */}
-                  <div className="border-l-4 border-[#F43676] bg-gray-50 rounded-r-2xl p-6 mb-8 relative">
-                    <p className="text-gray-700 text-lg leading-relaxed mb-4">
-                      Neque porro quisquam est, qui <strong>dolorem ipsum</strong> quia <strong>dolor sit amet</strong>, <strong>consectetur</strong>, <strong>adipisci velit, sed</strong> quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem.
-                    </p>
-                    <p className="text-gray-500 text-sm">— John Doe</p>
-                    <div className="absolute bottom-4 right-6 text-6xl text-gray-200 font-serif">&quot;</div>
-                  </div>
-
-                  <p className="text-gray-600 leading-relaxed mb-8">
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-                  </p>
-
-                  <h2 className="text-2xl font-bold text-[#1a1a2e] mb-4">
-                    3 - Pack light , Simple Economical Travel Tip
-                  </h2>
-
-                  <p className="text-gray-600 leading-relaxed mb-6">
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-                  </p>
-
-                  {/* Two Column Images */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-                    <div className="rounded-2xl overflow-hidden">
-                      <img
-                        src="https://picsum.photos/seed/twocol1/500/400"
-                        alt="Gallery image 1"
-                        className="w-full h-64 object-cover"
-                      />
-                    </div>
-                    <div className="rounded-2xl overflow-hidden">
-                      <img
-                        src="https://picsum.photos/seed/twocol2/500/400"
-                        alt="Gallery image 2"
-                        className="w-full h-64 object-cover"
-                      />
-                    </div>
-                  </div>
-
-                  <p className="text-gray-600 leading-relaxed mb-8">
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-                  </p>
                 </article>
 
                 {/* Post Tags */}
-                <div className="flex flex-wrap gap-2 mt-8 mb-8">
-                  {post.tags?.map((tag, index) => (
-                    <Link
-                      key={index}
-                      href={`/search?tag=${tag.toLowerCase()}`}
-                      className="px-4 py-2 bg-white border border-gray-200 rounded-full text-sm text-gray-600 hover:border-[#F43676] hover:text-[#F43676] transition-colors"
-                    >
-                      {tag}
-                    </Link>
-                  ))}
-                </div>
+                {blog.tags && blog.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-8 mb-8">
+                    {blog.tags.map((tag, index) => (
+                      <span
+                        key={index}
+                        className="px-4 py-2 bg-white border border-gray-200 rounded-full text-sm text-gray-600 hover:border-[#F43676] hover:text-[#F43676] transition-colors cursor-pointer"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
 
                 {/* Author Box */}
                 <div className="bg-white rounded-3xl p-6 mb-8 shadow-sm">
                   <div className="flex items-center gap-4">
-                    <div className="w-16 h-16 rounded-full overflow-hidden flex-shrink-0">
-                      <img
-                        src={`https://ui-avatars.com/api/?name=${post.author}&background=random&size=64`}
-                        alt={post.author}
-                        className="w-full h-full object-cover"
-                      />
+                    <div className="w-16 h-16 rounded-full overflow-hidden flex-shrink-0 bg-gradient-to-br from-[#F43676] to-purple-500 flex items-center justify-center text-white text-2xl font-bold">
+                      {blog.author?.charAt(0).toUpperCase()}
                     </div>
                     <div>
-                      <h4 className="text-xl font-bold text-[#1a1a2e]">{post.author}</h4>
-                      <Link href={`/author/${post.author}`} className="text-gray-500 hover:text-[#F43676] transition-colors text-sm">
-                        View All Posts
-                      </Link>
+                      <h4 className="text-xl font-bold text-[#002050]">{blog.author}</h4>
+                      <p className="text-gray-500 text-sm">Author</p>
                     </div>
                   </div>
                 </div>
 
-                {/* Previous/Next Posts */}
-                <div className="flex flex-col sm:flex-row justify-between gap-6 mb-8">
-                  {prevPost && (
-                    <div className="flex-1">
-                      <p className="text-sm font-semibold text-[#1a1a2e] mb-3">Previous Post</p>
-                      <Link href={`/blog/${prevPost.slug}`} className="flex items-center gap-3 group">
-                        <div className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0">
-                          <img
-                            src={prevPost.image}
-                            alt={prevPost.title}
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform"
-                          />
-                        </div>
-                        <p className="text-gray-600 group-hover:text-[#F43676] transition-colors text-sm leading-snug">
-                          {prevPost.title}
-                        </p>
-                      </Link>
-                    </div>
-                  )}
-                  {nextPost && (
-                    <div className="flex-1 text-right">
-                      <p className="text-sm font-semibold text-[#1a1a2e] mb-3">Next Post</p>
-                      <Link href={`/blog/${nextPost.slug}`} className="flex items-center gap-3 justify-end group">
-                        <p className="text-gray-600 group-hover:text-[#F43676] transition-colors text-sm leading-snug">
-                          {nextPost.title}
-                        </p>
-                        <div className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0">
-                          <img
-                            src={nextPost.image}
-                            alt={nextPost.title}
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform"
-                          />
-                        </div>
-                      </Link>
-                    </div>
-                  )}
-                </div>
-
-                {/* Comments Section */}
-                <div className="bg-white rounded-3xl p-8 shadow-sm">
-                  <h3 className="text-2xl font-bold text-[#1a1a2e] text-center mb-2">Comments</h3>
-                  <p className="text-gray-500 text-center mb-8">No comments yet. Why don&apos;t you start the discussion?</p>
-
-                  <h4 className="text-2xl font-bold text-[#1a1a2e] text-center mb-2">Leave a Reply</h4>
-                  <p className="text-gray-600 text-center mb-6">
-                    Your email address will not be published. Required fields are marked <span className="text-[#F43676]">*</span>
-                  </p>
-
-                  <form onSubmit={handleSubmitComment}>
-                    <div className="mb-6">
-                      <textarea
-                        value={comment}
-                        onChange={(e) => setComment(e.target.value)}
-                        placeholder="Write a comment..."
-                        rows={6}
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl outline-none focus:border-[#F43676] transition-colors resize-y"
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-                      <div>
-                        <label className="block text-sm font-semibold text-[#1a1a2e] mb-2">
-                          Name <span className="text-[#F43676]">*</span>
-                        </label>
-                        <input
-                          type="text"
-                          value={name}
-                          onChange={(e) => setName(e.target.value)}
-                          required
-                          className="w-full px-4 py-3 border border-gray-200 rounded-xl outline-none focus:border-[#F43676] transition-colors"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-semibold text-[#1a1a2e] mb-2">
-                          Email <span className="text-[#F43676]">*</span>
-                        </label>
-                        <input
-                          type="email"
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                          required
-                          className="w-full px-4 py-3 border border-gray-200 rounded-xl outline-none focus:border-[#F43676] transition-colors"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-semibold text-[#1a1a2e] mb-2">
-                          Website
-                        </label>
-                        <input
-                          type="url"
-                          value={website}
-                          onChange={(e) => setWebsite(e.target.value)}
-                          className="w-full px-4 py-3 border border-gray-200 rounded-xl outline-none focus:border-[#F43676] transition-colors"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2 mb-6">
-                      <input
-                        type="checkbox"
-                        id="saveInfo"
-                        checked={saveInfo}
-                        onChange={(e) => setSaveInfo(e.target.checked)}
-                        className="w-5 h-5 rounded border-gray-300 text-[#F43676] focus:ring-[#F43676]"
-                      />
-                      <label htmlFor="saveInfo" className="text-gray-600 text-sm">
-                        Save my name, email, and website in this browser for the next time I comment.
-                      </label>
-                    </div>
-
-                    <button
-                      type="submit"
-                      className="px-8 py-3 bg-[#F43676] text-white font-medium rounded-full hover:bg-[#e02a60] transition-colors"
-                    >
-                      Post Comment
-                    </button>
-                  </form>
+                {/* Back to Blog */}
+                <div className="mb-8">
+                  <Link
+                    href="/blog"
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-[#F43676] text-white rounded-full font-medium hover:bg-[#e02a60] transition-colors"
+                  >
+                    <FaArrowLeft className="text-sm" />
+                    Back to All Blogs
+                  </Link>
                 </div>
               </div>
 
               {/* Sidebar - Right Side */}
               <div className="lg:w-1/3 space-y-6">
                 {/* Search Box */}
-                <div className="bg-white rounded-3xl p-6 shadow-sm">
+                {/* <div className="bg-white rounded-3xl p-6 shadow-sm">
                   <div className="flex items-center gap-2 mb-4">
-                    <h3 className="text-xl font-bold text-[#1a1a2e]">Search</h3>
+                    <h3 className="text-xl font-bold text-[#002050]">Search</h3>
                     <span className="w-2 h-2 bg-[#F43676] rounded-full"></span>
                   </div>
-                  <div className="flex">
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      if (searchQuery.trim()) {
+                        window.location.href = `/blog?search=${encodeURIComponent(searchQuery)}`;
+                      }
+                    }}
+                    className="flex"
+                  >
                     <input
                       type="text"
                       placeholder="Search..."
@@ -428,65 +275,67 @@ export default function BlogDetailPage() {
                       onChange={(e) => setSearchQuery(e.target.value)}
                       className="flex-1 px-4 py-3 border border-gray-200 rounded-l-lg outline-none focus:border-[#F43676] transition-colors"
                     />
-                    <button className="px-5 py-3 bg-[#F43676] text-white rounded-r-lg hover:bg-[#e02a60] transition-colors">
+                    <button
+                      type="submit"
+                      className="px-5 py-3 bg-[#F43676] text-white rounded-r-lg hover:bg-[#e02a60] transition-colors"
+                    >
                       <FaSearch />
                     </button>
-                  </div>
-                </div>
+                  </form>
+                </div> */}
 
-                {/* Recent Petitions */}
-                <div className="bg-white rounded-3xl p-6 shadow-sm">
-                  <div className="flex items-center gap-2 mb-4">
-                    <h3 className="text-xl font-bold text-[#1a1a2e]">Recent Petitions</h3>
-                    <span className="w-2 h-2 bg-[#F43676] rounded-full"></span>
-                  </div>
-                  {recentPetitions.length > 0 ? (
-                    <ul className="space-y-3">
-                      {recentPetitions.map((petition) => (
-                        <li key={petition._id} className="border-b border-gray-100 pb-3 last:border-0 last:pb-0">
+                {/* Recent Blogs */}
+                {recentBlogs.length > 0 && (
+                  <div className="bg-white rounded-3xl p-6 shadow-sm">
+                    <div className="flex items-center gap-2 mb-4">
+                      <h3 className="text-xl font-bold text-[#002050]">Recent Posts</h3>
+                      <span className="w-2 h-2 bg-[#F43676] rounded-full"></span>
+                    </div>
+                    <ul className="space-y-4">
+                      {recentBlogs.map((recentBlog) => (
+                        <li key={recentBlog._id} className="group">
                           <Link
-                            href={`/currentpetitions/${petition._id}`}
-                            className="text-gray-600 hover:text-[#F43676] transition-colors text-sm leading-relaxed block"
+                            href={`/blog/${recentBlog.slug}`}
+                            className="flex items-start gap-3 p-2 rounded-xl hover:bg-pink-50 transition-colors"
                           >
-                            {petition.title}
+                            <div className="relative w-16 h-16 rounded-xl overflow-hidden flex-shrink-0">
+                              {recentBlog.image ? (
+                                <Image
+                                  src={recentBlog.image}
+                                  alt={recentBlog.title}
+                                  fill
+                                  className="object-cover group-hover:scale-110 transition-transform duration-300"
+                                />
+                              ) : (
+                                <div className="w-full h-full bg-gradient-to-br from-[#F43676] to-[#002050] flex items-center justify-center">
+                                  <FaBookOpen className="text-white text-sm opacity-50" />
+                                </div>
+                              )}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h4 className="text-sm font-semibold text-[#002050] line-clamp-2 group-hover:text-[#F43676] transition-colors leading-tight">
+                                {recentBlog.title}
+                              </h4>
+                              <p className="text-xs text-gray-500 mt-1">{formatDate(recentBlog.createdAt)}</p>
+                            </div>
                           </Link>
                         </li>
                       ))}
                     </ul>
-                  ) : (
-                    <p className="text-gray-500 text-sm">No recent petitions available.</p>
-                  )}
-                </div>
-
-                {/* Recent Comments */}
-                <div className="bg-white rounded-3xl p-6 shadow-sm">
-                  <div className="flex items-center gap-2 mb-4">
-                    <h3 className="text-xl font-bold text-[#1a1a2e]">Recent Comments</h3>
-                    <span className="w-2 h-2 bg-[#F43676] rounded-full"></span>
                   </div>
-                  <p className="text-gray-500 text-sm">No comments to show.</p>
-                </div>
-
-                {/* Archives */}
-                <div className="bg-white rounded-3xl p-6 shadow-sm">
-                  <div className="flex items-center gap-2 mb-4">
-                    <h3 className="text-xl font-bold text-[#1a1a2e]">Archives</h3>
-                    <span className="w-2 h-2 bg-[#F43676] rounded-full"></span>
-                  </div>
-                  <p className="text-gray-600">February 2024</p>
-                </div>
+                )}
 
                 {/* Categories */}
                 <div className="bg-white rounded-3xl p-6 shadow-sm">
                   <div className="flex items-center gap-2 mb-4">
-                    <h3 className="text-xl font-bold text-[#1a1a2e]">Categories</h3>
+                    <h3 className="text-xl font-bold text-[#002050]">Categories</h3>
                     <span className="w-2 h-2 bg-[#F43676] rounded-full"></span>
                   </div>
                   <ul className="space-y-3">
                     {categories.map((category, index) => (
                       <li key={index} className="border-b border-gray-100 pb-2 last:border-0 last:pb-0">
                         <Link
-                          href={`/search?category=${category.toLowerCase()}`}
+                          href={`/blog?category=${category.toLowerCase()}`}
                           className="text-gray-600 hover:text-[#F43676] transition-colors"
                         >
                           {category}
@@ -498,19 +347,15 @@ export default function BlogDetailPage() {
 
                 {/* Author Card */}
                 <div className="bg-white rounded-3xl p-6 shadow-sm text-center">
-                  <div className="w-24 h-24 rounded-full overflow-hidden mx-auto mb-4 border-4 border-gray-100">
-                    <img
-                      src="https://picsum.photos/seed/author/200/200"
-                      alt="John Doe"
-                      className="w-full h-full object-cover"
-                    />
+                  <div className="w-24 h-24 rounded-full overflow-hidden mx-auto mb-4 border-4 border-gray-100 bg-gradient-to-br from-[#F43676] to-purple-500 flex items-center justify-center text-white text-3xl font-bold">
+                    {blog.author?.charAt(0).toUpperCase()}
                   </div>
-                  <h4 className="text-xl font-bold text-[#1a1a2e] mb-2">John Doe</h4>
+                  <h4 className="text-xl font-bold text-[#002050] mb-2">{blog.author}</h4>
                   <p className="text-gray-500 text-sm leading-relaxed mb-4">
-                    John Doe is a versatile writer with a passion for storytelling. With a background in literature and a love for exploring diverse themes, his words captivate and resonate with readers across genres.
+                    Author of this blog post. Thank you for reading!
                   </p>
                   {/* Social Icons */}
-                  <div className="flex justify-center gap-2">
+                  {/* <div className="flex justify-center gap-2">
                     <a href="#" className="w-10 h-10 rounded-full bg-[#3b5998] text-white flex items-center justify-center hover:opacity-80 transition-opacity">
                       <FaFacebookF className="text-sm" />
                     </a>
@@ -523,53 +368,41 @@ export default function BlogDetailPage() {
                     <a href="#" className="w-10 h-10 rounded-full bg-[#0077b5] text-white flex items-center justify-center hover:opacity-80 transition-opacity">
                       <FaLinkedinIn className="text-sm" />
                     </a>
-                    <a href="#" className="w-10 h-10 rounded-full bg-[#ff0000] text-white flex items-center justify-center hover:opacity-80 transition-opacity">
-                      <FaYoutube className="text-sm" />
-                    </a>
-                    <a href="#" className="w-10 h-10 rounded-full bg-[#bd081c] text-white flex items-center justify-center hover:opacity-80 transition-opacity">
-                      <FaPinterestP className="text-sm" />
-                    </a>
-                  </div>
+                  </div> */}
                 </div>
 
                 {/* Tags */}
                 <div className="bg-white rounded-3xl p-6 shadow-sm">
                   <div className="flex items-center gap-2 mb-4">
-                    <h3 className="text-xl font-bold text-[#1a1a2e]">Tags</h3>
+                    <h3 className="text-xl font-bold text-[#002050]">Tags</h3>
                     <span className="w-2 h-2 bg-[#F43676] rounded-full"></span>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {tags.map((tag, index) => (
-                      <Link
+                      <span
                         key={index}
-                        href={`/search?tag=${tag.toLowerCase()}`}
-                        className="px-4 py-2 bg-white border border-gray-200 rounded-full text-sm text-gray-600 hover:border-[#F43676] hover:text-[#F43676] transition-colors"
+                        className="px-4 py-2 bg-gray-100 text-[#302d55] rounded-full text-sm font-medium hover:bg-[#F43676] hover:text-white transition-colors cursor-pointer"
                       >
                         {tag}
-                      </Link>
+                      </span>
                     ))}
                   </div>
                 </div>
 
-                {/* Ads */}
-                <div className="bg-white rounded-3xl p-6 shadow-sm">
-                  <div className="flex items-center gap-2 mb-4">
-                    <h3 className="text-xl font-bold text-[#1a1a2e]">Ads</h3>
-                    <span className="w-2 h-2 bg-[#F43676] rounded-full"></span>
-                  </div>
-                  <div className="rounded-2xl overflow-hidden relative">
-                    <img
-                      src="https://picsum.photos/seed/ad1/400/500"
-                      alt="Advertisement"
-                      className="w-full h-auto"
-                    />
-                    <div className="absolute top-4 left-4 text-white">
-                      <p className="text-2xl font-bold">SUMMER SALES!</p>
-                      <p className="text-3xl font-bold">20%</p>
-                      <button className="mt-2 px-4 py-1 bg-white text-black text-sm font-medium rounded">
-                        Shop Now
-                      </button>
-                    </div>
+                {/* CTA */}
+                <div className="bg-gradient-to-br from-[#F43676] to-[#e02a60] rounded-3xl p-6 shadow-lg text-white relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -translate-y-12 translate-x-12"></div>
+                  <div className="relative z-10">
+                    <h3 className="text-xl font-bold mb-2">Have a Story?</h3>
+                    <p className="text-white/90 text-sm mb-4">
+                      Start a petition and share your story with the world.
+                    </p>
+                    <Link
+                      href="/start-petition"
+                      className="inline-block w-full text-center bg-white text-[#F43676] px-5 py-3 rounded-xl font-semibold hover:bg-gray-100 transition-colors"
+                    >
+                      Start a Petition
+                    </Link>
                   </div>
                 </div>
               </div>

@@ -134,15 +134,15 @@ export default function Banner() {
     fetchPetitions();
   }, []);
 
-  // Auto-slide functionality
-  useEffect(() => {
-    if (heroSlides.length === 0) return;
+  // Auto-slide functionality - DISABLED
+  // useEffect(() => {
+  //   if (heroSlides.length === 0) return;
 
-    const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
-    }, 5000);
-    return () => clearInterval(interval);
-  }, [heroSlides.length]);
+  //   const interval = setInterval(() => {
+  //     setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
+  //   }, 5000);
+  //   return () => clearInterval(interval);
+  // }, [heroSlides.length]);
 
   const nextSlide = () => {
     if (heroSlides.length === 0) return;
@@ -181,7 +181,7 @@ export default function Banner() {
               display: flex;
               gap: 2rem;
               width: max-content;
-              animation: ticker-scroll 30s linear infinite;
+              animation: ticker-scroll 60s linear infinite;
             }
             .ticker-track:hover,
             .ticker-track.paused {
@@ -309,12 +309,13 @@ export default function Banner() {
                   {/* Category Tags */}
                   <div className="flex flex-wrap gap-2 sm:gap-3 mb-4 sm:mb-5">
                     {heroSlides[currentSlide]?.categories?.map((category, index) => (
-                      <span
+                      <Link
                         key={index}
-                        className="px-3 sm:px-4 py-1 sm:py-1.5 bg-[#F43676]/10 text-[#F43676] rounded-full text-xs sm:text-sm font-medium hover:bg-[#F43676]/20 transition-colors cursor-pointer"
+                        href={`/category/${category.toLowerCase()}`}
+                        className="px-3 sm:px-4 py-1 sm:py-1.5 bg-[#F43676]/10 text-[#F43676] rounded-full text-xs sm:text-sm font-medium hover:bg-[#F43676] hover:text-white transition-all cursor-pointer"
                       >
                         {category}
-                      </span>
+                      </Link>
                     ))}
                   </div>
 
@@ -337,17 +338,20 @@ export default function Banner() {
                     <FaChevronRight className="text-xs group-hover:translate-x-1 transition-transform" />
                   </Link>
 
-                  {/* Date and Signatures */}
+                  {/* Date and Comments */}
                   <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-[#302d55] text-xs sm:text-sm">
                     <span className="flex items-center gap-2">
                       <FaCalendarAlt className="text-[#302d55]" />
                       {heroSlides[currentSlide]?.date}
                     </span>
                     <span className="text-[#F43676] hidden sm:inline">•</span>
-                    <span className="flex items-center gap-2">
+                    <Link
+                      href={`${heroSlides[currentSlide]?.link || "/currentpetitions"}#comments`}
+                      className="flex items-center gap-2 hover:text-[#F43676] transition-colors"
+                    >
                       <FaComment className="text-[#302d55]" />
-                      {heroSlides[currentSlide]?.comments}
-                    </span>
+                      Comments
+                    </Link>
                   </div>
                 </motion.div>
               </AnimatePresence>

@@ -78,6 +78,20 @@ export default function PetitionDetailPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Handle hash navigation to comments section
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.location.hash === "#comments") {
+      // Wait for the page to fully load before scrolling
+      const timer = setTimeout(() => {
+        const commentsElement = document.getElementById("comments");
+        if (commentsElement) {
+          commentsElement.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [petition]); // Trigger when petition data is loaded
+
   // Check signature status when user or petition changes
   useEffect(() => {
     const checkSignatureStatus = async () => {
@@ -914,7 +928,7 @@ export default function PetitionDetailPage() {
 
         {/* Comments Section */}
         {petition && petition._id && (
-          <div className="mt-8 bg-white rounded-2xl shadow-lg p-6">
+          <div id="comments" className="mt-8 bg-white rounded-2xl shadow-lg p-6">
             <CommentsSection petitionId={petition._id} />
           </div>
         )}

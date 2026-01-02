@@ -296,8 +296,8 @@ export default function Content() {
 
   return (
     <>
-      <section className="bg-[#f0f2f5] py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
+      <section className="bg-[#f0f2f5] py-12 px-8 sm:px-10 lg:px-17">
+        <div className="max-w-[1600px] mx-auto">
           <div className="flex flex-col lg:flex-row gap-8">
             {/* Main Content - Left Side */}
             <div className="lg:w-2/3">
@@ -348,7 +348,7 @@ export default function Content() {
                         className="flex flex-col sm:flex-row items-center"
                       >
                         {/* Image - Extended outside */}
-                        <div className="sm:w-2/5 relative sm:-ml-6 my-4 sm:my-6">
+                        <div className="sm:w-2/5 relative sm:-ml-6 my-6 sm:my-8">
                           <div className="aspect-[4/3] rounded-2xl overflow-hidden shadow-lg">
                             <img
                               src={
@@ -379,14 +379,14 @@ export default function Content() {
                         </div>
 
                         {/* Content */}
-                        <div className="sm:w-3/5 p-6">
+                        <div className="sm:w-3/5 p-8">
                           {/* Category Tags - Show ALL categories */}
-                          <div className="flex flex-wrap gap-2 mb-3">
+                          <div className="flex flex-wrap gap-2 mb-4">
                             {petition.categories && petition.categories.length > 0 ? (
                               petition.categories.map((category, idx) => (
                                 <span
                                   key={idx}
-                                  className="px-3 py-1 bg-[#fce4ec] text-[#F43676] rounded-full text-xs font-medium"
+                                  className="px-4 py-1.5 bg-[#fce4ec] text-[#F43676] rounded-full text-sm font-medium"
                                 >
                                   {getCategoryLabel(category)}
                                 </span>
@@ -399,19 +399,19 @@ export default function Content() {
                           </div>
 
                           {/* Title */}
-                          <h3 className="text-xl font-bold text-[#002050] mb-3 leading-tight hover:text-[#F43676] transition-colors">
+                          <h3 className="text-2xl font-bold text-[#002050] mb-4 leading-tight hover:text-[#F43676] transition-colors">
                             {petition.title}
                           </h3>
 
                           {/* Description */}
-                          <p className="text-[#302d55] text-sm mb-4 leading-relaxed line-clamp-2">
-                            {petition.petitionDetails?.problem?.substring(0, 150)}
-                            {petition.petitionDetails?.problem?.length > 150 ? "..." : ""}
+                          <p className="text-[#302d55] text-base mb-5 leading-relaxed line-clamp-3">
+                            {petition.petitionDetails?.problem?.substring(0, 200)}
+                            {petition.petitionDetails?.problem?.length > 200 ? "..." : ""}
                           </p>
 
                           {/* Author Info */}
-                          <div className="flex items-center gap-3 text-sm">
-                            <div className="w-8 h-8 rounded-full overflow-hidden">
+                          <div className="flex items-center gap-3 text-base">
+                            <div className="w-10 h-10 rounded-full overflow-hidden">
                               <img
                                 src={
                                   petition.petitionStarter?.user?.profilePicture ||

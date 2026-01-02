@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { useAuth } from "../context/AuthContext";
@@ -15,7 +16,8 @@ import {
   FaMoon,
   FaChevronDown,
   FaBars,
-  FaTimes
+  FaTimes,
+  FaSpinner
 } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
 
@@ -24,7 +26,13 @@ export default function Navbar() {
   const [campaignDropdown, setCampaignDropdown] = useState(false);
   const [pagesDropdown, setPagesDropdown] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [searchLoading, setSearchLoading] = useState(false);
   const { user, logout } = useAuth();
+  const router = useRouter();
+  const searchRef = useRef(null);
 
   const toggleDropdown = () => {
     setDropdownOpen(!dropdownOpen);
@@ -35,6 +43,80 @@ export default function Navbar() {
     setDropdownOpen(false);
   };
 
+  // Toggle search bar
+  const toggleSearch = () => {
+    setSearchOpen(!searchOpen);
+    if (!searchOpen) {
+      setSearchQuery("");
+      setSearchResults([]);
+    }
+  };
+
+  // Fetch search results with debounce
+  useEffect(() => {
+    const fetchSearchResults = async () => {
+      if (searchQuery.length < 2) {
+        setSearchResults([]);
+        return;
+      }
+
+      setSearchLoading(true);
+      try {
+        const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+        const response = await fetch(
+          `${backendUrl}/api/petitions?search=${encodeURIComponent(searchQuery)}&limit=5`
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          setSearchResults(data.petitions || []);
+        }
+      } catch (err) {
+        console.error("Error fetching search results:", err);
+      } finally {
+        setSearchLoading(false);
+      }
+    };
+
+    const debounceTimer = setTimeout(fetchSearchResults, 300);
+    return () => clearTimeout(debounceTimer);
+  }, [searchQuery]);
+
+  // Close search when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (searchRef.current && !searchRef.current.contains(event.target)) {
+        setSearchOpen(false);
+        setSearchQuery("");
+        setSearchResults([]);
+      }
+    };
+
+    if (searchOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [searchOpen]);
+
+  // Handle search result click
+  const handleResultClick = (petitionId) => {
+    setSearchOpen(false);
+    setSearchQuery("");
+    setSearchResults([]);
+    router.push(`/currentpetitions/${petitionId}`);
+  };
+
+  // Handle search submit
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      setSearchOpen(false);
+      router.push(`/currentpetitions?search=${encodeURIComponent(searchQuery)}`);
+      setSearchQuery("");
+      setSearchResults([]);
+    }
+  };
+
   return (
     <motion.nav
       initial={{ y: -80, opacity: 0 }}
@@ -42,7 +124,7 @@ export default function Navbar() {
       transition={{ duration: 0.6, ease: "easeOut" }}
       className="w-full bg-white border-b border-gray-200 sticky top-0 z-50"
     >
-      <div className="max-w-[95%] xl:max-w-[90%] mx-auto px-2 sm:px-3 lg:px-4">
+      <div className="max-w-[95%] xl:max-w-[90%] mx-auto pl-0 pr-2 sm:pl-0 sm:pr-3 lg:pl-0 lg:pr-4">
         <div className="flex justify-between h-[105px] items-center">
           {/* Left side: Logo Only */}
           <div className="flex items-center">
@@ -51,9 +133,9 @@ export default function Navbar() {
                 <Image
                   src="/log.png"
                   alt="SOSIGN Logo"
-                  width={170}
-                  height={55}
-                  className="h-14 w-auto"
+                  width={140}
+                  height={45}
+                  className="h-12 w-auto"
                 />
               </Link>
             </motion.div>
@@ -245,13 +327,102 @@ export default function Navbar() {
               <FaMoon className="text-sm" />
             </button> */}
 
-            {/* Search Button */}
-            {/* <Link
-              href="/search"
-              className="w-8 h-8 rounded-full bg-[#F43676] flex items-center justify-center text-white hover:bg-[#e02a60] transition-colors"
-            >
-              <FaSearch className="text-xs" />
-            </Link> */}
+            {/* Search Button and Overlay */}
+            <div className="relative" ref={searchRef}>
+              <button
+                onClick={toggleSearch}
+                className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${searchOpen
+                    ? "bg-[#e02a60] text-white"
+                    : "bg-[#F43676] text-white hover:bg-[#e02a60]"
+                  }`}
+              >
+                {searchOpen ? <FaTimes className="text-xs" /> : <FaSearch className="text-xs" />}
+              </button>
+
+              {/* Search Overlay */}
+              <AnimatePresence>
+                {searchOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    transition={{ duration: 0.2 }}
+                    className="absolute right-0 top-12 w-80 sm:w-96 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden z-50"
+                  >
+                    {/* Search Input */}
+                    <form onSubmit={handleSearchSubmit} className="p-4 border-b border-gray-100">
+                      <div className="flex items-center gap-3 bg-gray-50 rounded-xl px-4 py-3">
+                        <FaSearch className="text-gray-400 text-sm flex-shrink-0" />
+                        <input
+                          type="text"
+                          placeholder="Search petitions..."
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          autoFocus
+                          className="flex-1 bg-transparent outline-none text-sm text-[#302d55] placeholder-gray-400"
+                        />
+                        {searchLoading && (
+                          <FaSpinner className="animate-spin text-[#F43676] text-sm flex-shrink-0" />
+                        )}
+                      </div>
+                    </form>
+
+                    {/* Search Results */}
+                    <div className="max-h-80 overflow-y-auto">
+                      {searchQuery.length < 2 && (
+                        <div className="p-4 text-center text-gray-400 text-sm">
+                          Type at least 2 characters to search
+                        </div>
+                      )}
+
+                      {searchQuery.length >= 2 && !searchLoading && searchResults.length === 0 && (
+                        <div className="p-4 text-center text-gray-400 text-sm">
+                          No petitions found for &quot;{searchQuery}&quot;
+                        </div>
+                      )}
+
+                      {searchResults.length > 0 && (
+                        <div className="py-2">
+                          {searchResults.map((petition) => (
+                            <button
+                              key={petition._id}
+                              onClick={() => handleResultClick(petition._id)}
+                              className="w-full px-4 py-3 flex items-center gap-3 hover:bg-pink-50 transition-colors text-left group"
+                            >
+                              {/* Petition Image */}
+                              <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+                                <img
+                                  src={petition.petitionDetails?.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(petition.title)}&background=random&size=48`}
+                                  alt={petition.title}
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
+                              {/* Petition Info */}
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium text-[#002050] group-hover:text-[#F43676] transition-colors line-clamp-1">
+                                  {petition.title}
+                                </p>
+                                <p className="text-xs text-gray-400 mt-0.5">
+                                  {petition.numberOfSignatures || 0} signatures • {petition.petitionStarter?.name || "Anonymous"}
+                                </p>
+                              </div>
+                            </button>
+                          ))}
+
+                          {/* See All Results Link */}
+                          <button
+                            onClick={handleSearchSubmit}
+                            className="w-full px-4 py-3 text-center text-sm font-medium text-[#F43676] hover:bg-pink-50 transition-colors border-t border-gray-100"
+                          >
+                            See all results for &quot;{searchQuery}&quot;
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
 
             {/* Login Button or User Profile */}
             {user ? (
