@@ -87,6 +87,8 @@ export default function Banner() {
     const fetchPetitions = async () => {
       try {
         setLoading(true);
+
+        // Fetch petitions for hero slider
         const response = await fetch(`${config.API_BASE_URL}/api/petitions?limit=10`);
 
         if (!response.ok) {
@@ -109,16 +111,26 @@ export default function Banner() {
           }));
 
           setHeroSlides(slides);
+        }
 
-          // Transform petitions into top stories format
-          const stories = data.petitions.map((petition) => ({
-            id: petition._id,
-            title: petition.title.length > 40 ? petition.title.substring(0, 40) + "..." : petition.title,
-            date: formatDate(petition.createdAt),
-            image: petition.petitionDetails?.image || `https://picsum.photos/seed/${petition._id}/100/100`,
-          }));
+        // Fetch top 3 petitions by signatures for ticker bar
+        const tickerResponse = await fetch(`${config.API_BASE_URL}/api/petitions?limit=3&sort=signatures`);
 
-          setTopStories(stories);
+        if (tickerResponse.ok) {
+          const tickerData = await tickerResponse.json();
+
+          if (tickerData.petitions && tickerData.petitions.length > 0) {
+            // Transform petitions into top stories format for ticker
+            const stories = tickerData.petitions.map((petition) => ({
+              id: petition._id,
+              title: petition.title.length > 50 ? petition.title.substring(0, 50) + "..." : petition.title,
+              date: `${petition.numberOfSignatures || 0} signatures`,
+              image: petition.petitionDetails?.image || `https://picsum.photos/seed/${petition._id}/100/100`,
+              link: `/currentpetitions/${petition._id}`,
+            }));
+
+            setTopStories(stories);
+          }
         }
 
         setError(null);
