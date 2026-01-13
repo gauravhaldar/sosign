@@ -244,12 +244,12 @@ export default function Footer() {
       </div>
 
       {/* Bottom Branding Section */}
-      <div className="border-t border-[#4a4775] py-6 text-center text-sm text-gray-400">
+      {/* <div className="border-t border-[#4a4775] py-6 text-center text-sm text-gray-400">
         <p>© 2025, <span className="font-semibold text-white">Sosign</span>. All rights reserved.</p>
         <p className="mt-2 text-xs">
           Developed by Haldar AI & IT.
         </p>
-      </div>
+      </div> */}
 
       {/* Scroll to Top Button */}
       <button
