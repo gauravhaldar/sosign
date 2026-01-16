@@ -2,34 +2,26 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useQuery } from "@tanstack/react-query";
 
 export default function YouHave() {
-  const [petitions, setPetitions] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { data: petitions = [], isLoading: loading } = useQuery({
+    queryKey: ["youHaveMissedPetitions"],
+    queryFn: async () => {
+      const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+      const response = await fetch(`${backendUrl}/api/petitions?limit=100`);
 
-  useEffect(() => {
-    const fetchPetitions = async () => {
-      try {
-        const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-        const response = await fetch(`${backendUrl}/api/petitions?limit=100`);
-
-        if (response.ok) {
-          const data = await response.json();
-          // Sort by numberOfSignatures (ascending) and take the first 4
-          const sortedPetitions = (data.petitions || [])
-            .sort((a, b) => (a.numberOfSignatures || 0) - (b.numberOfSignatures || 0))
-            .slice(0, 4);
-          setPetitions(sortedPetitions);
-        }
-      } catch (err) {
-        console.error("Error fetching petitions:", err);
-      } finally {
-        setLoading(false);
+      if (!response.ok) {
+        return [];
       }
-    };
-
-    fetchPetitions();
-  }, []);
+      const data = await response.json();
+      // Sort by numberOfSignatures (ascending) and take the first 4
+      return (data.petitions || [])
+        .sort((a, b) => (a.numberOfSignatures || 0) - (b.numberOfSignatures || 0))
+        .slice(0, 4);
+    },
+    staleTime: 5 * 60 * 1000,
+  });
 
   if (loading) {
     return (

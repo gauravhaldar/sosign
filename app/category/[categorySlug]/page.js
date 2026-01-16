@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
 import { FaChevronRight, FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn, FaYoutube, FaPinterestP, FaSearch, FaCalendarAlt, FaPlay, FaPen } from "react-icons/fa";
 import { useAuth } from "@/context/AuthContext";
 import Footer from "@/components/Footer";
@@ -126,10 +127,6 @@ const tags = [
 export default function CategoryPage() {
     const params = useParams();
     const [searchQuery, setSearchQuery] = useState("");
-    const [recentComments, setRecentComments] = useState([]);
-    const [recentPetitions, setRecentPetitions] = useState([]);
-    const [petitions, setPetitions] = useState([]);
-    const [loading, setLoading] = useState(true);
     const [showProfileModal, setShowProfileModal] = useState(false);
     const { user } = useAuth();
 
@@ -140,102 +137,73 @@ export default function CategoryPage() {
         : "";
 
     // Fetch petitions by category
-    useEffect(() => {
-        const fetchPetitions = async () => {
-            setLoading(true);
-            try {
-                const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-                // Convert slug back to category format (e.g., human_rights -> human rights)
-                const category = categorySlug?.replace(/_/g, ' ');
-                const response = await fetch(`${backendUrl}/api/petitions?category=${encodeURIComponent(category)}${searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : ""}`);
+    const { data: petitions = [], isLoading: loading } = useQuery({
+        queryKey: ["petitions", categorySlug, searchQuery],
+        queryFn: async () => {
+            const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+            const category = categorySlug?.replace(/_/g, ' ');
+            const response = await fetch(`${backendUrl}/api/petitions?category=${encodeURIComponent(category)}${searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : ""}`);
 
-                if (response.ok) {
-                    const data = await response.json();
-                    setPetitions(data.petitions || []);
-                } else {
-                    setPetitions([]);
-                }
-            } catch (err) {
-                console.error("Error fetching petitions:", err);
-                setPetitions([]);
-            } finally {
-                setLoading(false);
+            if (!response.ok) {
+                return [];
             }
-        };
-
-        if (categorySlug) {
-            fetchPetitions();
-        }
-    }, [categorySlug, searchQuery]);
+            const data = await response.json();
+            return data.petitions || [];
+        },
+        enabled: !!categorySlug,
+        staleTime: 60 * 1000,
+    });
 
     // Handle search form submit
     const handleSearch = (e) => {
         e.preventDefault();
-        // The useEffect will trigger automatically when searchQuery changes
+        // The useQuery will trigger automatically when searchQuery changes
     };
 
     // Fetch recent petitions for sidebar (across all categories)
-    useEffect(() => {
-        const fetchRecentPetitions = async () => {
-            try {
-                const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-                const response = await fetch(`${backendUrl}/api/petitions?limit=5`);
+    const { data: recentPetitions = [] } = useQuery({
+        queryKey: ["recentPetitions"],
+        queryFn: async () => {
+            const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+            const response = await fetch(`${backendUrl}/api/petitions?limit=5`);
 
-                if (response.ok) {
-                    const data = await response.json();
-                    setRecentPetitions(data.petitions || []);
-                } else {
-                    setRecentPetitions([]);
-                }
-            } catch (err) {
-                console.error("Error fetching recent petitions:", err);
-                setRecentPetitions([]);
+            if (!response.ok) {
+                return [];
             }
-        };
-
-        fetchRecentPetitions();
-    }, []);
+            const data = await response.json();
+            return data.petitions || [];
+        },
+        staleTime: 5 * 60 * 1000,
+    });
 
     // Fetch recent comments from the logged-in user
-    useEffect(() => {
-        const fetchRecentComments = async () => {
-            if (!user) {
-                setRecentComments([]);
-                return;
+    const { data: recentComments = [] } = useQuery({
+        queryKey: ["recentComments", user?.uid || "guest"],
+        queryFn: async () => {
+            const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+            const userInfo = JSON.parse(localStorage.getItem("user"));
+
+            if (!userInfo || !userInfo.token) {
+                return [];
             }
 
-            try {
-                const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-                const userInfo = JSON.parse(localStorage.getItem("user"));
-
-                if (!userInfo || !userInfo.token) {
-                    setRecentComments([]);
-                    return;
+            const response = await fetch(
+                `${backendUrl}/api/comments/user/recent?limit=4`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${userInfo.token}`,
+                    },
                 }
+            );
 
-                const response = await fetch(
-                    `${backendUrl}/api/comments/user/recent?limit=4`,
-                    {
-                        headers: {
-                            Authorization: `Bearer ${userInfo.token}`,
-                        },
-                    }
-                );
-
-                if (response.ok) {
-                    const data = await response.json();
-                    setRecentComments(data.comments || []);
-                } else {
-                    setRecentComments([]);
-                }
-            } catch (err) {
-                console.error("Error fetching recent comments:", err);
-                setRecentComments([]);
+            if (!response.ok) {
+                return [];
             }
-        };
-
-        fetchRecentComments();
-    }, [user]);
+            const data = await response.json();
+            return data.comments || [];
+        },
+        enabled: !!user,
+    });
 
     return (
         <>

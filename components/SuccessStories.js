@@ -1,33 +1,24 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
+import { useQuery } from "@tanstack/react-query";
 import { FaTrophy, FaArrowRight, FaUsers } from "react-icons/fa";
 
 export default function SuccessStories() {
-    const [petitions, setPetitions] = useState([]);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        const fetchSuccessfulPetitions = async () => {
-            try {
-                const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-                // Fetch successful petitions sorted by most signatures
-                const response = await fetch(`${backendUrl}/api/successful-petitions?sort=signatures&limit=4`);
-
-                if (response.ok) {
-                    const data = await response.json();
-                    setPetitions(data.successfulPetitions || []);
-                }
-            } catch (err) {
-                console.error("Error fetching successful petitions:", err);
-            } finally {
-                setLoading(false);
+    const { data: petitions = [], isLoading: loading } = useQuery({
+        queryKey: ["successfulPetitions"],
+        queryFn: async () => {
+            const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+            const response = await fetch(`${backendUrl}/api/successful-petitions?sort=signatures&limit=4`);
+            if (!response.ok) {
+                throw new Error("Network response was not ok");
             }
-        };
-
-        fetchSuccessfulPetitions();
-    }, []);
+            const data = await response.json();
+            return data.successfulPetitions || [];
+        },
+        staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    });
 
     const formatSignatures = (num) => {
         if (!num) return "0";

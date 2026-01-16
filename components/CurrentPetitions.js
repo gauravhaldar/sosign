@@ -1,9 +1,10 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useQuery } from "@tanstack/react-query";
 import { safeFetch } from "../utils/apiUtils";
 
 // Export petitions array
@@ -118,33 +119,24 @@ export const petitions = [
 ];
 
 export default function CurrentPetitions() {
-  const [petitions, setPetitions] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [visibleCount, setVisibleCount] = useState(5);
 
-  useEffect(() => {
-    const fetchPetitions = async () => {
-      try {
-        setLoading(true);
-        const data = await safeFetch("/api/petitions");
-
-        if (data.success === false && data.rateLimited) {
-          console.warn('Rate limit exceeded for current petitions, using fallback');
-          setPetitions([]);
-        } else {
-          setPetitions(data.petitions || []);
-        }
-      } catch (err) {
-        setError(err.message);
-        console.error("Failed to fetch petitions:", err);
-      } finally {
-        setLoading(false);
+  const { data: petitions = [], isLoading: loading, error: queryError } = useQuery({
+    queryKey: ["currentPetitions"],
+    queryFn: async () => {
+      const data = await safeFetch("/api/petitions");
+      if (data.success === false && data.rateLimited) {
+        console.warn('Rate limit exceeded for current petitions, using fallback');
+        return [];
       }
-    };
+      return data.petitions || [];
+    },
+    staleTime: 5 * 60 * 1000,
+  });
 
-    fetchPetitions();
-  }, []);
+  // Use query error if available, or keep existing error state logic if needed (but useQuery handles it better)
+  // We can remove the local 'error' state and just use 'queryError' derived variable
+  const error = queryError ? queryError.message : null;
 
   const handleLoadMore = () => {
     setVisibleCount(petitions.length);

@@ -7,6 +7,7 @@ import { FaSearch, FaCalendarAlt, FaPlay, FaChevronRight, FaChevronLeft, FaSpinn
 import { FaXTwitter } from "react-icons/fa6";
 import { useAuth } from "../context/AuthContext";
 import ProfileEditModal from "./ProfileEditModal";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
 
 // Categories mapping for display labels
 const categoryLabels = {
@@ -58,150 +59,107 @@ const tags = [
 export default function Content({ initialPetitions = [], initialPagination = {} }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [petitions, setPetitions] = useState(initialPetitions);
-  const [loading, setLoading] = useState(initialPetitions.length === 0);
-  const [error, setError] = useState(null);
-  const [paginationInfo, setPaginationInfo] = useState({
-    totalPages: initialPagination.totalPages || 1,
-    totalPetitions: initialPagination.totalPetitions || 0,
-    hasNextPage: initialPagination.hasNextPage || false,
-    hasPrevPage: initialPagination.hasPrevPage || false,
-  });
-  const [recentPosts, setRecentPosts] = useState(
-    initialPetitions.length > 0
-      ? initialPetitions.slice(0, 4).map((p) => ({
-        title: p.title,
-        slug: p._id,
-      }))
-      : []
-  );
-  const [recentComments, setRecentComments] = useState([]);
   const [showProfileModal, setShowProfileModal] = useState(false);
-  const [ads, setAds] = useState([]);
-  const [adsLoading, setAdsLoading] = useState(true);
   const [searchSuggestions, setSearchSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [suggestionsLoading, setSuggestionsLoading] = useState(false);
   const searchRef = useRef(null);
   const router = useRouter();
   const { user } = useAuth();
-  const isFirstRender = useRef(true);
 
   const ITEMS_PER_PAGE = 6;
 
   // Fetch petitions from API
-  useEffect(() => {
-    // Skip initial fetch if we have initial data and it's the first render
-    if (isFirstRender.current && initialPetitions.length > 0) {
-      isFirstRender.current = false;
-      return;
-    }
+  const {
+    data: petitionsData,
+    isLoading: petitionsLoading,
+    isError: isPetitionsError,
+    error: petitionsError
+  } = useQuery({
+    queryKey: ["petitions", currentPage, searchQuery],
+    queryFn: async () => {
+      const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+      const response = await fetch(
+        `${backendUrl}/api/petitions?page=${currentPage}&limit=${ITEMS_PER_PAGE}${searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : ""}`
+      );
 
-    const fetchPetitions = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-        const response = await fetch(
-          `${backendUrl}/api/petitions?page=${currentPage}&limit=${ITEMS_PER_PAGE}${searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : ""}`
-        );
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch petitions");
-        }
-
-        const data = await response.json();
-        setPetitions(data.petitions || []);
-        setPaginationInfo({
-          totalPages: data.totalPages || 1,
-          totalPetitions: data.totalPetitions || 0,
-          hasNextPage: data.hasNextPage || false,
-          hasPrevPage: data.hasPrevPage || false,
-        });
-
-        // Set recent posts from the first 4 petitions
-        if (data.petitions && data.petitions.length > 0) {
-          setRecentPosts(data.petitions.slice(0, 4).map(p => ({
-            title: p.title,
-            slug: p._id,
-          })));
-        }
-      } catch (err) {
-        console.error("Error fetching petitions:", err);
-        setError(err.message);
-      } finally {
-        setLoading(false);
+      if (!response.ok) {
+        throw new Error("Failed to fetch petitions");
       }
-    };
 
-    fetchPetitions();
-  }, [currentPage, searchQuery]);
+      return await response.json();
+    },
+    placeholderData: keepPreviousData,
+    initialData: (currentPage === 1 && !searchQuery) ? {
+      petitions: initialPetitions,
+      totalPages: initialPagination.totalPages,
+      totalPetitions: initialPagination.totalPetitions,
+      hasNextPage: initialPagination.hasNextPage,
+      hasPrevPage: initialPagination.hasPrevPage
+    } : undefined,
+    staleTime: 60 * 1000,
+  });
+
+  const petitions = petitionsData?.petitions || [];
+  const paginationInfo = {
+    totalPages: petitionsData?.totalPages || 1,
+    totalPetitions: petitionsData?.totalPetitions || 0,
+    hasNextPage: petitionsData?.hasNextPage || false,
+    hasPrevPage: petitionsData?.hasPrevPage || false,
+  };
+  const loading = petitionsLoading;
+  const error = isPetitionsError ? petitionsError.message : null;
+
+  // Recent posts based on first 4 petitions
+  const recentPosts = petitions.slice(0, 4).map((p) => ({
+    title: p.title,
+    slug: p._id,
+  }));
 
   // Fetch recent comments from the logged-in user
-  useEffect(() => {
-    const fetchRecentComments = async () => {
-      if (!user) {
-        setRecentComments([]);
-        return;
+  const { data: recentComments = [] } = useQuery({
+    queryKey: ["recentComments", user?.uid],
+    queryFn: async () => {
+      const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+      const userInfo = JSON.parse(localStorage.getItem("user"));
+
+      if (!userInfo || !userInfo.token) {
+        return [];
       }
 
-      try {
-        const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-        const userInfo = JSON.parse(localStorage.getItem("user"));
-
-        if (!userInfo || !userInfo.token) {
-          setRecentComments([]);
-          return;
+      const response = await fetch(
+        `${backendUrl}/api/comments/user/recent?limit=3`,
+        {
+          headers: {
+            Authorization: `Bearer ${userInfo.token}`,
+          },
         }
+      );
 
-        const response = await fetch(
-          `${backendUrl}/api/comments/user/recent?limit=3`,
-          {
-            headers: {
-              Authorization: `Bearer ${userInfo.token}`,
-            },
-          }
-        );
-
-        if (response.ok) {
-          const data = await response.json();
-          setRecentComments(data.comments || []);
-        } else {
-          setRecentComments([]);
-        }
-      } catch (err) {
-        console.error("Error fetching recent comments:", err);
-        setRecentComments([]);
+      if (response.ok) {
+        const data = await response.json();
+        return data.comments || [];
       }
-    };
-
-    fetchRecentComments();
-  }, [user]);
+      return [];
+    },
+    enabled: !!user,
+  });
 
   // Fetch active ads
-  useEffect(() => {
-    const fetchAds = async () => {
-      setAdsLoading(true);
-      try {
-        const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-        const response = await fetch(`${backendUrl}/api/ads/active?position=sidebar`);
+  const { data: ads = [], isLoading: adsLoading } = useQuery({
+    queryKey: ["activeAds", "sidebar"],
+    queryFn: async () => {
+      const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+      const response = await fetch(`${backendUrl}/api/ads/active?position=sidebar`);
 
-        if (response.ok) {
-          const data = await response.json();
-          setAds(data.ads || []);
-        } else {
-          setAds([]);
-        }
-      } catch (err) {
-        console.error("Error fetching ads:", err);
-        setAds([]);
-      } finally {
-        setAdsLoading(false);
+      if (response.ok) {
+        const data = await response.json();
+        return data.ads || [];
       }
-    };
-
-    fetchAds();
-  }, []);
+      return [];
+    },
+    staleTime: 5 * 60 * 1000,
+  });
 
   // Handle search
   const handleSearch = (e) => {

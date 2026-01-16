@@ -3,6 +3,7 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { AuthProvider } from "../context/AuthContext";
+import QueryProvider from "@/components/providers/QueryProvider";
 
 // Google Fonts
 const beVietnamPro = Be_Vietnam_Pro({
@@ -21,9 +22,10 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body className={`${beVietnamPro.variable} antialiased`}>
         <AuthProvider>
-          <Navbar />
-          <main>{children}</main>
-          
+          <QueryProvider>
+            <Navbar />
+            <main>{children}</main>
+          </QueryProvider>
         </AuthProvider>
       </body>
     </html>
