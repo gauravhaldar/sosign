@@ -124,6 +124,8 @@ export default function Banner({ initialPetitions = [] }) {
     const fetchPetitions = async () => {
       try {
         setLoading(true);
+
+        // Fetch petitions for hero slider
         const response = await fetch(`${config.API_BASE_URL}/api/petitions?limit=10`);
 
         if (!response.ok) {
@@ -146,16 +148,26 @@ export default function Banner({ initialPetitions = [] }) {
           }));
 
           setHeroSlides(slides);
+        }
 
-          // Transform petitions into top stories format
-          const stories = data.petitions.map((petition) => ({
-            id: petition._id,
-            title: petition.title.length > 40 ? petition.title.substring(0, 40) + "..." : petition.title,
-            date: formatDate(petition.createdAt),
-            image: petition.petitionDetails?.image || `https://picsum.photos/seed/${petition._id}/100/100`,
-          }));
+        // Fetch top 3 petitions by signatures for ticker bar
+        const tickerResponse = await fetch(`${config.API_BASE_URL}/api/petitions?limit=3&sort=signatures`);
 
-          setTopStories(stories);
+        if (tickerResponse.ok) {
+          const tickerData = await tickerResponse.json();
+
+          if (tickerData.petitions && tickerData.petitions.length > 0) {
+            // Transform petitions into top stories format for ticker
+            const stories = tickerData.petitions.map((petition) => ({
+              id: petition._id,
+              title: petition.title.length > 50 ? petition.title.substring(0, 50) + "..." : petition.title,
+              date: `${petition.numberOfSignatures || 0} signatures`,
+              image: petition.petitionDetails?.image || `https://picsum.photos/seed/${petition._id}/100/100`,
+              link: `/currentpetitions/${petition._id}`,
+            }));
+
+            setTopStories(stories);
+          }
         }
 
         setError(null);
@@ -171,15 +183,15 @@ export default function Banner({ initialPetitions = [] }) {
     fetchPetitions();
   }, []);
 
-  // Auto-slide functionality
-  useEffect(() => {
-    if (heroSlides.length === 0) return;
+  // Auto-slide functionality - DISABLED
+  // useEffect(() => {
+  //   if (heroSlides.length === 0) return;
 
-    const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
-    }, 5000);
-    return () => clearInterval(interval);
-  }, [heroSlides.length]);
+  //   const interval = setInterval(() => {
+  //     setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
+  //   }, 5000);
+  //   return () => clearInterval(interval);
+  // }, [heroSlides.length]);
 
   const nextSlide = () => {
     if (heroSlides.length === 0) return;
@@ -218,7 +230,7 @@ export default function Banner({ initialPetitions = [] }) {
               display: flex;
               gap: 2rem;
               width: max-content;
-              animation: ticker-scroll 30s linear infinite;
+              animation: ticker-scroll 60s linear infinite;
             }
             .ticker-track:hover,
             .ticker-track.paused {
@@ -346,12 +358,13 @@ export default function Banner({ initialPetitions = [] }) {
                   {/* Category Tags */}
                   <div className="flex flex-wrap gap-2 sm:gap-3 mb-4 sm:mb-5">
                     {heroSlides[currentSlide]?.categories?.map((category, index) => (
-                      <span
+                      <Link
                         key={index}
-                        className="px-3 sm:px-4 py-1 sm:py-1.5 bg-[#F43676]/10 text-[#F43676] rounded-full text-xs sm:text-sm font-medium hover:bg-[#F43676]/20 transition-colors cursor-pointer"
+                        href={`/category/${category.toLowerCase()}`}
+                        className="px-3 sm:px-4 py-1 sm:py-1.5 bg-[#F43676]/10 text-[#F43676] rounded-full text-xs sm:text-sm font-medium hover:bg-[#F43676] hover:text-white transition-all cursor-pointer"
                       >
                         {category}
-                      </span>
+                      </Link>
                     ))}
                   </div>
 
@@ -374,17 +387,20 @@ export default function Banner({ initialPetitions = [] }) {
                     <FaChevronRight className="text-xs group-hover:translate-x-1 transition-transform" />
                   </Link>
 
-                  {/* Date and Signatures */}
+                  {/* Date and Comments */}
                   <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-[#302d55] text-xs sm:text-sm">
                     <span className="flex items-center gap-2">
                       <FaCalendarAlt className="text-[#302d55]" />
                       {heroSlides[currentSlide]?.date}
                     </span>
                     <span className="text-[#F43676] hidden sm:inline">•</span>
-                    <span className="flex items-center gap-2">
+                    <Link
+                      href={`${heroSlides[currentSlide]?.link || "/currentpetitions"}#comments`}
+                      className="flex items-center gap-2 hover:text-[#F43676] transition-colors"
+                    >
                       <FaComment className="text-[#302d55]" />
-                      {heroSlides[currentSlide]?.comments}
-                    </span>
+                      Comments
+                    </Link>
                   </div>
                 </motion.div>
               </AnimatePresence>

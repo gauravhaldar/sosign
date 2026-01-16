@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { FaChevronRight, FaPlus, FaLink, FaShare, FaTrash, FaTrophy } from "react-icons/fa";
+import { FaChevronRight, FaPlus, FaLink, FaShare, FaEyeSlash, FaTrophy, FaSpinner, FaCheck, FaTimes, FaClock } from "react-icons/fa";
 import { useAuth } from "../../context/AuthContext";
 import LoginModal from "../../components/LoginModal";
 
@@ -11,10 +11,35 @@ const MyPetitionsPage = () => {
   const [petitions, setPetitions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [declareVictoryLoading, setDeclareVictoryLoading] = useState(null); // Track which petition is being processed
+  const [declareVictoryLoading, setDeclareVictoryLoading] = useState(null);
+  const [hideRequestLoading, setHideRequestLoading] = useState(null);
+  const [hideRequestStatus, setHideRequestStatus] = useState({});
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showHideModal, setShowHideModal] = useState(null);
+  const [hideReason, setHideReason] = useState("");
 
   const { user, loading: authLoading } = useAuth();
+
+  // Fetch hide request status for all petitions
+  const fetchHideRequestStatus = async (petitionIds, token) => {
+    const statuses = {};
+    for (const petitionId of petitionIds) {
+      try {
+        const response = await fetch(`/api/hide-requests/check/${petitionId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (response.ok) {
+          const data = await response.json();
+          statuses[petitionId] = data;
+        }
+      } catch (error) {
+        console.error(`Error checking hide status for ${petitionId}:`, error);
+      }
+    }
+    setHideRequestStatus(statuses);
+  };
 
   useEffect(() => {
     // Check if auth is still loading
@@ -53,6 +78,12 @@ const MyPetitionsPage = () => {
 
         const data = await response.json();
         setPetitions(data.petitions);
+
+        // Fetch hide request status for all petitions
+        if (data.petitions.length > 0) {
+          const petitionIds = data.petitions.map(p => p._id);
+          await fetchHideRequestStatus(petitionIds, userInfo.token);
+        }
       } catch (err) {
         setError(err.message);
       } finally {
@@ -82,26 +113,41 @@ const MyPetitionsPage = () => {
     }
   };
 
-  const deletePetition = async (petitionId) => {
-    if (window.confirm("Are you sure you want to delete this petition?")) {
-      try {
-        const userInfo = JSON.parse(localStorage.getItem("user"));
-        const response = await fetch(`/api/petitions/${petitionId}`, {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${userInfo.token}`,
-          },
-        });
+  const requestHidePetition = async (petitionId) => {
+    try {
+      setHideRequestLoading(petitionId);
+      const userInfo = JSON.parse(localStorage.getItem("user"));
 
-        if (response.ok) {
-          setPetitions(petitions.filter((p) => p._id !== petitionId));
-          alert("Petition deleted successfully!");
-        } else {
-          alert("Failed to delete petition");
-        }
-      } catch (error) {
-        alert("Error deleting petition");
+      const response = await fetch("/api/hide-requests", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userInfo.token}`,
+        },
+        body: JSON.stringify({
+          petitionId,
+          reason: hideReason,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Update local status
+        setHideRequestStatus(prev => ({
+          ...prev,
+          [petitionId]: { hasRequest: true, status: "pending" },
+        }));
+        setShowHideModal(null);
+        setHideReason("");
+        alert("Hide request submitted successfully! Awaiting admin approval.");
+      } else {
+        alert(data.message || "Failed to submit hide request");
       }
+    } catch (error) {
+      alert("Error submitting hide request. Please try again.");
+    } finally {
+      setHideRequestLoading(null);
     }
   };
 
@@ -421,14 +467,92 @@ const MyPetitionsPage = () => {
                         <FaShare />
                         Share
                       </button>
-                      <button
-                        onClick={() => deletePetition(petition._id)}
-                        className="flex-1 min-w-[140px] bg-red-100 hover:bg-red-200 text-red-700 font-semibold py-3 px-4 rounded-xl border border-red-200 transition-all duration-200 flex items-center justify-center gap-2 hover:scale-105"
-                      >
-                        <FaTrash />
-                        Delete
-                      </button>
+                      {/* Hide Request Button */}
+                      {petition.hidden ? (
+                        <div className="flex-1 min-w-[140px] bg-gray-100 text-gray-600 font-semibold py-3 px-4 rounded-xl border border-gray-200 flex items-center justify-center gap-2">
+                          <FaEyeSlash />
+                          Hidden
+                        </div>
+                      ) : hideRequestStatus[petition._id]?.hasRequest ? (
+                        <div className={`flex-1 min-w-[140px] font-semibold py-3 px-4 rounded-xl border flex items-center justify-center gap-2 ${hideRequestStatus[petition._id]?.status === "pending"
+                            ? "bg-yellow-50 text-yellow-700 border-yellow-200"
+                            : hideRequestStatus[petition._id]?.status === "approved"
+                              ? "bg-green-50 text-green-700 border-green-200"
+                              : "bg-red-50 text-red-700 border-red-200"
+                          }`}>
+                          {hideRequestStatus[petition._id]?.status === "pending" && (
+                            <>
+                              <FaClock />
+                              Hide Pending
+                            </>
+                          )}
+                          {hideRequestStatus[petition._id]?.status === "approved" && (
+                            <>
+                              <FaCheck />
+                              Hide Approved
+                            </>
+                          )}
+                          {hideRequestStatus[petition._id]?.status === "rejected" && (
+                            <>
+                              <FaTimes />
+                              Hide Rejected
+                            </>
+                          )}
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => setShowHideModal(petition._id)}
+                          disabled={hideRequestLoading === petition._id}
+                          className="flex-1 min-w-[140px] bg-orange-100 hover:bg-orange-200 text-orange-700 font-semibold py-3 px-4 rounded-xl border border-orange-200 transition-all duration-200 flex items-center justify-center gap-2 hover:scale-105 disabled:opacity-50"
+                        >
+                          {hideRequestLoading === petition._id ? (
+                            <FaSpinner className="animate-spin" />
+                          ) : (
+                            <FaEyeSlash />
+                          )}
+                          Request to Hide
+                        </button>
+                      )}
                     </div>
+
+                    {/* Hide Request Modal */}
+                    {showHideModal === petition._id && (
+                      <div className="mt-4 p-4 bg-white border border-orange-200 rounded-xl">
+                        <h4 className="font-semibold text-gray-700 mb-2">Request to Hide Petition</h4>
+                        <p className="text-sm text-gray-500 mb-3">
+                          Your petition will be hidden from public view after admin approval. It will still be visible to you and admins.
+                        </p>
+                        <textarea
+                          value={hideReason}
+                          onChange={(e) => setHideReason(e.target.value)}
+                          placeholder="Reason for hiding (optional)"
+                          className="w-full p-3 border border-gray-200 rounded-lg mb-3 text-sm"
+                          rows={2}
+                        />
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => requestHidePetition(petition._id)}
+                            disabled={hideRequestLoading === petition._id}
+                            className="flex-1 bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 px-4 rounded-lg transition-all flex items-center justify-center gap-2"
+                          >
+                            {hideRequestLoading === petition._id ? (
+                              <FaSpinner className="animate-spin" />
+                            ) : (
+                              "Submit Request"
+                            )}
+                          </button>
+                          <button
+                            onClick={() => {
+                              setShowHideModal(null);
+                              setHideReason("");
+                            }}
+                            className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 font-semibold rounded-lg transition-all"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   {/* Petition Overview Section */}
@@ -465,8 +589,8 @@ const MyPetitionsPage = () => {
                           onClick={() => declareVictory(petition._id)}
                           disabled={declareVictoryLoading === petition._id}
                           className={`${declareVictoryLoading === petition._id
-                              ? "bg-yellow-400 cursor-not-allowed"
-                              : "bg-gradient-to-r from-yellow-500 to-orange-500 hover:shadow-lg hover:scale-105"
+                            ? "bg-yellow-400 cursor-not-allowed"
+                            : "bg-gradient-to-r from-yellow-500 to-orange-500 hover:shadow-lg hover:scale-105"
                             } text-white font-bold py-3 px-6 rounded-xl transition-all duration-200 flex items-center gap-2`}
                         >
                           {declareVictoryLoading === petition._id ? (

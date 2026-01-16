@@ -6,6 +6,7 @@ import { FaYoutube, FaPlus, FaCircleInfo, FaCircleCheck, FaCircleExclamation, Fa
 import { useAuth } from "../../context/AuthContext";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import Captcha from "../../components/Captcha";
 
 export default function StartPetitionPage() {
   const { user, loading: authLoading, clearUser } = useAuth();
@@ -19,6 +20,8 @@ export default function StartPetitionPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [touchedFields, setTouchedFields] = useState({});
   const [selectedCategories, setSelectedCategories] = useState([]);
+  const [captchaVerified, setCaptchaVerified] = useState(false);
+  const [captchaResetTrigger, setCaptchaResetTrigger] = useState(0);
   const totalSteps = 4;
 
   // Available categories for petitions
@@ -369,7 +372,7 @@ export default function StartPetitionPage() {
       validations.push(validateField("pincode", formData.starter.pincode));
     }
 
-    return validations.every(v => v.isValid);
+    return validations.every(v => v.isValid) && captchaVerified;
   };
 
   // Function to check if current step is valid
@@ -1398,10 +1401,18 @@ export default function StartPetitionPage() {
                 <div className="mt-6 p-4 bg-orange-50 border border-orange-200 rounded-lg">
                   <p className="text-orange-700 text-sm flex items-center gap-2">
                     <FaCircleExclamation />
-                    Please complete all required fields (*) with valid information before submitting.
+                    Please complete all required fields (*) with valid information and verify the captcha before submitting.
                   </p>
                 </div>
               )}
+
+              {/* Captcha Section */}
+              <div className="mt-6">
+                <Captcha
+                  onVerify={(verified) => setCaptchaVerified(verified)}
+                  resetTrigger={captchaResetTrigger}
+                />
+              </div>
 
               <motion.button
                 whileHover={

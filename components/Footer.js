@@ -69,7 +69,7 @@ export default function Footer() {
           {/* Social Media Buttons */}
           <div className="flex flex-wrap gap-2">
             <a
-              href="https://facebook.com"
+              href="https://www.facebook.com/sosign.in/"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2 px-4 py-2 bg-[#3b5998] rounded-lg text-sm font-medium hover:opacity-90 transition-opacity"
@@ -101,7 +101,7 @@ export default function Footer() {
               <FaLinkedinIn /> LinkedIn
             </a>
             <a
-              href="https://youtube.com"
+              href="https://www.youtube.com/@sosign-in"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2 px-4 py-2 bg-[#FF0000] rounded-lg text-sm font-medium hover:opacity-90 transition-opacity"
@@ -187,6 +187,12 @@ export default function Footer() {
                 Privacy Policy
               </Link>
             </li>
+            <li>
+              <Link href="/terms" className="group flex items-center gap-2 text-gray-300 hover:text-[#F43676] transition-all duration-300 hover:translate-x-2">
+                <span className="w-2 h-2 bg-[#F43676] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                Terms & Conditions
+              </Link>
+            </li>
           </ul>
         </div>
 
@@ -238,12 +244,12 @@ export default function Footer() {
       </div>
 
       {/* Bottom Branding Section */}
-      <div className="border-t border-[#4a4775] py-6 text-center text-sm text-gray-400">
+      {/* <div className="border-t border-[#4a4775] py-6 text-center text-sm text-gray-400">
         <p>© 2025, <span className="font-semibold text-white">Sosign</span>. All rights reserved.</p>
         <p className="mt-2 text-xs">
           Developed by Haldar AI & IT.
         </p>
-      </div>
+      </div> */}
 
       {/* Scroll to Top Button */}
       <button
