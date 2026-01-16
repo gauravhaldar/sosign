@@ -68,15 +68,46 @@ const extractCategories = (petition) => {
   return categories.slice(0, 2); // Return max 2 categories
 };
 
-export default function Banner() {
+export default function Banner({ initialPetitions = [] }) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isTickerPaused, setIsTickerPaused] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const [heroSlides, setHeroSlides] = useState(defaultHeroSlides);
-  const [topStories, setTopStories] = useState(defaultTopStories);
-  const [loading, setLoading] = useState(true);
+
+  // Initialize state with transformed initial data if available
+  const initializeHeroSlides = () => {
+    if (initialPetitions.length > 0) {
+      return initialPetitions.map((petition) => ({
+        id: petition._id,
+        image: petition.petitionDetails?.image || `https://picsum.photos/seed/${petition._id}/800/600`,
+        categories: extractCategories(petition),
+        title: petition.title,
+        description: petition.petitionDetails?.problem || petition.petitionDetails?.solution || "Support this important cause by signing the petition.",
+        date: formatDate(petition.createdAt),
+        comments: `${petition.numberOfSignatures || 0} Signatures`,
+        link: `/currentpetitions/${petition._id}`,
+      }));
+    }
+    return defaultHeroSlides;
+  };
+
+  const initializeTopStories = () => {
+    if (initialPetitions.length > 0) {
+      return initialPetitions.map((petition) => ({
+        id: petition._id,
+        title: petition.title.length > 40 ? petition.title.substring(0, 40) + "..." : petition.title,
+        date: formatDate(petition.createdAt),
+        image: petition.petitionDetails?.image || `https://picsum.photos/seed/${petition._id}/100/100`,
+      }));
+    }
+    return defaultTopStories;
+  };
+
+  const [heroSlides, setHeroSlides] = useState(initializeHeroSlides);
+  const [topStories, setTopStories] = useState(initializeTopStories);
+  const [loading, setLoading] = useState(initialPetitions.length === 0);
   const [error, setError] = useState(null);
   const router = useRouter();
+  const isFirstRender = useRef(true);
 
   useEffect(() => {
     setMounted(true);
@@ -84,6 +115,12 @@ export default function Banner() {
 
   // Fetch petitions from the backend
   useEffect(() => {
+    // Skip if we have initial data
+    if (isFirstRender.current && initialPetitions.length > 0) {
+      isFirstRender.current = false;
+      return;
+    }
+
     const fetchPetitions = async () => {
       try {
         setLoading(true);

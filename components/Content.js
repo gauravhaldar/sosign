@@ -55,19 +55,26 @@ const tags = [
   "Lifestyle",
 ];
 
-export default function Content() {
+export default function Content({ initialPetitions = [], initialPagination = {} }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [petitions, setPetitions] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [petitions, setPetitions] = useState(initialPetitions);
+  const [loading, setLoading] = useState(initialPetitions.length === 0);
   const [error, setError] = useState(null);
   const [paginationInfo, setPaginationInfo] = useState({
-    totalPages: 1,
-    totalPetitions: 0,
-    hasNextPage: false,
-    hasPrevPage: false,
+    totalPages: initialPagination.totalPages || 1,
+    totalPetitions: initialPagination.totalPetitions || 0,
+    hasNextPage: initialPagination.hasNextPage || false,
+    hasPrevPage: initialPagination.hasPrevPage || false,
   });
-  const [recentPosts, setRecentPosts] = useState([]);
+  const [recentPosts, setRecentPosts] = useState(
+    initialPetitions.length > 0
+      ? initialPetitions.slice(0, 4).map((p) => ({
+        title: p.title,
+        slug: p._id,
+      }))
+      : []
+  );
   const [recentComments, setRecentComments] = useState([]);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [ads, setAds] = useState([]);
@@ -78,11 +85,18 @@ export default function Content() {
   const searchRef = useRef(null);
   const router = useRouter();
   const { user } = useAuth();
+  const isFirstRender = useRef(true);
 
   const ITEMS_PER_PAGE = 6;
 
   // Fetch petitions from API
   useEffect(() => {
+    // Skip initial fetch if we have initial data and it's the first render
+    if (isFirstRender.current && initialPetitions.length > 0) {
+      isFirstRender.current = false;
+      return;
+    }
+
     const fetchPetitions = async () => {
       setLoading(true);
       setError(null);
