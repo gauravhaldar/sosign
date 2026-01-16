@@ -9,16 +9,14 @@ export default function YouHave() {
     queryKey: ["youHaveMissedPetitions"],
     queryFn: async () => {
       const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-      const response = await fetch(`${backendUrl}/api/petitions?limit=100`);
+      // Use the dedicated popular endpoint (optimized on backend)
+      const response = await fetch(`${backendUrl}/api/petitions/popular?limit=4`);
 
       if (!response.ok) {
         return [];
       }
       const data = await response.json();
-      // Sort by numberOfSignatures (ascending) and take the first 4
-      return (data.petitions || [])
-        .sort((a, b) => (a.numberOfSignatures || 0) - (b.numberOfSignatures || 0))
-        .slice(0, 4);
+      return data.petitions || [];
     },
     staleTime: 5 * 60 * 1000,
   });
