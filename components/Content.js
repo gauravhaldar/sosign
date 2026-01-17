@@ -382,7 +382,7 @@ export default function Content({ initialPetitions = [], initialPagination = {} 
                           </p>
 
                           {/* Author Info */}
-                          <div className="flex items-center gap-3 text-base">
+                          <div className="flex items-center gap-3 text-base mb-4">
                             <div className="w-10 h-10 rounded-full overflow-hidden">
                               <img
                                 src={
@@ -401,6 +401,11 @@ export default function Content({ initialPetitions = [], initialPagination = {} 
                               <FaCalendarAlt className="text-xs" />
                               {formatDate(petition.createdAt)}
                             </span>
+                          </div>
+
+                          {/* Sign This Petition Button */}
+                          <div className="inline-block bg-gradient-to-r from-[#F43676] to-[#e02a60] text-white px-6 py-2.5 rounded-full font-semibold text-sm hover:shadow-lg hover:scale-105 transition-all duration-200">
+                            ✍️ Sign this Petition
                           </div>
                         </div>
                       </Link>

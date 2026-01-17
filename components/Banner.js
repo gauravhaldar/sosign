@@ -41,14 +41,9 @@ const formatDate = (dateString) => {
   });
 };
 
-// Helper function to extract categories from petition (based on country or keywords)
+// Helper function to extract categories from petition (based on keywords)
 const extractCategories = (petition) => {
   const categories = [];
-
-  // Add country as a category
-  if (petition.country) {
-    categories.push(petition.country);
-  }
 
   // Try to extract category from title or problem description
   const text = `${petition.title} ${petition.petitionDetails?.problem || ""}`.toLowerCase();
@@ -381,11 +376,21 @@ export default function Banner({ initialPetitions = [] }) {
                   {/* Continue Reading Link */}
                   <Link
                     href={heroSlides[currentSlide]?.link || "/currentpetitions"}
-                    className="inline-flex items-center gap-2 text-[#002050] font-semibold hover:text-[#F43676] transition-colors mb-4 sm:mb-6 group text-sm sm:text-base"
+                    className="inline-flex items-center gap-2 text-[#002050] font-semibold hover:text-[#F43676] transition-colors mb-4 group text-sm sm:text-base"
                   >
                     Continue Reading
                     <FaChevronRight className="text-xs group-hover:translate-x-1 transition-transform" />
                   </Link>
+
+                  {/* Sign This Petition Button */}
+                  <div className="mb-4 sm:mb-6">
+                    <Link
+                      href={heroSlides[currentSlide]?.link || "/currentpetitions"}
+                      className="inline-block bg-gradient-to-r from-[#F43676] to-[#e02a60] text-white px-6 py-2.5 rounded-full font-semibold text-sm hover:shadow-lg hover:scale-105 transition-all duration-200 cursor-pointer"
+                    >
+                      ✍️ Sign this Petition
+                    </Link>
+                  </div>
 
                   {/* Date and Comments */}
                   <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-[#302d55] text-xs sm:text-sm">

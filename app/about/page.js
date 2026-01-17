@@ -1,40 +1,170 @@
 "use client";
 
 import React from 'react';
+import { FaUsers, FaHandshake, FaBullhorn, FaMobileAlt, FaGlobe, FaHeart, FaCheckCircle } from 'react-icons/fa';
 
 export default function AboutPage() {
   return (
-    <div className="max-w-4xl mx-auto py-12 px-4 md:px-6 lg:px-8 bg-white shadow-lg rounded-xl mt-8 mb-12">
-      <h1 className="text-4xl md:text-5xl font-extrabold mb-10 text-center text-gray-900 leading-tight">
-        About Sosign
-      </h1>
+    <div className="bg-[#f0f2f5] min-h-screen py-12 px-4 md:px-6 lg:px-8">
+      <div className="max-w-5xl mx-auto">
+        {/* Hero Section */}
+        <div className="bg-gradient-to-r from-[#002050] to-[#2D3A8C] rounded-3xl p-8 md:p-12 mb-10 text-center shadow-xl">
+          <h1 className="text-3xl md:text-5xl font-extrabold text-white mb-4 leading-tight">
+            About Us – Sosign.in
+          </h1>
+          <p className="text-lg md:text-xl text-white/90 max-w-3xl mx-auto leading-relaxed">
+            Sosign.in is a powerful petition and signature-campaign platform built to transform voices into real-world change. We exist with one clear purpose: to create awareness, unite people, and help resolve social issues quickly, transparently, and permanently.
+          </p>
+        </div>
 
-      <div className="space-y-6 text-gray-700 leading-relaxed">
-        <p>
-          Sosign is the world&apos;s best petition cum Signature campaign platform, here we are with an aim to make people aware of ostracism and get the issue resolved quickly and permanently.
-        </p>
+        {/* Who We Are Section */}
+        <div className="bg-white rounded-2xl p-8 md:p-10 mb-8 shadow-lg">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-12 h-12 bg-[#F43676]/10 rounded-full flex items-center justify-center">
+              <FaUsers className="text-[#F43676] text-xl" />
+            </div>
+            <h2 className="text-2xl md:text-3xl font-bold text-[#002050]">Who We Are</h2>
+          </div>
+          <div className="space-y-4 text-[#302d55] leading-relaxed text-lg">
+            <p>
+              Sosign is a new-age digital movement that brings people from across the nation onto one common platform. We believe that every individual&apos;s opinion matters and that collective voices can influence decisions, policies, and actions.
+            </p>
+            <p>
+              At Sosign, we help citizens use their online identity as a force for good—to start petitions, support causes, and build campaigns that address the social challenges affecting our country today.
+            </p>
+          </div>
+        </div>
 
-        <h2 className="text-2xl font-semibold mt-8 mb-4 text-gray-800">Who we are:</h2>
-        <p>
-          We the Sosign is the new online platform that brings people all around the nation into a community to share their views on the important aspects existing in our country. We make the strong use of one’s online persona to start and win the campaign against the issues affecting the social environment of nation. We work to gather the ordinary people and NGO to make them even stronger to raise their voice in a right direction. Our aim is just to make social awareness against the criticisms going on in our society. So let us join and make our country even better!
-        </p>
-        <p>
-          Now the only thing we can do rather than just speaking off about the criticism with our friends on local kattas is to come on join the community and discuss some points against the criticism. We are the only medium for you to speak but you are the main aspects who can make us feel happy with our aim to make the world better.
-        </p>
+        {/* What We Do Section */}
+        <div className="bg-white rounded-2xl p-8 md:p-10 mb-8 shadow-lg">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-12 h-12 bg-[#F43676]/10 rounded-full flex items-center justify-center">
+              <FaHandshake className="text-[#F43676] text-xl" />
+            </div>
+            <h2 className="text-2xl md:text-3xl font-bold text-[#002050]">What We Do</h2>
+          </div>
+          <p className="text-[#302d55] leading-relaxed text-lg mb-6">
+            We connect:
+          </p>
+          <div className="grid md:grid-cols-3 gap-4 mb-6">
+            <div className="bg-[#f0f2f5] rounded-xl p-5 text-center">
+              <div className="w-10 h-10 bg-[#002050] rounded-full flex items-center justify-center mx-auto mb-3">
+                <FaUsers className="text-white text-sm" />
+              </div>
+              <p className="text-[#002050] font-semibold">Ordinary citizens who want change</p>
+            </div>
+            <div className="bg-[#f0f2f5] rounded-xl p-5 text-center">
+              <div className="w-10 h-10 bg-[#F43676] rounded-full flex items-center justify-center mx-auto mb-3">
+                <FaHeart className="text-white text-sm" />
+              </div>
+              <p className="text-[#002050] font-semibold">Social workers and NGOs working on the ground</p>
+            </div>
+            <div className="bg-[#f0f2f5] rounded-xl p-5 text-center">
+              <div className="w-10 h-10 bg-[#2D3A8C] rounded-full flex items-center justify-center mx-auto mb-3">
+                <FaBullhorn className="text-white text-sm" />
+              </div>
+              <p className="text-[#002050] font-semibold">Political leaders and parties who can drive policy and action</p>
+            </div>
+          </div>
+          <p className="text-[#302d55] leading-relaxed text-lg">
+            By bringing these stakeholders together, Sosign becomes a bridge between problems, people, and solutions. Our platform enables meaningful discussions, verified signature campaigns, and focused awareness drives that push issues in the right direction.
+          </p>
+        </div>
 
-        <h2 className="text-2xl font-semibold mt-8 mb-4 text-gray-800">Director & Founder Of Sosign:</h2>
-        <p>
-          Mr. Narendra Kumar Chandiramani is the founder and director of the company LeoHeart itech pvt. Ltd. and Sosign.com. He started LeoHeart itech Pvt. Ltd. In 2011 and Sosign.com in 2013 with aim to change the world by signature campagin with unique petition platform providing ordinary people the medium to raise the voice against the ostracism existing in the society. Initially Sosign was a “signature campaign” medium but later on with great supporters like you it turned into a petition cum signature campaign site name “Sosign.com”.
-        </p>
+        {/* Why Sosign Matters Section */}
+        <div className="bg-gradient-to-r from-[#F43676] to-[#ff6b9d] rounded-2xl p-8 md:p-10 mb-8 shadow-lg text-white">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+              <FaCheckCircle className="text-white text-xl" />
+            </div>
+            <h2 className="text-2xl md:text-3xl font-bold">Why Sosign Matters</h2>
+          </div>
+          <div className="space-y-4 leading-relaxed text-lg">
+            <p>
+              Too often, important issues are discussed only in closed circles—with friends, on local street corners, or on social media without impact. Sosign changes that.
+            </p>
+            <p className="font-semibold text-xl">
+              Instead of just talking about problems, we help you act.
+            </p>
+            <p>
+              Sosign gives you the medium to speak up, but you are the real power. Every signature, every shared campaign, and every discussion moves us closer to a better society.
+            </p>
+          </div>
+        </div>
 
-        <h2 className="text-2xl font-semibold mt-8 mb-4 text-gray-800">Future Scope of Sosign:</h2>
-        <p>
-          We are here to make the solutions to issues that can be a greater headline in future. Also in future there might be an android app of Sosign to make people easily start petition with us. Sosign may lead big campaigns in future like human trafficking etc. and other greater issues existing.
-        </p>
+        {/* Our Mission Section */}
+        <div className="bg-white rounded-2xl p-8 md:p-10 mb-8 shadow-lg">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-12 h-12 bg-[#F43676]/10 rounded-full flex items-center justify-center">
+              <FaBullhorn className="text-[#F43676] text-xl" />
+            </div>
+            <h2 className="text-2xl md:text-3xl font-bold text-[#002050]">Our Mission</h2>
+          </div>
+          <p className="text-[#302d55] leading-relaxed text-lg mb-6">
+            Our mission is simple yet strong:
+          </p>
+          <div className="grid md:grid-cols-2 gap-4">
+            {[
+              "Create social awareness",
+              "Encourage responsible participation",
+              "Support campaigns that lead to real solutions",
+              "Strengthen democracy through people-driven action"
+            ].map((item, index) => (
+              <div key={index} className="flex items-center gap-3 bg-[#f0f2f5] rounded-lg p-4">
+                <div className="w-8 h-8 bg-[#002050] rounded-full flex items-center justify-center flex-shrink-0">
+                  <FaCheckCircle className="text-white text-sm" />
+                </div>
+                <p className="text-[#002050] font-medium">{item}</p>
+              </div>
+            ))}
+          </div>
+        </div>
 
-        <p className="text-center text-lg font-bold mt-10 text-blue-600">
-          Come on we are changing the world do help us for it!
-        </p>
+        {/* Future Scope Section */}
+        <div className="bg-white rounded-2xl p-8 md:p-10 mb-8 shadow-lg">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-12 h-12 bg-[#F43676]/10 rounded-full flex items-center justify-center">
+              <FaGlobe className="text-[#F43676] text-xl" />
+            </div>
+            <h2 className="text-2xl md:text-3xl font-bold text-[#002050]">Future Scope of Sosign</h2>
+          </div>
+          <p className="text-[#302d55] leading-relaxed text-lg mb-6">
+            We are building Sosign not just for today, but for the future.
+          </p>
+          <div className="grid md:grid-cols-2 gap-4">
+            {[
+              { icon: FaMobileAlt, text: "Launch of a dedicated Android app to make starting and supporting petitions even easier" },
+              { icon: FaGlobe, text: "Expansion into large-scale national and global campaigns" },
+              { icon: FaHeart, text: "Focus on critical issues such as human trafficking, social justice, public welfare, and human rights" },
+              { icon: FaCheckCircle, text: "Becoming a trusted digital space where voices lead to measurable outcomes" }
+            ].map((item, index) => (
+              <div key={index} className="flex items-start gap-3 bg-[#f0f2f5] rounded-lg p-4">
+                <div className="w-8 h-8 bg-[#F43676] rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <item.icon className="text-white text-sm" />
+                </div>
+                <p className="text-[#302d55]">{item.text}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Join the Change CTA Section */}
+        <div className="bg-gradient-to-r from-[#002050] to-[#2D3A8C] rounded-2xl p-8 md:p-12 text-center shadow-xl">
+          <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">Join the Change</h2>
+          <p className="text-white/90 text-lg mb-6">
+            We are not just talking about changing the world—we are doing it together.
+          </p>
+          <div className="flex flex-wrap justify-center gap-4 mb-8">
+            {["Join Sosign.in", "Start a campaign", "Support a cause", "Add your signature"].map((action, index) => (
+              <span key={index} className="bg-white/10 backdrop-blur-sm border border-white/20 text-white px-5 py-2 rounded-full font-medium">
+                {action}
+              </span>
+            ))}
+          </div>
+          <p className="text-[#F43676] text-xl md:text-2xl font-bold italic">
+            Because when people unite with purpose, change is not optional—it&apos;s inevitable.
+          </p>
+        </div>
       </div>
     </div>
   );

@@ -78,6 +78,14 @@ function LoginContent() {
       setSignupError("Password is required");
       return;
     }
+
+    // Password validation: 6+ chars, uppercase, lowercase, special character
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*(),.?":{}|<>]).{6,}$/;
+    if (!passwordRegex.test(createPassword)) {
+      setSignupError("Password must be at least 6 characters with uppercase, lowercase, and special character");
+      return;
+    }
+
     if (!confirmPassword.trim()) {
       setSignupError("Please confirm your password");
       return;
@@ -259,14 +267,20 @@ function LoginContent() {
               <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Designation
               </label>
-              <input
-                type="text"
-                placeholder="Your designation"
-                className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-[#F43676] focus:outline-none transition-colors"
+              <select
+                className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-[#F43676] focus:outline-none transition-colors bg-white"
                 value={designation}
                 onChange={(e) => setDesignation(e.target.value)}
                 required
-              />
+              >
+                <option value="">Select your designation</option>
+                <option value="Individual">Individual</option>
+                <option value="Personal">Personal</option>
+                <option value="Politician">Politician</option>
+                <option value="NGO">NGO</option>
+                <option value="Political Party">Political Party</option>
+                <option value="Social Worker">Social Worker</option>
+              </select>
             </div>
 
             <div>
@@ -316,6 +330,9 @@ function LoginContent() {
               >
                 {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
+              <p className="text-xs text-gray-500 mt-1">
+                Min 6 chars with uppercase, lowercase & special character
+              </p>
             </div>
 
             <div className="relative">

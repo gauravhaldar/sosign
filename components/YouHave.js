@@ -99,7 +99,7 @@ export default function YouHave() {
                 </h3>
 
                 {/* Author Info */}
-                <div className="flex items-center gap-2 text-sm">
+                <div className="flex items-center gap-2 text-sm mb-3">
                   <div className="w-5 h-5 rounded-full bg-gray-400 overflow-hidden">
                     {petition.petitionStarter?.user?.photoURL ? (
                       <img
@@ -125,6 +125,11 @@ export default function YouHave() {
                       day: 'numeric'
                     })}
                   </span>
+                </div>
+
+                {/* Sign This Petition Button */}
+                <div className="inline-block bg-gradient-to-r from-[#F43676] to-[#e02a60] text-white px-4 py-1.5 rounded-full font-semibold text-xs hover:shadow-lg transition-all duration-200">
+                  ✍️ Sign Petition
                 </div>
               </div>
             </Link>
