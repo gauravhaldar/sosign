@@ -49,7 +49,7 @@ function LoginContent() {
       await login(loginEmail, loginPassword);
       router.push(redirectUrl);
     } catch (error) {
-      setLoginError(error);
+      setLoginError(error?.message || String(error) || "Login failed");
     }
   };
 
@@ -101,7 +101,7 @@ function LoginContent() {
       await signup(name, designation, signupEmail, mobile, createPassword);
       router.push(redirectUrl);
     } catch (error) {
-      setSignupError(error);
+      setSignupError(error?.message || String(error) || "Signup failed");
     }
   };
 

@@ -193,7 +193,7 @@ export default function CurrentPetitions() {
       ) : (
         <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
           {petitions.slice(0, visibleCount).map((petition, index) => (
-            <Link key={petition._id} href={`/currentpetitions/${petition._id}`}>
+            <Link key={petition._id} href={`/currentpetitions/${petition.slug || petition._id}`}>
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}

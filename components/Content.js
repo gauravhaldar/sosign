@@ -316,7 +316,7 @@ export default function Content({ initialPetitions = [], initialPagination = {} 
                         }`}
                     >
                       <Link
-                        href={`/currentpetitions/${petition._id}`}
+                        href={`/currentpetitions/${petition.slug || petition._id}`}
                         className="flex flex-col sm:flex-row items-center"
                       >
                         {/* Image - Extended outside */}

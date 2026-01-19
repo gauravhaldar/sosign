@@ -61,7 +61,7 @@ export default function YouHave() {
           {petitions.map((petition) => (
             <Link
               key={petition._id}
-              href={`/currentpetitions/${petition._id}`}
+              href={`/currentpetitions/${petition.slug || petition._id}`}
               className="group relative rounded-2xl overflow-hidden aspect-square"
             >
               {/* Background Image */}

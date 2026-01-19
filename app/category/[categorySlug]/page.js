@@ -242,7 +242,7 @@ export default function CategoryPage() {
                                                         key={petition._id}
                                                         className="relative bg-white rounded-3xl shadow-sm hover:shadow-md transition-shadow border border-gray-100"
                                                     >
-                                                        <Link href={`/currentpetitions/${petition._id}`} className="flex flex-col sm:flex-row items-center">
+                                                        <Link href={`/currentpetitions/${petition.slug || petition._id}`} className="flex flex-col sm:flex-row items-center">
                                                             {/* Image */}
                                                             <div className="sm:w-2/5 relative sm:-ml-6 my-4 sm:my-6">
                                                                 <div className="aspect-[4/3] rounded-2xl overflow-hidden shadow-lg bg-gradient-to-br from-pink-100 to-gray-100">
@@ -372,7 +372,7 @@ export default function CategoryPage() {
                                             {recentPetitions.map((petition) => (
                                                 <li key={petition._id} className="border-b border-gray-100 pb-3 last:border-0 last:pb-0">
                                                     <Link
-                                                        href={`/currentpetitions/${petition._id}`}
+                                                        href={`/currentpetitions/${petition.slug || petition._id}`}
                                                         className="text-gray-600 hover:text-[#F43676] transition-colors text-sm leading-relaxed block"
                                                     >
                                                         {petition.title}

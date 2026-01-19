@@ -518,7 +518,7 @@ export default function CategoryPostPage() {
                                             {recentPetitions.map((petition) => (
                                                 <li key={petition._id} className="border-b border-gray-100 pb-3 last:border-0 last:pb-0">
                                                     <Link
-                                                        href={`/currentpetitions/${petition._id}`}
+                                                        href={`/currentpetitions/${petition.slug || petition._id}`}
                                                         className="text-gray-600 hover:text-[#F43676] transition-colors text-sm leading-relaxed block"
                                                     >
                                                         {petition.title}

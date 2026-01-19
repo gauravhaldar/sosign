@@ -205,7 +205,7 @@ export default function Footer() {
               latestPetitions.map((petition) => (
                 <Link
                   key={petition._id}
-                  href={`/currentpetitions/${petition._id}`}
+                  href={`/currentpetitions/${petition.slug || petition._id}`}
                   className="flex gap-3 group"
                 >
                   <div className="w-16 h-16 rounded-lg overflow-hidden shrink-0 bg-gradient-to-br from-pink-100 to-gray-100">

@@ -79,7 +79,7 @@ export default function Banner({ initialPetitions = [] }) {
         description: petition.petitionDetails?.problem || petition.petitionDetails?.solution || "Support this important cause by signing the petition.",
         date: formatDate(petition.createdAt),
         comments: `${petition.numberOfSignatures || 0} Signatures`,
-        link: `/currentpetitions/${petition._id}`,
+        link: `/currentpetitions/${petition.slug || petition._id}`,
       }));
     }
     return defaultHeroSlides;
@@ -139,7 +139,7 @@ export default function Banner({ initialPetitions = [] }) {
             description: petition.petitionDetails?.problem || petition.petitionDetails?.solution || "Support this important cause by signing the petition.",
             date: formatDate(petition.createdAt),
             comments: `${petition.numberOfSignatures || 0} Signatures`,
-            link: `/currentpetitions/${petition._id}`,
+            link: `/currentpetitions/${petition.slug || petition._id}`,
           }));
 
           setHeroSlides(slides);
@@ -158,7 +158,7 @@ export default function Banner({ initialPetitions = [] }) {
               title: petition.title.length > 50 ? petition.title.substring(0, 50) + "..." : petition.title,
               date: `${petition.numberOfSignatures || 0} signatures`,
               image: petition.petitionDetails?.image || `https://picsum.photos/seed/${petition._id}/100/100`,
-              link: `/currentpetitions/${petition._id}`,
+              link: `/currentpetitions/${petition.slug || petition._id}`,
             }));
 
             setTopStories(stories);
