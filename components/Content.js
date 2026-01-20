@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { FaSearch, FaCalendarAlt, FaPlay, FaChevronRight, FaChevronLeft, FaSpinner, FaPen, FaFacebookF, FaInstagram, FaYoutube, FaLinkedinIn } from "react-icons/fa";
+import { FaSearch, FaCalendarAlt, FaPlay, FaChevronRight, FaChevronLeft, FaSpinner, FaPen, FaFacebookF, FaInstagram, FaYoutube, FaLinkedinIn, FaCopy } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
 import { useAuth } from "../context/AuthContext";
 import ProfileEditModal from "./ProfileEditModal";
@@ -63,6 +63,7 @@ export default function Content({ initialPetitions = [], initialPagination = {} 
   const [searchSuggestions, setSearchSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [suggestionsLoading, setSuggestionsLoading] = useState(false);
+  const [copied, setCopied] = useState(false);
   const searchRef = useRef(null);
   const router = useRouter();
   const { user } = useAuth();
@@ -691,6 +692,31 @@ export default function Content({ initialPetitions = [], initialPagination = {} 
                   <p className="text-[#302d55] text-sm leading-relaxed mb-4">
                     {user.bio || "Click the edit button to add your bio and tell others about yourself!"}
                   </p>
+
+                  {/* Referral Code */}
+                  {user.uniqueCode && (
+                    <div className="bg-pink-50 rounded-xl p-3 mb-4">
+                      <p className="text-xs font-semibold text-gray-600 mb-2">Your Referral Code</p>
+                      <div className="flex items-center gap-2">
+                        <input
+                          value={user.uniqueCode}
+                          readOnly
+                          className="flex-1 px-3 py-2 border border-pink-200 rounded-lg bg-white font-mono text-sm tracking-wider text-center font-bold text-[#F43676] focus:outline-none"
+                        />
+                        <button
+                          onClick={() => {
+                            navigator.clipboard.writeText(user.uniqueCode);
+                            setCopied(true);
+                            setTimeout(() => setCopied(false), 2000);
+                          }}
+                          className="bg-gradient-to-r from-[#F43676] to-[#e02a60] text-white px-3 py-2 rounded-lg font-medium hover:shadow-md hover:scale-105 transition-all duration-200 flex items-center gap-1 text-sm"
+                        >
+                          <FaCopy className="text-xs" />
+                          {copied ? "Copied!" : "Copy"}
+                        </button>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Social Media Icons */}
                   {user.socialLinks && Object.values(user.socialLinks).some(link => link) && (

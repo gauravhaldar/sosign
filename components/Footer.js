@@ -47,8 +47,8 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 pb-12">
         {/* Search & About Section */}
         <div>
-          <h3 className="text-xl font-bold mb-5">Search</h3>
-          <div className="flex mb-8">
+          {/* <h3 className="text-xl font-bold mb-5">Search</h3> */}
+          {/* <div className="flex mb-8">
             <input
               type="text"
               placeholder="Search"
@@ -59,7 +59,7 @@ export default function Footer() {
             <button className="px-4 py-3 bg-[#F43676] rounded-r-lg hover:bg-[#e02a60] transition-colors">
               <FaSearch className="text-white" />
             </button>
-          </div>
+          </div> */}
 
           <h3 className="text-xl font-bold mb-4">About Sosign</h3>
           <p className="text-gray-300 text-sm leading-relaxed mb-6">

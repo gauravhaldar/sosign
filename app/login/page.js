@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
-import { Eye, EyeOff } from "lucide-react";
+import { useState, useEffect, Suspense, useRef } from "react";
+import { Eye, EyeOff, Check, Loader2 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { useAuth } from "../../context/AuthContext";
 import Image from "next/image";
-import { auth, provider } from "../../utils/Firebase";
+import { auth, provider, RecaptchaVerifier, signInWithPhoneNumber } from "../../utils/Firebase";
 import { signInWithPopup } from "firebase/auth";
 
 function LoginContent() {
@@ -29,6 +30,17 @@ function LoginContent() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [signupError, setSignupError] = useState("");
 
+  // Phone OTP verification states
+  const [otpSent, setOtpSent] = useState(false);
+  const [otp, setOtp] = useState("");
+  const [confirmationResult, setConfirmationResult] = useState(null);
+  const [phoneVerified, setPhoneVerified] = useState(false);
+  const [sendingOtp, setSendingOtp] = useState(false);
+  const [verifyingOtp, setVerifyingOtp] = useState(false);
+  const [otpError, setOtpError] = useState("");
+  const recaptchaContainerRef = useRef(null);
+  const recaptchaVerifierRef = useRef(null);
+
   const { login, signup, loading, googleLogin } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -40,6 +52,93 @@ function LoginContent() {
       setRedirectUrl(redirect);
     }
   }, [searchParams]);
+
+  // Initialize reCAPTCHA verifier
+  const setupRecaptcha = () => {
+    if (!recaptchaVerifierRef.current) {
+      recaptchaVerifierRef.current = new RecaptchaVerifier(auth, 'recaptcha-container', {
+        'size': 'invisible',
+        'callback': () => {
+          // reCAPTCHA solved
+        },
+        'expired-callback': () => {
+          setOtpError("reCAPTCHA expired. Please try again.");
+          recaptchaVerifierRef.current = null;
+        }
+      });
+    }
+    return recaptchaVerifierRef.current;
+  };
+
+  // Send OTP to phone number
+  const handleSendOtp = async () => {
+    if (!mobile.trim()) {
+      setOtpError("Please enter your mobile number");
+      return;
+    }
+
+    // Validate mobile number (10 digits)
+    const cleanMobile = mobile.replace(/\D/g, '');
+    if (cleanMobile.length !== 10) {
+      setOtpError("Please enter a valid 10-digit mobile number");
+      return;
+    }
+
+    setSendingOtp(true);
+    setOtpError("");
+
+    try {
+      const appVerifier = setupRecaptcha();
+      const phoneNumber = `+91${cleanMobile}`;
+      const result = await signInWithPhoneNumber(auth, phoneNumber, appVerifier);
+      setConfirmationResult(result);
+      setOtpSent(true);
+      setOtpError("");
+    } catch (error) {
+      console.error("Error sending OTP:", error);
+      setOtpError(error.message || "Failed to send OTP. Please try again.");
+      // Reset reCAPTCHA on error
+      recaptchaVerifierRef.current = null;
+    } finally {
+      setSendingOtp(false);
+    }
+  };
+
+  // Verify OTP
+  const handleVerifyOtp = async () => {
+    if (!otp.trim()) {
+      setOtpError("Please enter the OTP");
+      return;
+    }
+
+    if (otp.length !== 6) {
+      setOtpError("Please enter a valid 6-digit OTP");
+      return;
+    }
+
+    setVerifyingOtp(true);
+    setOtpError("");
+
+    try {
+      await confirmationResult.confirm(otp);
+      setPhoneVerified(true);
+      setOtpError("");
+    } catch (error) {
+      console.error("Error verifying OTP:", error);
+      setOtpError("Invalid OTP. Please try again.");
+    } finally {
+      setVerifyingOtp(false);
+    }
+  };
+
+  // Resend OTP
+  const handleResendOtp = () => {
+    setOtpSent(false);
+    setOtp("");
+    setConfirmationResult(null);
+    recaptchaVerifierRef.current = null;
+    handleSendOtp();
+  };
 
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
@@ -74,6 +173,13 @@ function LoginContent() {
       setSignupError("Mobile number is required");
       return;
     }
+
+    // Check phone verification
+    if (!phoneVerified) {
+      setSignupError("Please verify your mobile number with OTP");
+      return;
+    }
+
     if (!createPassword.trim()) {
       setSignupError("Password is required");
       return;
@@ -212,13 +318,13 @@ function LoginContent() {
 
             <p className="text-xs text-gray-500 text-center leading-relaxed">
               By joining or logging in, you accept{" "}
-              <span className="text-[#F43676] cursor-pointer hover:underline">
+              <Link href="/terms" className="text-[#F43676] cursor-pointer hover:underline">
                 sosign.in Terms of Service
-              </span>{" "}
+              </Link>{" "}
               and{" "}
-              <span className="text-[#F43676] cursor-pointer hover:underline">
+              <Link href="/privacy" className="text-[#F43676] cursor-pointer hover:underline">
                 Privacy Policy
-              </span>
+              </Link>
               .
             </p>
 
@@ -285,16 +391,109 @@ function LoginContent() {
 
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Mobile
+                Mobile Number
               </label>
-              <input
-                type="tel"
-                placeholder="Enter mobile number"
-                className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-[#F43676] focus:outline-none transition-colors"
-                value={mobile}
-                onChange={(e) => setMobile(e.target.value)}
-                required
-              />
+              <div className="flex gap-2">
+                <div className="flex items-center px-3 border-2 border-gray-200 rounded-l-xl bg-gray-50 text-gray-600 font-medium">
+                  +91
+                </div>
+                <input
+                  type="tel"
+                  placeholder="Enter 10-digit mobile number"
+                  className={`flex-1 border-2 border-gray-200 rounded-r-xl px-4 py-3 focus:border-[#F43676] focus:outline-none transition-colors ${phoneVerified ? 'bg-green-50 border-green-300' : ''} ${otpSent && !phoneVerified ? 'bg-gray-50' : ''}`}
+                  value={mobile}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/\D/g, '').slice(0, 10);
+                    setMobile(value);
+                  }}
+                  disabled={otpSent || phoneVerified}
+                  required
+                />
+                {!otpSent && !phoneVerified && (
+                  <button
+                    type="button"
+                    onClick={handleSendOtp}
+                    disabled={sendingOtp || mobile.length !== 10}
+                    className="px-4 py-3 bg-gradient-to-r from-[#F43676] to-[#e02a60] text-white rounded-xl font-semibold hover:shadow-lg hover:scale-[1.02] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center gap-2 whitespace-nowrap"
+                  >
+                    {sendingOtp ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Sending...
+                      </>
+                    ) : (
+                      'Send OTP'
+                    )}
+                  </button>
+                )}
+                {phoneVerified && (
+                  <div className="flex items-center px-4 text-green-600">
+                    <Check className="w-6 h-6" />
+                  </div>
+                )}
+              </div>
+
+              {/* OTP Input Section */}
+              {otpSent && !phoneVerified && (
+                <div className="mt-3 p-4 bg-pink-50 rounded-xl border border-pink-100">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Enter OTP
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="Enter 6-digit OTP"
+                      className="flex-1 border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-[#F43676] focus:outline-none transition-colors text-center tracking-widest font-mono text-lg"
+                      value={otp}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/\D/g, '').slice(0, 6);
+                        setOtp(value);
+                      }}
+                      maxLength={6}
+                    />
+                    <button
+                      type="button"
+                      onClick={handleVerifyOtp}
+                      disabled={verifyingOtp || otp.length !== 6}
+                      className="px-6 py-3 bg-gradient-to-r from-[#F43676] to-[#e02a60] text-white rounded-xl font-semibold hover:shadow-lg hover:scale-[1.02] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center gap-2"
+                    >
+                      {verifyingOtp ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          Verifying...
+                        </>
+                      ) : (
+                        'Verify'
+                      )}
+                    </button>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-2">
+                    Didn&apos;t receive OTP?{' '}
+                    <button
+                      type="button"
+                      onClick={handleResendOtp}
+                      className="text-[#F43676] font-semibold hover:underline"
+                    >
+                      Resend OTP
+                    </button>
+                  </p>
+                </div>
+              )}
+
+              {/* Phone Verified Success Message */}
+              {phoneVerified && (
+                <p className="text-green-600 text-sm mt-2 flex items-center gap-1">
+                  <Check className="w-4 h-4" /> Mobile number verified successfully!
+                </p>
+              )}
+
+              {/* OTP Error */}
+              {otpError && (
+                <p className="text-red-500 text-sm mt-2">{otpError}</p>
+              )}
+
+              {/* Invisible reCAPTCHA container */}
+              <div id="recaptcha-container" ref={recaptchaContainerRef}></div>
             </div>
 
             <div>

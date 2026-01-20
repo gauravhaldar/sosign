@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { FaTimes, FaCamera, FaSpinner, FaPhone, FaFacebookF, FaInstagram, FaYoutube, FaLinkedinIn } from "react-icons/fa";
+import { FaTimes, FaCamera, FaSpinner, FaPhone, FaFacebookF, FaInstagram, FaYoutube, FaLinkedinIn, FaCheck } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
 import { useAuth } from "@/context/AuthContext";
+import { auth, RecaptchaVerifier, signInWithPhoneNumber } from "@/utils/Firebase";
 
 export default function ProfileEditModal({ isOpen, onClose }) {
     const { user, updateProfile } = useAuth();
@@ -18,6 +19,19 @@ export default function ProfileEditModal({ isOpen, onClose }) {
     const [success, setSuccess] = useState("");
     const fileInputRef = useRef(null);
 
+    // OTP verification states
+    const [otpSent, setOtpSent] = useState(false);
+    const [otp, setOtp] = useState("");
+    const [confirmationResult, setConfirmationResult] = useState(null);
+    const [phoneVerified, setPhoneVerified] = useState(false);
+    const [sendingOtp, setSendingOtp] = useState(false);
+    const [verifyingOtp, setVerifyingOtp] = useState(false);
+    const [otpError, setOtpError] = useState("");
+    const recaptchaRef = useRef(null);
+
+    // Check if mobile is already verified (signed up with mobile or mobileVerified flag)
+    const isMobileVerified = (user?.mobileNumber && user?.mobileVerified) || (user?.mobileNumber && !user?.googleId);
+
     // Social links state
     const [socialLinks, setSocialLinks] = useState({
         facebook: user?.socialLinks?.facebook || "",
@@ -28,6 +42,70 @@ export default function ProfileEditModal({ isOpen, onClose }) {
     });
 
     if (!isOpen) return null;
+
+    // Setup reCAPTCHA
+    const setupRecaptcha = () => {
+        if (!recaptchaRef.current) {
+            recaptchaRef.current = new RecaptchaVerifier(auth, 'modal-recaptcha-container', {
+                'size': 'invisible',
+                'callback': () => { },
+                'expired-callback': () => {
+                    setOtpError("reCAPTCHA expired. Please try again.");
+                    recaptchaRef.current = null;
+                }
+            });
+        }
+        return recaptchaRef.current;
+    };
+
+    // Send OTP
+    const handleSendOtp = async () => {
+        const cleanMobile = mobileNumber.replace(/\D/g, '');
+        if (cleanMobile.length !== 10) {
+            setOtpError("Please enter a valid 10-digit mobile number");
+            return;
+        }
+
+        setSendingOtp(true);
+        setOtpError("");
+
+        try {
+            const appVerifier = setupRecaptcha();
+            const phoneNumber = `+91${cleanMobile}`;
+            const result = await signInWithPhoneNumber(auth, phoneNumber, appVerifier);
+            setConfirmationResult(result);
+            setOtpSent(true);
+            setOtpError("");
+        } catch (error) {
+            console.error("Error sending OTP:", error);
+            setOtpError(error.message || "Failed to send OTP. Please try again.");
+            recaptchaRef.current = null;
+        } finally {
+            setSendingOtp(false);
+        }
+    };
+
+    // Verify OTP
+    const handleVerifyOtp = async () => {
+        if (otp.length !== 6) {
+            setOtpError("Please enter a valid 6-digit OTP");
+            return;
+        }
+
+        setVerifyingOtp(true);
+        setOtpError("");
+
+        try {
+            await confirmationResult.confirm(otp);
+            setPhoneVerified(true);
+            setOtpError("");
+        } catch (error) {
+            console.error("Error verifying OTP:", error);
+            setOtpError("Invalid OTP. Please try again.");
+        } finally {
+            setVerifyingOtp(false);
+        }
+    };
 
     const handleFileChange = (e) => {
         const file = e.target.files[0];
@@ -60,7 +138,16 @@ export default function ProfileEditModal({ isOpen, onClose }) {
             formData.append("name", name);
             formData.append("bio", bio);
             formData.append("designation", designation);
-            formData.append("mobileNumber", mobileNumber);
+
+            // Include mobile number and verification status
+            if (phoneVerified) {
+                formData.append("mobileNumber", mobileNumber);
+                formData.append("mobileVerified", "true");
+            } else if (!isMobileVerified) {
+                // Only update mobile if user hasn't verified yet and hasn't just verified
+                formData.append("mobileNumber", mobileNumber);
+            }
+
             formData.append("socialLinks", JSON.stringify(socialLinks));
             if (profilePicture) {
                 formData.append("profilePicture", profilePicture);
@@ -156,21 +243,121 @@ export default function ProfileEditModal({ isOpen, onClose }) {
                         />
                     </div>
 
-                    {/* Mobile Number */}
+                    {/* Mobile Number with OTP */}
                     <div>
                         <label className="block text-sm font-semibold text-[#002050] mb-2">
                             Mobile Number
                         </label>
-                        <div className="relative">
-                            <FaPhone className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-                            <input
-                                type="tel"
-                                value={mobileNumber}
-                                onChange={(e) => setMobileNumber(e.target.value)}
-                                className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl outline-none focus:border-[#F43676] transition-colors"
-                                placeholder="e.g., +91 9876543210"
-                            />
-                        </div>
+
+                        {/* If already verified, show read-only */}
+                        {isMobileVerified ? (
+                            <div className="flex items-center gap-2">
+                                <div className="flex items-center flex-1 px-4 py-3 border border-green-200 rounded-xl bg-green-50">
+                                    <FaPhone className="text-green-500 mr-3" />
+                                    <span className="text-gray-500 mr-1">+91</span>
+                                    <span className="font-medium text-gray-700">{user?.mobileNumber}</span>
+                                </div>
+                                <div className="flex items-center px-3 py-3 text-green-600 bg-green-50 rounded-xl border border-green-200">
+                                    <FaCheck className="text-sm mr-1" />
+                                    <span className="text-sm font-medium">Verified</span>
+                                </div>
+                            </div>
+                        ) : phoneVerified ? (
+                            /* Just verified in this session */
+                            <div className="flex items-center gap-2">
+                                <div className="flex items-center flex-1 px-4 py-3 border border-green-200 rounded-xl bg-green-50">
+                                    <FaPhone className="text-green-500 mr-3" />
+                                    <span className="text-gray-500 mr-1">+91</span>
+                                    <span className="font-medium text-gray-700">{mobileNumber}</span>
+                                </div>
+                                <div className="flex items-center px-3 py-3 text-green-600 bg-green-50 rounded-xl border border-green-200">
+                                    <FaCheck className="text-sm mr-1" />
+                                    <span className="text-sm font-medium">Verified</span>
+                                </div>
+                            </div>
+                        ) : !otpSent ? (
+                            /* Input for mobile with Send OTP */
+                            <div className="space-y-2">
+                                <div className="flex gap-2">
+                                    <div className="flex items-center px-3 border border-gray-200 rounded-l-xl bg-gray-50 text-gray-600 font-medium">
+                                        +91
+                                    </div>
+                                    <input
+                                        type="tel"
+                                        value={mobileNumber}
+                                        onChange={(e) => {
+                                            const value = e.target.value.replace(/\D/g, '').slice(0, 10);
+                                            setMobileNumber(value);
+                                        }}
+                                        className="flex-1 px-4 py-3 border border-gray-200 rounded-r-xl outline-none focus:border-[#F43676] transition-colors"
+                                        placeholder="Enter 10-digit number"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={handleSendOtp}
+                                        disabled={sendingOtp || mobileNumber.length !== 10}
+                                        className="px-4 py-3 bg-gradient-to-r from-[#F43676] to-[#e02a60] text-white rounded-xl font-semibold hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 whitespace-nowrap"
+                                    >
+                                        {sendingOtp ? (
+                                            <FaSpinner className="animate-spin" />
+                                        ) : (
+                                            'Send OTP'
+                                        )}
+                                    </button>
+                                </div>
+                                {otpError && (
+                                    <p className="text-red-500 text-sm">{otpError}</p>
+                                )}
+                            </div>
+                        ) : (
+                            /* OTP verification section */
+                            <div className="space-y-3">
+                                <p className="text-sm text-gray-500">OTP sent to +91 {mobileNumber}</p>
+                                <div className="flex gap-2">
+                                    <input
+                                        type="text"
+                                        value={otp}
+                                        onChange={(e) => {
+                                            const value = e.target.value.replace(/\D/g, '').slice(0, 6);
+                                            setOtp(value);
+                                        }}
+                                        maxLength={6}
+                                        className="flex-1 px-4 py-3 border border-gray-200 rounded-xl outline-none focus:border-[#F43676] transition-colors text-center font-mono tracking-widest text-lg"
+                                        placeholder="Enter 6-digit OTP"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={handleVerifyOtp}
+                                        disabled={verifyingOtp || otp.length !== 6}
+                                        className="px-6 py-3 bg-gradient-to-r from-[#F43676] to-[#e02a60] text-white rounded-xl font-semibold hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                    >
+                                        {verifyingOtp ? (
+                                            <FaSpinner className="animate-spin" />
+                                        ) : (
+                                            'Verify'
+                                        )}
+                                    </button>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setOtpSent(false);
+                                        setOtp("");
+                                        setConfirmationResult(null);
+                                        recaptchaRef.current = null;
+                                    }}
+                                    className="text-sm text-[#F43676] hover:underline"
+                                >
+                                    Change number
+                                </button>
+                                {otpError && (
+                                    <p className="text-red-500 text-sm">{otpError}</p>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Invisible reCAPTCHA container */}
+                        <div id="modal-recaptcha-container"></div>
                     </div>
 
                     {/* Bio */}

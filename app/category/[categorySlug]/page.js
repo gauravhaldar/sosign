@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { FaChevronRight, FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn, FaYoutube, FaPinterestP, FaSearch, FaCalendarAlt, FaPlay, FaPen } from "react-icons/fa";
+import { FaChevronRight, FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn, FaYoutube, FaPinterestP, FaSearch, FaCalendarAlt, FaPlay, FaPen, FaSpinner } from "react-icons/fa";
 import { useAuth } from "@/context/AuthContext";
 import Footer from "@/components/Footer";
 import ProfileEditModal from "@/components/ProfileEditModal";
@@ -203,6 +203,22 @@ export default function CategoryPage() {
             return data.comments || [];
         },
         enabled: !!user,
+    });
+
+    // Fetch active ads for sidebar
+    const { data: ads = [], isLoading: adsLoading } = useQuery({
+        queryKey: ["activeAds", "sidebar"],
+        queryFn: async () => {
+            const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+            const response = await fetch(`${backendUrl}/api/ads/active?position=sidebar`);
+
+            if (response.ok) {
+                const data = await response.json();
+                return data.ads || [];
+            }
+            return [];
+        },
+        staleTime: 5 * 60 * 1000,
     });
 
     return (
@@ -534,20 +550,57 @@ export default function CategoryPage() {
                                         <h3 className="text-xl font-bold text-[#1a1a2e]">Ads</h3>
                                         <span className="w-2 h-2 bg-[#F43676] rounded-full"></span>
                                     </div>
-                                    <div className="rounded-2xl overflow-hidden relative">
-                                        <img
-                                            src="https://picsum.photos/seed/ad1/400/500"
-                                            alt="Advertisement"
-                                            className="w-full h-auto"
-                                        />
-                                        <div className="absolute top-4 left-4 text-white">
-                                            <p className="text-2xl font-bold">SUMMER SALES!</p>
-                                            <p className="text-3xl font-bold">20%</p>
-                                            <button className="mt-2 px-4 py-1 bg-white text-black text-sm font-medium rounded">
-                                                Shop Now
-                                            </button>
+
+                                    {adsLoading ? (
+                                        <div className="flex items-center justify-center py-8">
+                                            <FaSpinner className="animate-spin text-2xl text-[#F43676]" />
                                         </div>
-                                    </div>
+                                    ) : ads.length > 0 ? (
+                                        <div className="space-y-4">
+                                            {ads.map((ad, index) => (
+                                                <a
+                                                    key={ad._id || index}
+                                                    href={ad.link}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="block group"
+                                                    onClick={async () => {
+                                                        try {
+                                                            const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+                                                            await fetch(`${backendUrl}/api/ads/${ad._id}/click`, { method: "POST" });
+                                                        } catch (err) {
+                                                            console.error("Error tracking click:", err);
+                                                        }
+                                                    }}
+                                                >
+                                                    <div className="rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                                                        <img
+                                                            src={ad.image || ad.imageUrl}
+                                                            alt={ad.title || "Advertisement"}
+                                                            className="w-full h-auto object-cover"
+                                                        />
+                                                    </div>
+                                                    <div className="mt-3">
+                                                        <h4 className="font-semibold text-[#1a1a2e] group-hover:text-[#F43676] transition-colors line-clamp-1">
+                                                            {ad.title}
+                                                        </h4>
+                                                        {ad.description && (
+                                                            <p className="text-gray-500 text-sm mt-1 line-clamp-2">
+                                                                {ad.description}
+                                                            </p>
+                                                        )}
+                                                    </div>
+                                                    {index < ads.length - 1 && (
+                                                        <div className="border-b border-gray-100 mt-4"></div>
+                                                    )}
+                                                </a>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className="text-center py-6 text-gray-400">
+                                            <p className="text-sm">No ads available</p>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div >
