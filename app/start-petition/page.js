@@ -22,7 +22,10 @@ export default function StartPetitionPage() {
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [captchaVerified, setCaptchaVerified] = useState(false);
   const [captchaResetTrigger, setCaptchaResetTrigger] = useState(0);
+  const [draftLoaded, setDraftLoaded] = useState(false);
+  const [showDraftNotification, setShowDraftNotification] = useState(false);
   const totalSteps = 4;
+  const DRAFT_KEY = "petition_draft";
 
   // Available categories for petitions
   const categories = [
@@ -93,7 +96,7 @@ export default function StartPetitionPage() {
       example: "e.g., 'Ministry of Environment' or 'Municipal Corporation of Delhi'"
     },
     recipientEmail: {
-      required: true,
+      required: false,
       minLength: 5,
       maxLength: 100,
       pattern: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
@@ -302,6 +305,91 @@ export default function StartPetitionPage() {
     }
   }, [user, authLoading, router]);
 
+  // Load draft from localStorage on mount
+  useEffect(() => {
+    if (user && !draftLoaded) {
+      try {
+        const savedDraft = localStorage.getItem(DRAFT_KEY);
+        if (savedDraft) {
+          const draft = JSON.parse(savedDraft);
+          // Only load draft if it's for the same user
+          if (draft.userId === user.uid || draft.userId === user.id) {
+            if (draft.formData) setFormData(draft.formData);
+            if (draft.recipients) setRecipients(draft.recipients);
+            if (draft.selectedCategories) setSelectedCategories(draft.selectedCategories);
+            if (draft.step) setStep(draft.step);
+            setShowDraftNotification(true);
+            setTimeout(() => setShowDraftNotification(false), 5000);
+          }
+        }
+      } catch (error) {
+        console.error("Error loading draft:", error);
+      }
+      setDraftLoaded(true);
+    }
+  }, [user, draftLoaded]);
+
+  // Auto-save draft to localStorage whenever form data changes
+  useEffect(() => {
+    if (user && draftLoaded) {
+      const draft = {
+        userId: user.uid || user.id,
+        formData,
+        recipients,
+        selectedCategories,
+        step,
+        savedAt: new Date().toISOString(),
+      };
+      try {
+        localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+      } catch (error) {
+        console.error("Error saving draft:", error);
+      }
+    }
+  }, [formData, recipients, selectedCategories, step, user, draftLoaded]);
+
+  // Function to clear draft
+  const clearDraft = () => {
+    try {
+      localStorage.removeItem(DRAFT_KEY);
+    } catch (error) {
+      console.error("Error clearing draft:", error);
+    }
+  };
+
+  // Function to discard draft and reset form
+  const discardDraft = () => {
+    clearDraft();
+    setFormData({
+      title: "",
+      country: "India",
+      problem: "",
+      solution: "",
+      videoUrl: "",
+      starter: {
+        name: "",
+        age: "",
+        email: "",
+        mobile: "",
+        location: "",
+        comment: "",
+        aadharNumber: "",
+        panNumber: "",
+        voterNumber: "",
+        pincode: "",
+        mpConstituencyNumber: "",
+        mlaConstituencyNumber: "",
+      },
+    });
+    setRecipients([{ name: "", organization: "", email: "", phone: "" }]);
+    setSelectedCategories([]);
+    setStep(1);
+    setSelectedImage(null);
+    setTouchedFields({});
+    setCaptchaVerified(false);
+    setShowDraftNotification(false);
+  };
+
   // Show loading while checking authentication
   if (authLoading) {
     return (
@@ -336,10 +424,11 @@ export default function StartPetitionPage() {
   };
 
   const isStep2Valid = () => {
-    // At least one recipient with valid name and email
+    // At least one recipient with valid name (email is optional)
     return recipients.some((recipient) => {
       const nameValid = validateField("recipientName", recipient.name).isValid;
-      const emailValid = validateField("recipientEmail", recipient.email).isValid;
+      // Email is optional - only validate if provided
+      const emailValid = !recipient.email || validateField("recipientEmail", recipient.email).isValid;
       return nameValid && emailValid;
     });
   };
@@ -425,7 +514,7 @@ export default function StartPetitionPage() {
       submitData.append("country", formData.country);
       submitData.append("categories", JSON.stringify(selectedCategories));
 
-      const validRecipients = recipients.filter((r) => r.name && r.email);
+      const validRecipients = recipients.filter((r) => r.name);
       submitData.append("decisionMakers", JSON.stringify(validRecipients));
 
       const petitionDetails = {
@@ -460,6 +549,8 @@ export default function StartPetitionPage() {
       const result = await response.json();
 
       if (response.ok) {
+        // Clear the draft on successful submission
+        clearDraft();
         // Redirect to the my-petition page after successful creation
         router.push("/my-petition");
       } else {
@@ -526,6 +617,42 @@ export default function StartPetitionPage() {
             transition={{ duration: 0.5 }}
           ></motion.div>
         </motion.div>
+
+        {/* Draft Notification */}
+        <AnimatePresence>
+          {showDraftNotification && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-xl flex items-center justify-between"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                  <FaCircleInfo className="text-blue-500 text-lg" />
+                </div>
+                <div>
+                  <p className="font-medium text-blue-800">Draft Restored</p>
+                  <p className="text-sm text-blue-600">We saved your progress. You can continue where you left off!</p>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={discardDraft}
+                  className="px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  Start Fresh
+                </button>
+                <button
+                  onClick={() => setShowDraftNotification(false)}
+                  className="px-3 py-1.5 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                >
+                  Continue
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         <AnimatePresence mode="wait">
           {step === 1 && (
@@ -660,7 +787,7 @@ export default function StartPetitionPage() {
               </p>
               <p className="mb-4 text-sm text-gray-500 flex items-center gap-1">
                 <FaCircleInfo className="text-blue-400" />
-                At least one recipient with a valid name (3+ characters) and email address is required.
+                At least one recipient with a valid name (3+ characters) is required. Email is optional.
               </p>
               <div className="space-y-4">
                 {recipients.map((recipient, recipientIdx) => {
@@ -742,7 +869,7 @@ export default function StartPetitionPage() {
                       {/* Email Field */}
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Email Address <span className="text-red-500">*</span>
+                          Email Address <span className="text-gray-400">(optional)</span>
                         </label>
                         <div className="relative">
                           <input
