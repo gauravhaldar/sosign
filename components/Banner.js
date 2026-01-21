@@ -41,11 +41,23 @@ const formatDate = (dateString) => {
   });
 };
 
-// Helper function to extract categories from petition (based on keywords)
+// Helper function to extract and format categories from petition
 const extractCategories = (petition) => {
-  const categories = [];
+  // Use actual categories from petition if available
+  if (petition.categories && petition.categories.length > 0) {
+    return petition.categories
+      .slice(0, 2) // Limit to 2 categories for display
+      .map(cat => {
+        // Convert slug format to display format (e.g., 'human_rights' -> 'Human Rights')
+        return cat
+          .split('_')
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(' ');
+      });
+  }
 
-  // Try to extract category from title or problem description
+  // Fallback: Try to extract category from title or problem description (for legacy petitions)
+  const categories = [];
   const text = `${petition.title} ${petition.petitionDetails?.problem || ""}`.toLowerCase();
 
   if (text.includes("environment") || text.includes("climate") || text.includes("pollution")) {
@@ -60,7 +72,7 @@ const extractCategories = (petition) => {
     categories.push("Social");
   }
 
-  return categories.slice(0, 2); // Return max 2 categories
+  return categories.slice(0, 2);
 };
 
 export default function Banner({ initialPetitions = [] }) {
@@ -355,7 +367,7 @@ export default function Banner({ initialPetitions = [] }) {
                     {heroSlides[currentSlide]?.categories?.map((category, index) => (
                       <Link
                         key={index}
-                        href={`/category/${category.toLowerCase()}`}
+                        href={`/category/${category.toLowerCase().replace(/\s+/g, '_')}`}
                         className="px-3 sm:px-4 py-1 sm:py-1.5 bg-[#F43676]/10 text-[#F43676] rounded-full text-xs sm:text-sm font-medium hover:bg-[#F43676] hover:text-white transition-all cursor-pointer"
                       >
                         {category}

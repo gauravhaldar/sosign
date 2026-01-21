@@ -393,33 +393,36 @@ function LoginContent() {
               <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Mobile Number
               </label>
-              <div className="flex gap-2">
-                <div className="flex items-center px-3 border-2 border-gray-200 rounded-l-xl bg-gray-50 text-gray-600 font-medium">
-                  +91
+              <div className="flex flex-col sm:flex-row gap-2">
+                <div className="flex flex-1">
+                  <div className="flex items-center px-3 border-2 border-gray-200 border-r-0 rounded-l-xl bg-gray-50 text-gray-600 font-medium">
+                    +91
+                  </div>
+                  <input
+                    type="tel"
+                    placeholder="Enter 10-digit number"
+                    className={`flex-1 border-2 border-gray-200 rounded-r-xl px-4 py-3 focus:border-[#F43676] focus:outline-none transition-colors min-w-0 ${phoneVerified ? 'bg-green-50 border-green-300' : ''} ${otpSent && !phoneVerified ? 'bg-gray-50' : ''}`}
+                    value={mobile}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/\D/g, '').slice(0, 10);
+                      setMobile(value);
+                    }}
+                    disabled={otpSent || phoneVerified}
+                    required
+                  />
                 </div>
-                <input
-                  type="tel"
-                  placeholder="Enter 10-digit mobile number"
-                  className={`flex-1 border-2 border-gray-200 rounded-r-xl px-4 py-3 focus:border-[#F43676] focus:outline-none transition-colors ${phoneVerified ? 'bg-green-50 border-green-300' : ''} ${otpSent && !phoneVerified ? 'bg-gray-50' : ''}`}
-                  value={mobile}
-                  onChange={(e) => {
-                    const value = e.target.value.replace(/\D/g, '').slice(0, 10);
-                    setMobile(value);
-                  }}
-                  disabled={otpSent || phoneVerified}
-                  required
-                />
                 {!otpSent && !phoneVerified && (
                   <button
                     type="button"
                     onClick={handleSendOtp}
                     disabled={sendingOtp || mobile.length !== 10}
-                    className="px-4 py-3 bg-gradient-to-r from-[#F43676] to-[#e02a60] text-white rounded-xl font-semibold hover:shadow-lg hover:scale-[1.02] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center gap-2 whitespace-nowrap"
+                    className="w-full sm:w-auto px-4 py-3 bg-gradient-to-r from-[#F43676] to-[#e02a60] text-white rounded-xl font-semibold hover:shadow-lg hover:scale-[1.02] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-2 whitespace-nowrap text-sm sm:text-base"
                   >
                     {sendingOtp ? (
                       <>
                         <Loader2 className="w-4 h-4 animate-spin" />
-                        Sending...
+                        <span className="hidden sm:inline">Sending...</span>
+                        <span className="sm:hidden">Sending</span>
                       </>
                     ) : (
                       'Send OTP'
@@ -427,8 +430,9 @@ function LoginContent() {
                   </button>
                 )}
                 {phoneVerified && (
-                  <div className="flex items-center px-4 text-green-600">
+                  <div className="flex items-center justify-center sm:justify-start px-4 text-green-600">
                     <Check className="w-6 h-6" />
+                    <span className="ml-2 sm:hidden text-sm font-medium">Verified</span>
                   </div>
                 )}
               </div>

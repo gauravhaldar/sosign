@@ -9,7 +9,7 @@ import { useAuth } from "../context/AuthContext";
 import ProfileEditModal from "./ProfileEditModal";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
 
-// Categories mapping for display labels
+// Categories mapping for display labels (kept for backward compatibility with petition data)
 const categoryLabels = {
   animals: "Animals",
   game: "Game",
@@ -24,22 +24,6 @@ const categoryLabels = {
   politics: "Politics",
   human_rights: "Human Rights",
 };
-
-// All categories for sidebar
-const allCategories = [
-  "Animals",
-  "Game",
-  "Interior",
-  "Lifestyle",
-  "Sports",
-  "Technology",
-  "Travel",
-  "Environment",
-  "Education",
-  "Health",
-  "Politics",
-  "Human Rights",
-];
 
 
 // Tags - mapped to categories
@@ -156,6 +140,22 @@ export default function Content({ initialPetitions = [], initialPagination = {} 
       if (response.ok) {
         const data = await response.json();
         return data.ads || [];
+      }
+      return [];
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+
+  // Fetch categories from API
+  const { data: categoriesData = [], isLoading: categoriesLoading } = useQuery({
+    queryKey: ["categories"],
+    queryFn: async () => {
+      const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+      const response = await fetch(`${backendUrl}/api/categories`);
+
+      if (response.ok) {
+        const data = await response.json();
+        return data.categories || [];
       }
       return [];
     },
@@ -626,18 +626,24 @@ export default function Content({ initialPetitions = [], initialPagination = {} 
                   <h3 className="text-xl font-bold text-[#002050]">Categories</h3>
                   <span className="w-2 h-2 bg-[#F43676] rounded-full"></span>
                 </div>
-                <ul className="space-y-3">
-                  {allCategories.map((category, index) => (
-                    <li key={index} className="border-b border-gray-100 pb-2 last:border-0 last:pb-0">
-                      <Link
-                        href={`/category/${category.toLowerCase().replace(" ", "_")}`}
-                        className="text-[#302d55] hover:text-[#F43676] transition-colors"
-                      >
-                        {category}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
+                {categoriesLoading ? (
+                  <div className="flex items-center justify-center py-4">
+                    <FaSpinner className="animate-spin text-[#F43676]" />
+                  </div>
+                ) : (
+                  <ul className="space-y-3">
+                    {categoriesData.map((category, index) => (
+                      <li key={category._id || index} className="border-b border-gray-100 pb-2 last:border-0 last:pb-0">
+                        <Link
+                          href={`/category/${category.slug}`}
+                          className="text-[#302d55] hover:text-[#F43676] transition-colors"
+                        >
+                          {category.name}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
 
               {/* Recent Posts */}

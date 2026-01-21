@@ -2,11 +2,28 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { FaYoutube, FaPlus, FaCircleInfo, FaCircleCheck, FaCircleExclamation, FaPaw, FaGamepad, FaCouch, FaPersonRunning, FaLaptopCode, FaPlane, FaGraduationCap, FaHeartPulse, FaHandFist, FaLeaf, FaLandmarkDome, FaSpa } from "react-icons/fa6";
+import { FaYoutube, FaPlus, FaCircleInfo, FaCircleCheck, FaCircleExclamation, FaPaw, FaGamepad, FaCouch, FaPersonRunning, FaLaptopCode, FaPlane, FaGraduationCap, FaHeartPulse, FaHandFist, FaLeaf, FaLandmarkDome, FaSpa, FaSpinner, FaTags, FaXmark } from "react-icons/fa6";
 import { useAuth } from "../../context/AuthContext";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import Captcha from "../../components/Captcha";
+
+// Icon mapping for dynamic category icons
+const iconMap = {
+  FaPaw: FaPaw,
+  FaGamepad: FaGamepad,
+  FaCouch: FaCouch,
+  FaSpa: FaSpa,
+  FaPersonRunning: FaPersonRunning,
+  FaLaptopCode: FaLaptopCode,
+  FaPlane: FaPlane,
+  FaLeaf: FaLeaf,
+  FaGraduationCap: FaGraduationCap,
+  FaHeartPulse: FaHeartPulse,
+  FaLandmarkDome: FaLandmarkDome,
+  FaHandFist: FaHandFist,
+  FaTags: FaTags, // Default icon for custom categories
+};
 
 export default function StartPetitionPage() {
   const { user, loading: authLoading, clearUser } = useAuth();
@@ -24,24 +41,14 @@ export default function StartPetitionPage() {
   const [captchaResetTrigger, setCaptchaResetTrigger] = useState(0);
   const [draftLoaded, setDraftLoaded] = useState(false);
   const [showDraftNotification, setShowDraftNotification] = useState(false);
+  const [categories, setCategories] = useState([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState("");
+  const [creatingCategory, setCreatingCategory] = useState(false);
+  const [categoryError, setCategoryError] = useState("");
   const totalSteps = 4;
   const DRAFT_KEY = "petition_draft";
-
-  // Available categories for petitions
-  const categories = [
-    { id: "animals", label: "Animals", icon: FaPaw },
-    { id: "game", label: "Game", icon: FaGamepad },
-    { id: "interior", label: "Interior", icon: FaCouch },
-    { id: "lifestyle", label: "Lifestyle", icon: FaSpa },
-    { id: "sports", label: "Sports", icon: FaPersonRunning },
-    { id: "technology", label: "Technology", icon: FaLaptopCode },
-    { id: "travel", label: "Travel", icon: FaPlane },
-    { id: "environment", label: "Environment", icon: FaLeaf },
-    { id: "education", label: "Education", icon: FaGraduationCap },
-    { id: "health", label: "Health", icon: FaHeartPulse },
-    { id: "politics", label: "Politics", icon: FaLandmarkDome },
-    { id: "human_rights", label: "Human Rights", icon: FaHandFist },
-  ];
 
   // Form data state
   const [formData, setFormData] = useState({
@@ -304,6 +311,88 @@ export default function StartPetitionPage() {
       router.push("/login?redirect=/start-petition");
     }
   }, [user, authLoading, router]);
+
+  // Fetch categories from API
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        setCategoriesLoading(true);
+        const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+        const response = await fetch(`${backendUrl}/api/categories`);
+
+        if (response.ok) {
+          const data = await response.json();
+          // Transform API categories to match expected format
+          const transformedCategories = data.categories.map((cat) => ({
+            id: cat.slug,
+            label: cat.name,
+            icon: iconMap[cat.icon] || FaTags,
+          }));
+          setCategories(transformedCategories);
+        }
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      } finally {
+        setCategoriesLoading(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  // Handle creating a new category
+  const handleCreateCategory = async () => {
+    if (!newCategoryName.trim()) {
+      setCategoryError("Category name is required");
+      return;
+    }
+
+    if (newCategoryName.trim().length < 3) {
+      setCategoryError("Category name must be at least 3 characters");
+      return;
+    }
+
+    setCreatingCategory(true);
+    setCategoryError("");
+
+    try {
+      const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+      const response = await fetch(`${backendUrl}/api/categories`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user?.token}`,
+        },
+        body: JSON.stringify({ name: newCategoryName.trim() }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.category) {
+        // Add the new category to the list
+        const newCategory = {
+          id: data.category.slug,
+          label: data.category.name,
+          icon: FaTags,
+        };
+        setCategories((prev) => [...prev, newCategory]);
+
+        // Auto-select the new category
+        setSelectedCategories((prev) => [...prev, data.category.slug]);
+
+        // Close modal and reset
+        setShowCategoryModal(false);
+        setNewCategoryName("");
+      } else {
+        setCategoryError(data.message || "Failed to create category");
+      }
+    } catch (error) {
+      console.error("Error creating category:", error);
+      setCategoryError("Failed to create category. Please try again.");
+    } finally {
+      setCreatingCategory(false);
+    }
+  };
 
   // Load draft from localStorage on mount
   useEffect(() => {
@@ -725,33 +814,54 @@ export default function StartPetitionPage() {
                   <FaCircleInfo className="text-blue-400" />
                   Choose categories that best describe your petition. This helps people find your cause.
                 </p>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                  {categories.map((category) => {
-                    const isSelected = selectedCategories.includes(category.id);
-                    return (
-                      <motion.button
-                        key={category.id}
-                        type="button"
-                        onClick={() => toggleCategory(category.id)}
-                        whileHover={{ scale: 1.03 }}
-                        whileTap={{ scale: 0.97 }}
-                        className={`flex items-center gap-2 px-4 py-3 rounded-xl border-2 transition-all duration-200 text-sm font-medium ${isSelected
-                          ? "border-[#F43676] bg-gradient-to-r from-[#F43676]/10 to-[#2D3A8C]/10 text-[#F43676] shadow-md"
-                          : "border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:bg-gray-50"
-                          }`}
-                      >
-                        {(() => {
-                          const IconComponent = category.icon;
-                          return <IconComponent className={`text-lg ${isSelected ? 'text-[#F43676]' : 'text-[#2D3A8C]'}`} />;
-                        })()}
-                        <span>{category.label}</span>
-                        {isSelected && (
-                          <FaCircleCheck className="ml-auto text-[#F43676]" />
-                        )}
-                      </motion.button>
-                    );
-                  })}
-                </div>
+
+                {/* Categories Loading State */}
+                {categoriesLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <FaSpinner className="animate-spin text-2xl text-[#F43676] mr-2" />
+                    <span className="text-gray-500">Loading categories...</span>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                    {categories.map((category) => {
+                      const isSelected = selectedCategories.includes(category.id);
+                      return (
+                        <motion.button
+                          key={category.id}
+                          type="button"
+                          onClick={() => toggleCategory(category.id)}
+                          whileHover={{ scale: 1.03 }}
+                          whileTap={{ scale: 0.97 }}
+                          className={`flex items-center gap-2 px-4 py-3 rounded-xl border-2 transition-all duration-200 text-sm font-medium ${isSelected
+                            ? "border-[#F43676] bg-gradient-to-r from-[#F43676]/10 to-[#2D3A8C]/10 text-[#F43676] shadow-md"
+                            : "border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:bg-gray-50"
+                            }`}
+                        >
+                          {(() => {
+                            const IconComponent = category.icon;
+                            return <IconComponent className={`text-lg ${isSelected ? 'text-[#F43676]' : 'text-[#2D3A8C]'}`} />;
+                          })()}
+                          <span>{category.label}</span>
+                          {isSelected && (
+                            <FaCircleCheck className="ml-auto text-[#F43676]" />
+                          )}
+                        </motion.button>
+                      );
+                    })}
+
+                    {/* Create New Category Button */}
+                    <motion.button
+                      type="button"
+                      onClick={() => setShowCategoryModal(true)}
+                      whileHover={{ scale: 1.03 }}
+                      whileTap={{ scale: 0.97 }}
+                      className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 border-dashed border-[#2D3A8C] bg-[#2D3A8C]/5 text-[#2D3A8C] hover:bg-[#2D3A8C]/10 transition-all duration-200 text-sm font-medium"
+                    >
+                      <FaPlus className="text-lg" />
+                      <span>Create Category</span>
+                    </motion.button>
+                  </div>
+                )}
 
                 {/* Category validation feedback */}
                 {selectedCategories.length === 0 && (
@@ -767,6 +877,93 @@ export default function StartPetitionPage() {
                   </p>
                 )}
               </div>
+
+              {/* Create Category Modal */}
+              <AnimatePresence>
+                {showCategoryModal && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4"
+                    onClick={() => setShowCategoryModal(false)}
+                  >
+                    <motion.div
+                      initial={{ scale: 0.9, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      exit={{ scale: 0.9, opacity: 0 }}
+                      className="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-xl font-bold text-gray-800">Create New Category</h3>
+                        <button
+                          type="button"
+                          onClick={() => setShowCategoryModal(false)}
+                          className="text-gray-400 hover:text-gray-600 transition-colors"
+                        >
+                          <FaXmark className="text-xl" />
+                        </button>
+                      </div>
+
+                      <p className="text-gray-500 text-sm mb-4">
+                        Create a custom category for your petition. This will be visible to all users.
+                      </p>
+
+                      <input
+                        type="text"
+                        value={newCategoryName}
+                        onChange={(e) => {
+                          setNewCategoryName(e.target.value);
+                          setCategoryError("");
+                        }}
+                        placeholder="Enter category name..."
+                        className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-[#F43676] focus:outline-none transition-all duration-200"
+                        maxLength={50}
+                      />
+
+                      {categoryError && (
+                        <p className="text-red-500 text-sm mt-2 flex items-center gap-1">
+                          <FaCircleExclamation className="text-xs" />
+                          {categoryError}
+                        </p>
+                      )}
+
+                      <div className="flex gap-3 mt-6">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowCategoryModal(false);
+                            setNewCategoryName("");
+                            setCategoryError("");
+                          }}
+                          className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors font-medium"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleCreateCategory}
+                          disabled={creatingCategory || !newCategoryName.trim()}
+                          className="flex-1 px-4 py-2.5 bg-gradient-to-r from-[#F43676] to-[#e02a60] text-white rounded-lg hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all font-medium flex items-center justify-center gap-2"
+                        >
+                          {creatingCategory ? (
+                            <>
+                              <FaSpinner className="animate-spin" />
+                              Creating...
+                            </>
+                          ) : (
+                            <>
+                              <FaPlus />
+                              Create
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    </motion.div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </motion.div>
           )}
 

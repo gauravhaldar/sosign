@@ -332,8 +332,8 @@ export default function Navbar() {
               <button
                 onClick={toggleSearch}
                 className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${searchOpen
-                    ? "bg-[#e02a60] text-white"
-                    : "bg-[#F43676] text-white hover:bg-[#e02a60]"
+                  ? "bg-[#e02a60] text-white"
+                  : "bg-[#F43676] text-white hover:bg-[#e02a60]"
                   }`}
               >
                 {searchOpen ? <FaTimes className="text-xs" /> : <FaSearch className="text-xs" />}
@@ -347,11 +347,11 @@ export default function Navbar() {
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 10, scale: 0.95 }}
                     transition={{ duration: 0.2 }}
-                    className="absolute right-0 top-12 w-80 sm:w-96 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden z-50"
+                    className="fixed sm:absolute left-2 right-2 sm:left-auto sm:right-0 top-[70px] sm:top-12 w-auto sm:w-96 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden z-50"
                   >
                     {/* Search Input */}
-                    <form onSubmit={handleSearchSubmit} className="p-4 border-b border-gray-100">
-                      <div className="flex items-center gap-3 bg-gray-50 rounded-xl px-4 py-3">
+                    <form onSubmit={handleSearchSubmit} className="p-3 sm:p-4 border-b border-gray-100">
+                      <div className="flex items-center gap-2 sm:gap-3 bg-gray-50 rounded-xl px-3 sm:px-4 py-2.5 sm:py-3">
                         <FaSearch className="text-gray-400 text-sm flex-shrink-0" />
                         <input
                           type="text"
@@ -359,7 +359,7 @@ export default function Navbar() {
                           value={searchQuery}
                           onChange={(e) => setSearchQuery(e.target.value)}
                           autoFocus
-                          className="flex-1 bg-transparent outline-none text-sm text-[#302d55] placeholder-gray-400"
+                          className="flex-1 bg-transparent outline-none text-sm text-[#302d55] placeholder-gray-400 min-w-0"
                         />
                         {searchLoading && (
                           <FaSpinner className="animate-spin text-[#F43676] text-sm flex-shrink-0" />
@@ -368,7 +368,7 @@ export default function Navbar() {
                     </form>
 
                     {/* Search Results */}
-                    <div className="max-h-80 overflow-y-auto">
+                    <div className="max-h-[60vh] sm:max-h-80 overflow-y-auto">
                       {searchQuery.length < 2 && (
                         <div className="p-4 text-center text-gray-400 text-sm">
                           Type at least 2 characters to search
@@ -387,10 +387,10 @@ export default function Navbar() {
                             <button
                               key={petition._id}
                               onClick={() => handleResultClick(petition._id)}
-                              className="w-full px-4 py-3 flex items-center gap-3 hover:bg-pink-50 transition-colors text-left group"
+                              className="w-full px-3 sm:px-4 py-2.5 sm:py-3 flex items-center gap-2 sm:gap-3 hover:bg-pink-50 transition-colors text-left group"
                             >
                               {/* Petition Image */}
-                              <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+                              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
                                 <img
                                   src={petition.petitionDetails?.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(petition.title)}&background=random&size=48`}
                                   alt={petition.title}
@@ -402,7 +402,7 @@ export default function Navbar() {
                                 <p className="text-sm font-medium text-[#002050] group-hover:text-[#F43676] transition-colors line-clamp-1">
                                   {petition.title}
                                 </p>
-                                <p className="text-xs text-gray-400 mt-0.5">
+                                <p className="text-xs text-gray-400 mt-0.5 line-clamp-1">
                                   {petition.numberOfSignatures || 0} signatures • {petition.petitionStarter?.name || "Anonymous"}
                                 </p>
                               </div>
@@ -412,7 +412,7 @@ export default function Navbar() {
                           {/* See All Results Link */}
                           <button
                             onClick={handleSearchSubmit}
-                            className="w-full px-4 py-3 text-center text-sm font-medium text-[#F43676] hover:bg-pink-50 transition-colors border-t border-gray-100"
+                            className="w-full px-3 sm:px-4 py-3 text-center text-sm font-medium text-[#F43676] hover:bg-pink-50 transition-colors border-t border-gray-100"
                           >
                             See all results for &quot;{searchQuery}&quot;
                           </button>
