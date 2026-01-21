@@ -388,8 +388,8 @@ const MyPetitionsPage = () => {
             <button
               onClick={() => setActiveTab("created")}
               className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all duration-200 ${activeTab === "created"
-                  ? "bg-gradient-to-r from-[#F43676] to-[#e02a60] text-white shadow-lg"
-                  : "bg-white text-gray-600 hover:bg-gray-50 border border-gray-200"
+                ? "bg-gradient-to-r from-[#F43676] to-[#e02a60] text-white shadow-lg"
+                : "bg-white text-gray-600 hover:bg-gray-50 border border-gray-200"
                 }`}
             >
               <FaPenFancy className="text-sm" />
@@ -398,8 +398,8 @@ const MyPetitionsPage = () => {
             <button
               onClick={() => setActiveTab("signed")}
               className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all duration-200 ${activeTab === "signed"
-                  ? "bg-gradient-to-r from-[#F43676] to-[#e02a60] text-white shadow-lg"
-                  : "bg-white text-gray-600 hover:bg-gray-50 border border-gray-200"
+                ? "bg-gradient-to-r from-[#F43676] to-[#e02a60] text-white shadow-lg"
+                : "bg-white text-gray-600 hover:bg-gray-50 border border-gray-200"
                 }`}
             >
               <FaFileSignature className="text-sm" />
@@ -580,7 +580,7 @@ const MyPetitionsPage = () => {
                       <FaFileSignature className="text-blue-500 text-3xl" />
                     </div>
                     <h3 className="text-xl font-bold text-gray-700 mb-2">No Signed Petitions</h3>
-                    <p className="text-gray-500 mb-6">You haven't signed any petitions yet. Explore and support causes you care about!</p>
+                    <p className="text-gray-500 mb-6">You haven&apos;t signed any petitions yet. Explore and support causes you care about!</p>
                     <Link href="/currentpetitions">
                       <button className="bg-gradient-to-r from-[#F43676] to-[#e02a60] text-white font-semibold py-3 px-6 rounded-xl">
                         Browse Petitions
