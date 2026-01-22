@@ -6,6 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useQuery } from "@tanstack/react-query";
 import { safeFetch } from "../utils/apiUtils";
+import { FileText, PenTool, MapPin } from "lucide-react";
 
 // Export petitions array
 export const petitions = [
@@ -185,7 +186,7 @@ export default function CurrentPetitions() {
       {petitions.length === 0 ? (
         <div className="text-center bg-white rounded-3xl p-12 shadow-sm max-w-md mx-auto">
           <div className="w-20 h-20 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <span className="text-4xl">📋</span>
+            <FileText className="w-10 h-10 text-[#F43676]" />
           </div>
           <h3 className="text-xl font-bold text-gray-700 mb-2">No Petitions Available</h3>
           <p className="text-gray-500">Check back soon for new petitions to support!</p>
@@ -212,13 +213,14 @@ export default function CurrentPetitions() {
                     />
                   ) : (
                     <div className="text-gray-400 text-center">
-                      <p className="text-4xl mb-2">📋</p>
+                      <FileText className="w-10 h-10 mx-auto mb-2 text-gray-300" />
                       <p className="text-xs">No Image</p>
                     </div>
                   )}
                   {/* Signature Badge */}
-                  <div className="absolute top-3 right-3 bg-gradient-to-r from-[#F43676] to-[#e02a60] text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg">
-                    {petition.numberOfSignatures || 0} ✍️
+                  <div className="absolute top-3 right-3 bg-gradient-to-r from-[#F43676] to-[#e02a60] text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg flex items-center gap-1">
+                    <PenTool className="w-3 h-3" />
+                    {petition.numberOfSignatures || 0}
                   </div>
                 </div>
                 <div className="p-4 md:p-6 text-center flex-1 flex flex-col">
@@ -240,8 +242,8 @@ export default function CurrentPetitions() {
                         "Citizen"}
                     </p>
                     {petition.country && (
-                      <p className="text-xs text-[#F43676] font-semibold">
-                        📍 {petition.country}
+                      <p className="text-xs text-[#F43676] font-semibold flex items-center gap-1">
+                        <MapPin className="w-3 h-3" /> {petition.country}
                       </p>
                     )}
                   </div>

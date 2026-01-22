@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { FaChevronLeft, FaChevronRight, FaCalendarAlt, FaComment, FaPause, FaPlay } from "react-icons/fa";
+import { PenTool } from "lucide-react";
 import config from "@/config/api";
 
 // Default fallback data in case API fails or returns empty
@@ -400,7 +401,10 @@ export default function Banner({ initialPetitions = [] }) {
                       href={heroSlides[currentSlide]?.link || "/currentpetitions"}
                       className="inline-block bg-gradient-to-r from-[#F43676] to-[#e02a60] text-white px-6 py-2.5 rounded-full font-semibold text-sm hover:shadow-lg hover:scale-105 transition-all duration-200 cursor-pointer"
                     >
-                      ✍️ Sign this Petition
+                      <span className="inline-flex items-center gap-2">
+                        <PenTool className="w-4 h-4" />
+                        Sign this Petition
+                      </span>
                     </Link>
                   </div>
 

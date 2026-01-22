@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn, FaYoutube, FaPinterestP, FaSearch, FaArrowUp } from "react-icons/fa";
 import { useState, useEffect } from "react";
+import { FileText } from "lucide-react";
 
 // Categories data
 const categories = [
@@ -216,7 +217,9 @@ export default function Footer() {
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-2xl">📝</div>
+                      <div className="w-full h-full flex items-center justify-center">
+                        <FileText className="w-6 h-6 text-gray-400" />
+                      </div>
                     )}
                   </div>
                   <div className="flex-1">

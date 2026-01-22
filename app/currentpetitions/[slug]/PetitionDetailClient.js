@@ -7,6 +7,29 @@ import Image from "next/image";
 import { useAuth } from "../../../context/AuthContext";
 import LoginModal from "../../../components/LoginModal";
 import CommentsSection from "../../../components/CommentsSection";
+import {
+    FileText,
+    Users,
+    AlertTriangle,
+    Lightbulb,
+    Globe,
+    PenTool,
+    Video,
+    BarChart3,
+    Share2,
+    Download,
+    Check,
+    CheckCircle,
+    X,
+    XCircle,
+    Clock,
+    Edit3,
+    Copy,
+    Mail,
+    Calendar,
+    RefreshCw,
+    ImageIcon
+} from "lucide-react";
 
 export default function PetitionDetailClient({ initialPetition }) {
     const { slug } = useParams();
@@ -397,7 +420,7 @@ export default function PetitionDetailClient({ initialPetition }) {
                             ) : (
                                 <div className="w-full aspect-video bg-gradient-to-br from-[#3650AD]/10 to-[#F43676]/10 rounded-xl flex items-center justify-center">
                                     <div className="text-[#1a1a2e] text-center">
-                                        <p className="text-4xl mb-3">📋</p>
+                                        <ImageIcon className="w-12 h-12 mx-auto mb-3 text-[#3650AD]/50" strokeWidth={1.5} />
                                         <p className="text-lg font-medium text-gray-500">No Image Available</p>
                                     </div>
                                 </div>
@@ -425,9 +448,12 @@ export default function PetitionDetailClient({ initialPetition }) {
                             <h2 className="text-xl font-bold text-[#1a1a2e]">Sign this Petition</h2>
 
                             {signSuccess && (
-                                <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-                                    <p className="font-medium">✓ Petition signed successfully!</p>
-                                    <p className="text-sm">Thank you for your support.</p>
+                                <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-4 flex items-start gap-3">
+                                    <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
+                                    <div>
+                                        <p className="font-semibold">Petition signed successfully!</p>
+                                        <p className="text-sm text-green-600">Thank you for your support.</p>
+                                    </div>
                                 </div>
                             )}
 
@@ -455,24 +481,30 @@ export default function PetitionDetailClient({ initialPetition }) {
                                 </div>
                             ) : signatureStatus.isCreator ? (
                                 <div className="text-center space-y-4">
-                                    <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg">
-                                        <p className="text-blue-800 font-medium">
-                                            📝 This is your petition
-                                        </p>
-                                        <p className="text-blue-600 text-sm">
-                                            You cannot sign your own petition.
-                                        </p>
+                                    <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg flex items-start gap-3 text-left">
+                                        <Edit3 className="w-5 h-5 text-blue-500 mt-0.5 flex-shrink-0" />
+                                        <div>
+                                            <p className="text-blue-800 font-semibold">
+                                                This is your petition
+                                            </p>
+                                            <p className="text-blue-600 text-sm">
+                                                You cannot sign your own petition.
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
                             ) : signatureStatus.hasSigned ? (
                                 <div className="text-center space-y-4">
-                                    <div className="bg-green-50 border border-green-200 p-4 rounded-lg">
-                                        <p className="text-green-800 font-medium">
-                                            ✓ You have signed this petition
-                                        </p>
-                                        <p className="text-green-600 text-sm">
-                                            Thank you for your support!
-                                        </p>
+                                    <div className="bg-green-50 border border-green-200 p-4 rounded-lg flex items-start gap-3 text-left">
+                                        <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
+                                        <div>
+                                            <p className="text-green-800 font-semibold">
+                                                You have signed this petition
+                                            </p>
+                                            <p className="text-green-600 text-sm">
+                                                Thank you for your support!
+                                            </p>
+                                        </div>
                                     </div>
                                     <div className="bg-gray-50 p-4 rounded-lg">
                                         <p className="text-sm text-gray-600 mb-2">Signed as:</p>
@@ -519,11 +551,14 @@ export default function PetitionDetailClient({ initialPetition }) {
                 <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Decision Makers */}
                     {petition.decisionMakers && petition.decisionMakers.length > 0 && (
-                        <div className="bg-white rounded-2xl p-6 shadow-lg">
-                            <p className="font-bold text-[#1a1a2e] mb-2 flex items-center gap-2">
-                                <span className="text-[#F43676]">👥</span> Decision Makers
-                            </p>
-                            <p className="text-gray-600">
+                        <div className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow duration-300">
+                            <div className="flex items-center gap-3 mb-3">
+                                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#F43676]/10 to-[#F43676]/20 flex items-center justify-center">
+                                    <Users className="w-5 h-5 text-[#F43676]" />
+                                </div>
+                                <p className="font-bold text-[#1a1a2e]">Decision Makers</p>
+                            </div>
+                            <p className="text-gray-600 leading-relaxed">
                                 {petition.decisionMakers.map((dm) => dm.name || dm).join(", ")}
                             </p>
                         </div>
@@ -531,39 +566,51 @@ export default function PetitionDetailClient({ initialPetition }) {
 
                     {/* Problem */}
                     {petition.petitionDetails?.problem && (
-                        <div className="bg-white rounded-2xl p-6 shadow-lg">
-                            <p className="font-bold text-[#1a1a2e] mb-2 flex items-center gap-2">
-                                <span className="text-[#F43676]">⚠️</span> Problem
-                            </p>
-                            <p className="text-gray-600">{petition.petitionDetails.problem}</p>
+                        <div className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow duration-300">
+                            <div className="flex items-center gap-3 mb-3">
+                                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-500/10 to-amber-500/20 flex items-center justify-center">
+                                    <AlertTriangle className="w-5 h-5 text-amber-500" />
+                                </div>
+                                <p className="font-bold text-[#1a1a2e]">Problem</p>
+                            </div>
+                            <p className="text-gray-600 leading-relaxed">{petition.petitionDetails.problem}</p>
                         </div>
                     )}
 
                     {/* Solution */}
                     {petition.petitionDetails?.solution && (
-                        <div className="bg-white rounded-2xl p-6 shadow-lg">
-                            <p className="font-bold text-[#1a1a2e] mb-2 flex items-center gap-2">
-                                <span className="text-[#F43676]">💡</span> Solution
-                            </p>
-                            <p className="text-gray-600">{petition.petitionDetails.solution}</p>
+                        <div className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow duration-300">
+                            <div className="flex items-center gap-3 mb-3">
+                                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-500/10 to-emerald-500/20 flex items-center justify-center">
+                                    <Lightbulb className="w-5 h-5 text-emerald-500" />
+                                </div>
+                                <p className="font-bold text-[#1a1a2e]">Solution</p>
+                            </div>
+                            <p className="text-gray-600 leading-relaxed">{petition.petitionDetails.solution}</p>
                         </div>
                     )}
 
                     {/* Country */}
                     {petition.country && (
-                        <div className="bg-white rounded-2xl p-6 shadow-lg">
-                            <p className="font-bold text-[#1a1a2e] mb-2 flex items-center gap-2">
-                                <span className="text-[#F43676]">🌍</span> Country
-                            </p>
-                            <p className="text-gray-600">{petition.country}</p>
+                        <div className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow duration-300">
+                            <div className="flex items-center gap-3 mb-3">
+                                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500/10 to-blue-500/20 flex items-center justify-center">
+                                    <Globe className="w-5 h-5 text-blue-500" />
+                                </div>
+                                <p className="font-bold text-[#1a1a2e]">Country</p>
+                            </div>
+                            <p className="text-gray-600 leading-relaxed">{petition.country}</p>
                         </div>
                     )}
 
                     {/* Petition Starter */}
-                    <div className="bg-white rounded-2xl p-6 shadow-lg">
-                        <p className="font-bold text-[#1a1a2e] mb-2 flex items-center gap-2">
-                            <span className="text-[#F43676]">✍️</span> Petition Starter
-                        </p>
+                    <div className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow duration-300">
+                        <div className="flex items-center gap-3 mb-3">
+                            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500/10 to-purple-500/20 flex items-center justify-center">
+                                <PenTool className="w-5 h-5 text-purple-500" />
+                            </div>
+                            <p className="font-bold text-[#1a1a2e]">Petition Starter</p>
+                        </div>
                         <p className="text-gray-700 font-medium">
                             {petition.petitionStarter?.user?.name ||
                                 petition.petitionStarter?.name ||
@@ -583,45 +630,61 @@ export default function PetitionDetailClient({ initialPetition }) {
 
                     {/* Video URL */}
                     {petition.petitionDetails?.videoUrl && (
-                        <div className="bg-white rounded-2xl p-6 shadow-lg">
-                            <p className="font-bold text-[#1a1a2e] mb-2 flex items-center gap-2">
-                                <span className="text-[#F43676]">🎬</span> Video
-                            </p>
+                        <div className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow duration-300">
+                            <div className="flex items-center gap-3 mb-3">
+                                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-red-500/10 to-red-500/20 flex items-center justify-center">
+                                    <Video className="w-5 h-5 text-red-500" />
+                                </div>
+                                <p className="font-bold text-[#1a1a2e]">Video</p>
+                            </div>
                             <a
                                 href={petition.petitionDetails.videoUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-[#3650AD] hover:text-[#F43676] underline font-medium transition-colors"
+                                className="inline-flex items-center gap-2 text-[#3650AD] hover:text-[#F43676] font-medium transition-colors"
                             >
-                                Watch Video
+                                <span>Watch Video</span>
+                                <Video className="w-4 h-4" />
                             </a>
                         </div>
                     )}
 
                     {/* Petition Updates & Supporters */}
-                    <div className="bg-white rounded-2xl p-6 shadow-lg">
-                        <p className="font-bold text-[#1a1a2e] mb-3 flex items-center gap-2">
-                            <span className="text-[#F43676]">📊</span> Statistics
-                        </p>
-                        <div className="space-y-2 text-gray-600">
-                            <p className="flex items-center gap-2">
-                                <span className="font-medium">Total Supporters:</span> {petition.numberOfSignatures || 0}
-                            </p>
-                            <p className="flex items-center gap-2">
-                                <span className="font-medium">Started:</span> {new Date(petition.createdAt).toLocaleDateString()}
-                            </p>
-                            <p className="flex items-center gap-2">
-                                <span className="font-medium">Last Updated:</span> {new Date(petition.updatedAt).toLocaleDateString()}
-                            </p>
+                    <div className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow duration-300">
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-500/10 to-indigo-500/20 flex items-center justify-center">
+                                <BarChart3 className="w-5 h-5 text-indigo-500" />
+                            </div>
+                            <p className="font-bold text-[#1a1a2e]">Statistics</p>
+                        </div>
+                        <div className="space-y-3 text-gray-600">
+                            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                                <Users className="w-4 h-4 text-[#3650AD]" />
+                                <span className="font-medium">Total Supporters:</span>
+                                <span className="ml-auto font-semibold text-[#1a1a2e]">{petition.numberOfSignatures || 0}</span>
+                            </div>
+                            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                                <Calendar className="w-4 h-4 text-[#3650AD]" />
+                                <span className="font-medium">Started:</span>
+                                <span className="ml-auto text-[#1a1a2e]">{new Date(petition.createdAt).toLocaleDateString()}</span>
+                            </div>
+                            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                                <RefreshCw className="w-4 h-4 text-[#3650AD]" />
+                                <span className="font-medium">Last Updated:</span>
+                                <span className="ml-auto text-[#1a1a2e]">{new Date(petition.updatedAt).toLocaleDateString()}</span>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 {/* Share This Petition */}
                 <div className="mt-8 bg-white rounded-2xl p-6 shadow-lg">
-                    <p className="font-bold text-[#1a1a2e] mb-4 flex items-center gap-2">
-                        <span className="text-[#F43676]">🔗</span> Share This Petition
-                    </p>
+                    <div className="flex items-center gap-3 mb-5">
+                        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#3650AD]/10 to-[#F43676]/20 flex items-center justify-center">
+                            <Share2 className="w-5 h-5 text-[#3650AD]" />
+                        </div>
+                        <p className="font-bold text-[#1a1a2e] text-lg">Share This Petition</p>
+                    </div>
                     <div className="flex flex-wrap gap-4 justify-center md:justify-start">
                         {(() => {
                             // Use production domain for social sharing (Facebook requires publicly accessible URLs)
@@ -687,14 +750,16 @@ export default function PetitionDetailClient({ initialPetition }) {
                                     </a>
                                     <button
                                         onClick={handleCopy}
-                                        className="bg-gray-200 text-gray-700 px-5 py-2.5 rounded-lg font-medium hover:bg-gray-300 transition duration-300 transform hover:-translate-y-0.5 shadow-md"
+                                        className="bg-gray-200 text-gray-700 px-5 py-2.5 rounded-lg font-medium hover:bg-gray-300 transition duration-300 transform hover:-translate-y-0.5 shadow-md inline-flex items-center gap-2"
                                     >
+                                        <Copy className="w-4 h-4" />
                                         Copy Link
                                     </button>
                                     <a
                                         href={`mailto:?subject=${encodedText}&body=${encodedProductionUrl}`}
-                                        className="bg-[#F43676] text-white px-5 py-2.5 rounded-lg font-medium hover:bg-[#d92d66] transition duration-300 transform hover:-translate-y-0.5 shadow-md"
+                                        className="bg-[#F43676] text-white px-5 py-2.5 rounded-lg font-medium hover:bg-[#d92d66] transition duration-300 transform hover:-translate-y-0.5 shadow-md inline-flex items-center gap-2"
                                     >
+                                        <Mail className="w-4 h-4" />
                                         Email
                                     </a>
                                 </>
@@ -706,14 +771,20 @@ export default function PetitionDetailClient({ initialPetition }) {
                 {/* Download Petition Data Section - Only visible to petition creator */}
                 {signatureStatus.isCreator && (
                     <div className="mt-8 bg-white rounded-2xl p-6 shadow-lg">
-                        <p className="font-bold text-[#1a1a2e] mb-4 flex items-center gap-2">
-                            <span className="text-[#F43676]">📥</span> Download Petition Data
-                        </p>
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#3650AD]/10 to-[#3650AD]/20 flex items-center justify-center">
+                                <Download className="w-5 h-5 text-[#3650AD]" />
+                            </div>
+                            <p className="font-bold text-[#1a1a2e] text-lg">Download Petition Data</p>
+                        </div>
 
                         {downloadSuccess && (
-                            <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg mb-4">
-                                <p className="font-medium">✓ Download request submitted successfully!</p>
-                                <p className="text-sm">Please wait for admin approval. You will be able to download once approved.</p>
+                            <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-4 flex items-start gap-3">
+                                <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
+                                <div>
+                                    <p className="font-semibold">Download request submitted successfully!</p>
+                                    <p className="text-sm text-green-600">Please wait for admin approval. You will be able to download once approved.</p>
+                                </div>
                             </div>
                         )}
 
@@ -740,53 +811,63 @@ export default function PetitionDetailClient({ initialPetition }) {
                             </div>
                         ) : downloadStatus.canDownload ? (
                             <div className="space-y-3">
-                                <div className="bg-green-50 border border-green-200 p-4 rounded-lg">
-                                    <p className="text-green-800 font-medium">✓ Your download request has been approved!</p>
-                                    <p className="text-green-600 text-sm">You can now download the petition data.</p>
-                                    {downloadStatus.approvedFields && downloadStatus.approvedFields.length > 0 && (
-                                        <div className="mt-3">
-                                            <p className="text-green-700 text-xs font-medium mb-1">Approved data fields:</p>
-                                            <div className="flex flex-wrap gap-1">
-                                                {downloadStatus.approvedFields.map((field) => {
-                                                    const fieldLabels = {
-                                                        petitionDetails: "Petition Details",
-                                                        petitionStarter: "Petition Starter",
-                                                        decisionMakers: "Decision Makers",
-                                                        statistics: "Statistics",
-                                                        signatures: "Signatures List",
-                                                        comments: "Comments List",
-                                                    };
-                                                    return (
-                                                        <span
-                                                            key={field}
-                                                            className="px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded"
-                                                        >
-                                                            {fieldLabels[field] || field}
-                                                        </span>
-                                                    );
-                                                })}
-                                            </div>
-                                        </div>
-                                    )}
+                                <div className="bg-green-50 border border-green-200 p-4 rounded-lg flex items-start gap-3">
+                                    <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
+                                    <div>
+                                        <p className="text-green-800 font-semibold">Your download request has been approved!</p>
+                                        <p className="text-green-600 text-sm">You can now download the petition data.</p>
+                                    </div>
                                 </div>
+                                {downloadStatus.approvedFields && downloadStatus.approvedFields.length > 0 && (
+                                    <div className="mt-3">
+                                        <p className="text-green-700 text-xs font-medium mb-1">Approved data fields:</p>
+                                        <div className="flex flex-wrap gap-1">
+                                            {downloadStatus.approvedFields.map((field) => {
+                                                const fieldLabels = {
+                                                    petitionDetails: "Petition Details",
+                                                    petitionStarter: "Petition Starter",
+                                                    decisionMakers: "Decision Makers",
+                                                    statistics: "Statistics",
+                                                    signatures: "Signatures List",
+                                                    comments: "Comments List",
+                                                };
+                                                return (
+                                                    <span
+                                                        key={field}
+                                                        className="px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded"
+                                                    >
+                                                        {fieldLabels[field] || field}
+                                                    </span>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                )}
                                 <button
                                     onClick={handleDownloadPetition}
                                     disabled={downloadLoading}
-                                    className="w-full md:w-auto px-6 py-3 bg-gradient-to-r from-[#3650AD] to-[#F43676] text-white rounded-lg font-semibold hover:opacity-90 transition-all transform hover:-translate-y-0.5 shadow-lg disabled:opacity-50"
+                                    className="w-full md:w-auto px-6 py-3 bg-gradient-to-r from-[#3650AD] to-[#F43676] text-white rounded-lg font-semibold hover:opacity-90 transition-all transform hover:-translate-y-0.5 shadow-lg disabled:opacity-50 inline-flex items-center justify-center gap-2"
                                 >
-                                    {downloadLoading ? "Downloading..." : "📥 Download Petition Data (PDF)"}
+                                    <Download className="w-5 h-5" />
+                                    {downloadLoading ? "Downloading..." : "Download Petition Data (PDF)"}
                                 </button>
                             </div>
                         ) : downloadStatus.hasRequest && downloadStatus.status === "pending" ? (
-                            <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
-                                <p className="text-yellow-800 font-medium">⏳ Your download request is pending</p>
-                                <p className="text-yellow-600 text-sm">Please wait for admin approval. Check back later.</p>
+                            <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg flex items-start gap-3">
+                                <Clock className="w-5 h-5 text-yellow-500 mt-0.5 flex-shrink-0" />
+                                <div>
+                                    <p className="text-yellow-800 font-semibold">Your download request is pending</p>
+                                    <p className="text-yellow-600 text-sm">Please wait for admin approval. Check back later.</p>
+                                </div>
                             </div>
                         ) : downloadStatus.hasRequest && downloadStatus.status === "rejected" ? (
                             <div className="space-y-3">
-                                <div className="bg-red-50 border border-red-200 p-4 rounded-lg">
-                                    <p className="text-red-800 font-medium">✗ Your previous request was rejected</p>
-                                    <p className="text-red-600 text-sm">You can submit a new request with a different reason.</p>
+                                <div className="bg-red-50 border border-red-200 p-4 rounded-lg flex items-start gap-3">
+                                    <XCircle className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" />
+                                    <div>
+                                        <p className="text-red-800 font-semibold">Your previous request was rejected</p>
+                                        <p className="text-red-600 text-sm">You can submit a new request with a different reason.</p>
+                                    </div>
                                 </div>
                                 <button
                                     onClick={() => setShowDownloadModal(true)}

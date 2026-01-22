@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
+import { PenTool } from "lucide-react";
 
 export default function YouHave() {
   const { data: petitions = [], isLoading: loading } = useQuery({
@@ -80,8 +81,9 @@ export default function YouHave() {
               {/* Content */}
               <div className="absolute inset-0 p-4 flex flex-col justify-end">
                 {/* Signature Count Badge */}
-                <div className="absolute top-4 right-4 bg-gradient-to-r from-[#F43676] to-[#e02a60] text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg">
-                  {petition.numberOfSignatures || 0} ✍️
+                <div className="absolute top-4 right-4 bg-gradient-to-r from-[#F43676] to-[#e02a60] text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg flex items-center gap-1">
+                  <PenTool className="w-3 h-3" />
+                  {petition.numberOfSignatures || 0}
                 </div>
 
                 {/* Category Tag */}
@@ -128,8 +130,8 @@ export default function YouHave() {
                 </div>
 
                 {/* Sign This Petition Button */}
-                <div className="inline-block bg-gradient-to-r from-[#F43676] to-[#e02a60] text-white px-4 py-1.5 rounded-full font-semibold text-xs hover:shadow-lg transition-all duration-200">
-                  ✍️ Sign Petition
+                <div className="inline-flex items-center gap-1 bg-gradient-to-r from-[#F43676] to-[#e02a60] text-white px-4 py-1.5 rounded-full font-semibold text-xs hover:shadow-lg transition-all duration-200">
+                  <PenTool className="w-3 h-3" /> Sign Petition
                 </div>
               </div>
             </Link>

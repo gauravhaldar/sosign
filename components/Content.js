@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { FaSearch, FaCalendarAlt, FaPlay, FaChevronRight, FaChevronLeft, FaSpinner, FaPen, FaFacebookF, FaInstagram, FaYoutube, FaLinkedinIn, FaCopy } from "react-icons/fa";
+import { FaCalendarAlt, FaChevronLeft, FaChevronRight, FaSpinner, FaCopy, FaPen, FaFacebookF, FaInstagram, FaLinkedinIn, FaYoutube, FaPlay, FaUser } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
+import { PenTool, User } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import ProfileEditModal from "./ProfileEditModal";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
@@ -405,8 +406,9 @@ export default function Content({ initialPetitions = [], initialPagination = {} 
                           </div>
 
                           {/* Sign This Petition Button */}
-                          <div className="inline-block bg-gradient-to-r from-[#F43676] to-[#e02a60] text-white px-6 py-2.5 rounded-full font-semibold text-sm hover:shadow-lg hover:scale-105 transition-all duration-200">
-                            ✍️ Sign this Petition
+                          <div className="inline-flex items-center gap-2 bg-gradient-to-r from-[#F43676] to-[#e02a60] text-white px-6 py-2.5 rounded-full font-semibold text-sm hover:shadow-lg hover:scale-105 transition-all duration-200">
+                            <PenTool className="w-4 h-4" />
+                            Sign this Petition
                           </div>
                         </div>
                       </Link>
@@ -783,7 +785,7 @@ export default function Content({ initialPetitions = [], initialPagination = {} 
               ) : (
                 <div className="bg-white rounded-3xl p-6 shadow-sm text-center">
                   <div className="w-24 h-24 rounded-full overflow-hidden mx-auto mb-4 border-4 border-gray-100 bg-gradient-to-br from-pink-100 to-gray-100 flex items-center justify-center">
-                    <span className="text-4xl">👤</span>
+                    <User className="w-10 h-10 text-gray-400" />
                   </div>
                   <h4 className="text-xl font-bold text-[#002050] mb-2">Welcome!</h4>
                   <p className="text-[#302d55] text-sm leading-relaxed mb-4">

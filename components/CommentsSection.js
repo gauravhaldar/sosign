@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../context/AuthContext";
 import LoginModal from "./LoginModal";
 import config from "../config/api";
+import { Clock, ThumbsUp } from "lucide-react";
 
 const CommentsSection = ({ petitionId }) => {
   const [comments, setComments] = useState([]);
@@ -472,8 +473,8 @@ const CommentsSection = ({ petitionId }) => {
                         </div>
                         {/* Pending Approval Badge */}
                         {!comment.isApproved && (
-                          <span className="ml-2 px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded-full">
-                            ⏳ Pending Approval
+                          <span className="ml-2 px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded-full inline-flex items-center gap-1">
+                            <Clock className="w-3 h-3" /> Pending Approval
                           </span>
                         )}
                       </div>
@@ -539,7 +540,7 @@ const CommentsSection = ({ petitionId }) => {
                           : "text-gray-500 hover:text-blue-600"
                           }`}
                       >
-                        <span>👍</span>
+                        <ThumbsUp className="w-4 h-4" />
                         <span>{(comment?.likes || []).length}</span>
                       </button>
                       <button

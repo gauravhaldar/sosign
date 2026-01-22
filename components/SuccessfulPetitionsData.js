@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { safeFetch } from "../utils/apiUtils";
+import { Trophy, AlertTriangle } from "lucide-react";
 
 // Static array for backward compatibility - this can be replaced with real data
 export const successfulPetitions = [
@@ -126,7 +127,7 @@ export const useSuccessfulPetitions = (options = {}) => {
         setRetryCount(0); // Reset retry count on success
       } catch (err) {
         if (!isMounted) return;
-        
+
         console.error("Error fetching successful petitions:", err);
         setError(err.message);
         setSuccessfulPetitions([]);
@@ -158,7 +159,7 @@ export default function SuccessfulPetitionsData({
   category = "",
   location = "",
   sort = "newest",
-  onPageChange = () => {},
+  onPageChange = () => { },
 }) {
   const { successfulPetitions, loading, error, pagination } =
     useSuccessfulPetitions({
@@ -221,11 +222,12 @@ export default function SuccessfulPetitionsData({
           <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-800 mb-12">
             Successful Petitions
           </h2>
-          
+
           {/* Error notice */}
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-8">
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-8 flex items-center gap-3">
+            <AlertTriangle className="w-5 h-5 text-yellow-600" />
             <p className="text-yellow-800 text-sm">
-              ⚠️ Unable to load latest data. Showing sample successful petitions.
+              Unable to load latest data. Showing sample successful petitions.
             </p>
           </div>
 
@@ -251,7 +253,9 @@ export default function SuccessfulPetitionsData({
                   ) : (
                     <div className="relative h-48 bg-gradient-to-br from-green-100 to-emerald-100 flex items-center justify-center">
                       <div className="text-center">
-                        <div className="text-4xl mb-2">🎉</div>
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center mx-auto mb-2">
+                          <Trophy className="w-6 h-6 text-white" />
+                        </div>
                         <div className="text-green-700 font-semibold">
                           Success Story
                         </div>
@@ -365,7 +369,9 @@ export default function SuccessfulPetitionsData({
                 ) : (
                   <div className="relative h-48 bg-gradient-to-br from-green-100 to-emerald-100 flex items-center justify-center">
                     <div className="text-center">
-                      <div className="text-4xl mb-2">🎉</div>
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center mx-auto mb-2">
+                        <Trophy className="w-6 h-6 text-white" />
+                      </div>
                       <div className="text-green-700 font-semibold">
                         Success Story
                       </div>
@@ -432,11 +438,10 @@ export default function SuccessfulPetitionsData({
             <button
               onClick={() => pagination.hasPrev && onPageChange(page - 1)}
               disabled={!pagination.hasPrev}
-              className={`px-4 py-2 rounded-lg transition-colors ${
-                pagination.hasPrev
+              className={`px-4 py-2 rounded-lg transition-colors ${pagination.hasPrev
                   ? "bg-blue-500 hover:bg-blue-600 text-white"
                   : "bg-gray-300 text-gray-500 cursor-not-allowed"
-              }`}
+                }`}
             >
               Previous
             </button>
@@ -448,11 +453,10 @@ export default function SuccessfulPetitionsData({
             <button
               onClick={() => pagination.hasNext && onPageChange(page + 1)}
               disabled={!pagination.hasNext}
-              className={`px-4 py-2 rounded-lg transition-colors ${
-                pagination.hasNext
+              className={`px-4 py-2 rounded-lg transition-colors ${pagination.hasNext
                   ? "bg-blue-500 hover:bg-blue-600 text-white"
                   : "bg-gray-300 text-gray-500 cursor-not-allowed"
-              }`}
+                }`}
             >
               Next
             </button>
