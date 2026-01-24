@@ -47,6 +47,11 @@ export default function StartPetitionPage() {
   const [newCategoryName, setNewCategoryName] = useState("");
   const [creatingCategory, setCreatingCategory] = useState(false);
   const [categoryError, setCategoryError] = useState("");
+  // Constituency settings
+  const [constituencySettings, setConstituencySettings] = useState({
+    required: false,
+    allowedConstituency: "",
+  });
   const totalSteps = 4;
   const DRAFT_KEY = "petition_draft";
 
@@ -618,6 +623,12 @@ export default function StartPetitionPage() {
         submitData.append("image", selectedImage);
       }
 
+      // Add constituency settings
+      submitData.append("constituencySettings", JSON.stringify({
+        required: constituencySettings.required,
+        allowedConstituency: constituencySettings.allowedConstituency?.trim() || undefined,
+      }));
+
       // Check if user and token are available
       if (!user || !user.token) {
         setIsSubmitting(false);
@@ -876,6 +887,74 @@ export default function StartPetitionPage() {
                     {selectedCategories.length} {selectedCategories.length === 1 ? "category" : "categories"} selected
                   </p>
                 )}
+              </div>
+
+              {/* Constituency Requirement Settings */}
+              <div className="mt-8 p-5 bg-gray-50 rounded-xl border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                  <FaCircleInfo className="text-[#2D3A8C]" />
+                  Signing Requirements (Optional)
+                </h3>
+                <p className="text-sm text-gray-500 mb-4">
+                  You can require signers to provide their constituency number. This helps ensure local relevance for constituency-specific issues.
+                </p>
+
+                {/* Toggle for constituency requirement */}
+                <div className="flex items-center justify-between p-4 bg-white rounded-lg border border-gray-200 mb-3">
+                  <div>
+                    <p className="font-medium text-gray-700">Require Constituency Number to Sign</p>
+                    <p className="text-sm text-gray-500">Signers must enter their constituency number</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setConstituencySettings(prev => ({ ...prev, required: !prev.required }))}
+                    className={`relative w-14 h-7 rounded-full transition-colors duration-200 ${constituencySettings.required ? 'bg-[#2D3A8C]' : 'bg-gray-300'
+                      }`}
+                  >
+                    <span
+                      className={`absolute top-1 left-1 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ${constituencySettings.required ? 'translate-x-7' : 'translate-x-0'
+                        }`}
+                    />
+                  </button>
+                </div>
+
+                {/* Show allowed constituency input only when requirement is enabled */}
+                <AnimatePresence>
+                  {constituencySettings.required && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="overflow-hidden"
+                    >
+                      <div className="p-4 bg-white rounded-lg border border-gray-200">
+                        <label className="block mb-2 font-medium text-gray-700">
+                          Restrict to Specific Constituency (Optional)
+                        </label>
+                        <p className="text-sm text-gray-500 mb-3">
+                          Leave blank to allow any constituency, or enter a specific number to restrict signing.
+                        </p>
+                        <input
+                          type="text"
+                          value={constituencySettings.allowedConstituency}
+                          onChange={(e) => setConstituencySettings(prev => ({
+                            ...prev,
+                            allowedConstituency: e.target.value
+                          }))}
+                          placeholder="e.g., 123 or leave empty for any constituency"
+                          className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-[#F43676] focus:outline-none transition-all duration-200"
+                          maxLength={10}
+                        />
+                        {constituencySettings.allowedConstituency && (
+                          <p className="text-blue-600 text-sm mt-2 flex items-center gap-1">
+                            <FaCircleInfo className="text-xs" />
+                            Only users with constituency number &quot;{constituencySettings.allowedConstituency}&quot; can sign this petition.
+                          </p>
+                        )}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
 
               {/* Create Category Modal */}

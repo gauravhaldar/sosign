@@ -7,6 +7,7 @@ import Image from "next/image";
 import { useAuth } from "../../../context/AuthContext";
 import LoginModal from "../../../components/LoginModal";
 import CommentsSection from "../../../components/CommentsSection";
+import Captcha from "../../../components/Captcha";
 import {
     FileText,
     Users,
@@ -41,6 +42,11 @@ export default function PetitionDetailClient({ initialPetition }) {
     const [signError, setSignError] = useState(null);
     const [signSuccess, setSignSuccess] = useState(false);
     const [referralCode, setReferralCode] = useState("");
+    const [constituencyNumber, setConstituencyNumber] = useState("");
+
+    // CAPTCHA state
+    const [captchaVerified, setCaptchaVerified] = useState(false);
+    const [captchaResetTrigger, setCaptchaResetTrigger] = useState(0);
     const [signatureStatus, setSignatureStatus] = useState({
         hasSigned: false,
         isCreator: false,
@@ -314,6 +320,27 @@ export default function PetitionDetailClient({ initialPetition }) {
             return;
         }
 
+        // Validate CAPTCHA
+        if (!captchaVerified) {
+            setSignError("Please complete the security verification");
+            return;
+        }
+
+        // Validate constituency number if required
+        if (petition.constituencySettings?.required) {
+            if (!constituencyNumber.trim()) {
+                setSignError("Please enter your constituency number");
+                return;
+            }
+            // Check if specific constituency is required
+            if (petition.constituencySettings.allowedConstituency) {
+                if (constituencyNumber.trim() !== petition.constituencySettings.allowedConstituency) {
+                    setSignError(`This petition is restricted to constituency: ${petition.constituencySettings.allowedConstituency}`);
+                    return;
+                }
+            }
+        }
+
         try {
             setSigning(true);
             setSignError(null);
@@ -328,15 +355,15 @@ export default function PetitionDetailClient({ initialPetition }) {
                 },
                 body: JSON.stringify({
                     referralCode: referralCode?.trim() || undefined,
+                    constituencyNumber: constituencyNumber?.trim() || undefined,
                 }),
             });
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || "Failed to sign petition");
-            }
-
             const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || "Failed to sign petition");
+            }
 
             setPetition((prev) => ({
                 ...prev,
@@ -354,6 +381,9 @@ export default function PetitionDetailClient({ initialPetition }) {
         } catch (err) {
             setSignError(err.message);
             console.error("Failed to sign petition:", err);
+            // Reset CAPTCHA on error
+            setCaptchaVerified(false);
+            setCaptchaResetTrigger(prev => prev + 1);
         } finally {
             setSigning(false);
         }
@@ -534,9 +564,41 @@ export default function PetitionDetailClient({ initialPetition }) {
                                             maxLength={12}
                                         />
                                     </div>
+                                    {/* Constituency Number (if required) */}
+                                    {petition.constituencySettings?.required && (
+                                        <div className="bg-orange-50 p-4 rounded-lg border border-orange-200">
+                                            <label className="block text-left text-sm font-medium text-gray-700 mb-1">
+                                                Constituency Number <span className="text-red-500">*</span>
+                                                {petition.constituencySettings.allowedConstituency && (
+                                                    <span className="text-orange-600 ml-2">
+                                                        (Must be: {petition.constituencySettings.allowedConstituency})
+                                                    </span>
+                                                )}
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={constituencyNumber}
+                                                onChange={(e) => setConstituencyNumber(e.target.value)}
+                                                placeholder={petition.constituencySettings.allowedConstituency
+                                                    ? `Enter: ${petition.constituencySettings.allowedConstituency}`
+                                                    : "Enter your constituency number"
+                                                }
+                                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                maxLength={10}
+                                            />
+                                            <p className="text-xs text-gray-500 mt-1">
+                                                This petition requires your constituency number to sign.
+                                            </p>
+                                        </div>
+                                    )}
+                                    {/* CAPTCHA Section */}
+                                    <Captcha
+                                        onVerify={(verified) => setCaptchaVerified(verified)}
+                                        resetTrigger={captchaResetTrigger}
+                                    />
                                     <button
                                         onClick={handleSignPetition}
-                                        disabled={signing || !signatureStatus.canSign}
+                                        disabled={signing || !signatureStatus.canSign || !captchaVerified || (petition.constituencySettings?.required && !constituencyNumber.trim())}
                                         className="bg-[#3650AD] text-white w-full py-3 rounded-lg font-semibold hover:bg-blue-700 transition duration-300 transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                         {signing ? "Signing..." : "Sign Petition"}

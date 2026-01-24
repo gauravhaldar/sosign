@@ -69,3 +69,41 @@ export async function DELETE(request, { params }) {
     );
   }
 }
+
+export async function PUT(request, { params }) {
+  try {
+    const { id } = await params;
+
+    // Forward Authorization header
+    const authHeader = request.headers.get("authorization");
+    if (!authHeader) {
+      return NextResponse.json(
+        { message: "Authorization header is required" },
+        { status: 401 }
+      );
+    }
+
+    const body = await request.json();
+
+    const backendResponse = await fetch(
+      `${config.API_BASE_URL}/api/petitions/${id}`,
+      {
+        method: "PUT",
+        headers: {
+          Authorization: authHeader,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+      }
+    );
+
+    const result = await backendResponse.json();
+    return NextResponse.json(result, { status: backendResponse.status });
+  } catch (error) {
+    console.error("API Error (PUT):", error);
+    return NextResponse.json(
+      { message: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}

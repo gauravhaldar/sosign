@@ -15,12 +15,15 @@ export async function PUT(request, { params }) {
       );
     }
 
-    // Read optional referralCode from request body
+    // Read optional referralCode and constituencyNumber from request body
     let body = null;
     try {
       const json = await request.json().catch(() => null);
       if (json && typeof json === "object") {
-        body = JSON.stringify({ referralCode: json.referralCode });
+        body = JSON.stringify({
+          referralCode: json.referralCode,
+          constituencyNumber: json.constituencyNumber,
+        });
       }
     } catch (e) {
       body = null;

@@ -19,7 +19,8 @@ import {
   FaPenFancy,
   FaUsers,
   FaCalendarAlt,
-  FaArrowRight
+  FaArrowRight,
+  FaEdit
 } from "react-icons/fa";
 import { useAuth } from "../../context/AuthContext";
 import LoginModal from "../../components/LoginModal";
@@ -43,6 +44,19 @@ const MyPetitionsPage = () => {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showHideModal, setShowHideModal] = useState(null);
   const [hideReason, setHideReason] = useState("");
+
+  // Edit petition state
+  const [showEditModal, setShowEditModal] = useState(null);
+  const [editLoading, setEditLoading] = useState(false);
+  const [editFormData, setEditFormData] = useState({
+    title: "",
+    country: "",
+    categories: [],
+    decisionMakers: [{ name: "", organization: "", email: "", phone: "" }],
+    problem: "",
+    solution: "",
+    videoUrl: "",
+  });
 
   const { user, loading: authLoading } = useAuth();
 
@@ -273,6 +287,102 @@ const MyPetitionsPage = () => {
     });
   };
 
+  const openEditModal = (petition) => {
+    setEditFormData({
+      title: petition.title || "",
+      country: petition.country || "",
+      categories: petition.categories || [],
+      decisionMakers: petition.decisionMakers?.length > 0
+        ? petition.decisionMakers.map(dm => ({
+          name: dm.name || "",
+          organization: dm.organization || "",
+          email: dm.email || "",
+          phone: dm.phone || "",
+        }))
+        : [{ name: "", organization: "", email: "", phone: "" }],
+      problem: petition.petitionDetails?.problem || "",
+      solution: petition.petitionDetails?.solution || "",
+      videoUrl: petition.petitionDetails?.videoUrl || "",
+    });
+    setShowEditModal(petition._id);
+  };
+
+  const updateDecisionMaker = (index, field, value) => {
+    const updatedDMs = [...editFormData.decisionMakers];
+    updatedDMs[index] = { ...updatedDMs[index], [field]: value };
+    setEditFormData({ ...editFormData, decisionMakers: updatedDMs });
+  };
+
+  const addDecisionMaker = () => {
+    setEditFormData({
+      ...editFormData,
+      decisionMakers: [...editFormData.decisionMakers, { name: "", organization: "", email: "", phone: "" }],
+    });
+  };
+
+  const removeDecisionMaker = (index) => {
+    if (editFormData.decisionMakers.length > 1) {
+      const updatedDMs = editFormData.decisionMakers.filter((_, i) => i !== index);
+      setEditFormData({ ...editFormData, decisionMakers: updatedDMs });
+    }
+  };
+
+  const handleUpdatePetition = async (petitionId) => {
+    try {
+      setEditLoading(true);
+      const userInfo = JSON.parse(localStorage.getItem("user"));
+
+      const response = await fetch(`/api/petitions/${petitionId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userInfo.token}`,
+        },
+        body: JSON.stringify({
+          title: editFormData.title,
+          country: editFormData.country,
+          decisionMakers: editFormData.decisionMakers.filter(dm => dm.name && dm.email),
+          petitionDetails: {
+            problem: editFormData.problem,
+            solution: editFormData.solution,
+            videoUrl: editFormData.videoUrl,
+          },
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Update local state
+        setPetitions(petitions.map(p =>
+          p._id === petitionId
+            ? {
+              ...p,
+              title: editFormData.title,
+              country: editFormData.country,
+              decisionMakers: editFormData.decisionMakers.filter(dm => dm.name && dm.email),
+              petitionDetails: {
+                ...p.petitionDetails,
+                problem: editFormData.problem,
+                solution: editFormData.solution,
+                videoUrl: editFormData.videoUrl,
+              }
+            }
+            : p
+        ));
+        setShowEditModal(null);
+        alert("Petition updated successfully!");
+      } else {
+        alert(data.message || "Failed to update petition");
+      }
+    } catch (error) {
+      console.error("Error updating petition:", error);
+      alert("Error updating petition. Please try again.");
+    } finally {
+      setEditLoading(false);
+    }
+  };
+
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#f0f2f5]">
@@ -501,6 +611,12 @@ const MyPetitionsPage = () => {
                                 <FaShare className="text-xs" /> Share
                               </button>
                               <button
+                                onClick={() => openEditModal(petition)}
+                                className="flex items-center gap-1.5 px-3 py-2 bg-[#3650AD] hover:bg-[#2a4085] text-white text-sm font-medium rounded-lg transition-colors"
+                              >
+                                <FaEdit className="text-xs" /> Edit
+                              </button>
+                              <button
                                 onClick={() => declareVictory(petition._id)}
                                 disabled={declareVictoryLoading === petition._id}
                                 className="flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-yellow-500 to-orange-500 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
@@ -552,6 +668,152 @@ const MyPetitionsPage = () => {
                                   >
                                     Cancel
                                   </button>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Edit Modal */}
+                            {showEditModal === petition._id && (
+                              <div className="mt-4 p-5 bg-blue-50 border border-blue-200 rounded-xl">
+                                <h4 className="font-semibold text-[#1a1a2e] mb-4 flex items-center gap-2 text-lg">
+                                  <FaEdit className="text-[#3650AD]" /> Edit Petition
+                                </h4>
+                                <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
+                                  {/* Title */}
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Title *</label>
+                                    <input
+                                      type="text"
+                                      value={editFormData.title}
+                                      onChange={(e) => setEditFormData({ ...editFormData, title: e.target.value })}
+                                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3650AD] focus:border-transparent outline-none"
+                                      placeholder="Petition title"
+                                    />
+                                  </div>
+
+                                  {/* Country */}
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Country *</label>
+                                    <input
+                                      type="text"
+                                      value={editFormData.country}
+                                      onChange={(e) => setEditFormData({ ...editFormData, country: e.target.value })}
+                                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3650AD] focus:border-transparent outline-none"
+                                      placeholder="Country"
+                                    />
+                                  </div>
+
+                                  {/* Decision Makers */}
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Decision Makers</label>
+                                    {editFormData.decisionMakers.map((dm, index) => (
+                                      <div key={index} className="bg-white p-3 rounded-lg border border-gray-200 mb-2">
+                                        <div className="flex justify-between items-center mb-2">
+                                          <span className="text-xs font-medium text-gray-500">Decision Maker {index + 1}</span>
+                                          {editFormData.decisionMakers.length > 1 && (
+                                            <button
+                                              type="button"
+                                              onClick={() => removeDecisionMaker(index)}
+                                              className="text-red-500 hover:text-red-700 text-xs"
+                                            >
+                                              Remove
+                                            </button>
+                                          )}
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-2">
+                                          <input
+                                            type="text"
+                                            value={dm.name}
+                                            onChange={(e) => updateDecisionMaker(index, "name", e.target.value)}
+                                            className="p-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#3650AD] outline-none"
+                                            placeholder="Name *"
+                                          />
+                                          <input
+                                            type="email"
+                                            value={dm.email}
+                                            onChange={(e) => updateDecisionMaker(index, "email", e.target.value)}
+                                            className="p-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#3650AD] outline-none"
+                                            placeholder="Email *"
+                                          />
+                                          <input
+                                            type="text"
+                                            value={dm.organization}
+                                            onChange={(e) => updateDecisionMaker(index, "organization", e.target.value)}
+                                            className="p-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#3650AD] outline-none"
+                                            placeholder="Organization"
+                                          />
+                                          <input
+                                            type="text"
+                                            value={dm.phone}
+                                            onChange={(e) => updateDecisionMaker(index, "phone", e.target.value)}
+                                            className="p-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#3650AD] outline-none"
+                                            placeholder="Phone"
+                                          />
+                                        </div>
+                                      </div>
+                                    ))}
+                                    <button
+                                      type="button"
+                                      onClick={addDecisionMaker}
+                                      className="text-sm text-[#3650AD] hover:text-[#2a4085] font-medium flex items-center gap-1"
+                                    >
+                                      <FaPlus className="text-xs" /> Add Decision Maker
+                                    </button>
+                                  </div>
+
+                                  {/* Problem Description */}
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Problem Description *</label>
+                                    <textarea
+                                      value={editFormData.problem}
+                                      onChange={(e) => setEditFormData({ ...editFormData, problem: e.target.value })}
+                                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3650AD] focus:border-transparent outline-none resize-none"
+                                      rows={4}
+                                      placeholder="Describe the problem..."
+                                    />
+                                  </div>
+
+                                  {/* Proposed Solution */}
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Proposed Solution *</label>
+                                    <textarea
+                                      value={editFormData.solution}
+                                      onChange={(e) => setEditFormData({ ...editFormData, solution: e.target.value })}
+                                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3650AD] focus:border-transparent outline-none resize-none"
+                                      rows={4}
+                                      placeholder="Describe your proposed solution..."
+                                    />
+                                  </div>
+
+                                  {/* Video URL */}
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Video URL (optional)</label>
+                                    <input
+                                      type="url"
+                                      value={editFormData.videoUrl}
+                                      onChange={(e) => setEditFormData({ ...editFormData, videoUrl: e.target.value })}
+                                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3650AD] focus:border-transparent outline-none"
+                                      placeholder="https://youtube.com/..."
+                                    />
+                                  </div>
+
+                                  {/* Action Buttons */}
+                                  <div className="flex gap-2 pt-2">
+                                    <button
+                                      onClick={() => handleUpdatePetition(petition._id)}
+                                      disabled={editLoading}
+                                      className="flex-1 bg-[#3650AD] hover:bg-[#2a4085] text-white font-semibold py-3 px-4 rounded-lg flex items-center justify-center gap-2"
+                                    >
+                                      {editLoading ? <FaSpinner className="animate-spin" /> : <FaCheck />}
+                                      {editLoading ? "Saving..." : "Save Changes"}
+                                    </button>
+                                    <button
+                                      onClick={() => setShowEditModal(null)}
+                                      className="px-4 py-3 bg-gray-200 text-gray-700 font-semibold rounded-lg flex items-center gap-2 hover:bg-gray-300"
+                                    >
+                                      <FaTimes /> Cancel
+                                    </button>
+                                  </div>
                                 </div>
                               </div>
                             )}
@@ -649,9 +911,9 @@ const MyPetitionsPage = () => {
                 )}
               </motion.div>
             )}
-          </AnimatePresence>
-        </div>
-      </div>
+          </AnimatePresence >
+        </div >
+      </div >
 
       <LoginModal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)} />
     </>
