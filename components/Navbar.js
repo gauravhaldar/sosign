@@ -17,7 +17,8 @@ import {
   FaChevronDown,
   FaBars,
   FaTimes,
-  FaSpinner
+  FaSpinner,
+  FaWallet
 } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
 
@@ -30,7 +31,7 @@ export default function Navbar() {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [searchLoading, setSearchLoading] = useState(false);
-  const { user, logout } = useAuth();
+  const { user, logout, walletBalance } = useAuth();
   const router = useRouter();
   const searchRef = useRef(null);
 
@@ -424,6 +425,18 @@ export default function Navbar() {
               </AnimatePresence>
             </div>
 
+            {/* Wallet Button - Only shown when logged in */}
+            {user && (
+              <Link
+                href="/wallet"
+                className="relative flex items-center gap-1.5 bg-gradient-to-r from-[#F43676] to-[#e02a60] text-white px-3 py-2 rounded-full font-medium text-sm hover:shadow-lg hover:shadow-pink-300/30 transition-all duration-200"
+              >
+                <FaWallet className="text-sm" />
+                <span className="hidden sm:inline">₹{walletBalance.toFixed(2)}</span>
+                <span className="sm:hidden">₹{walletBalance.toFixed(0)}</span>
+              </Link>
+            )}
+
             {/* Login Button or User Profile */}
             {user ? (
               <div className="relative">
@@ -559,6 +572,18 @@ export default function Navbar() {
                 >
                   Contact
                 </Link>
+
+                {/* Wallet Link for Mobile - Only shown when logged in */}
+                {user && (
+                  <Link
+                    href="/wallet"
+                    className="flex items-center gap-2 text-[#F43676] font-medium text-sm py-2 border-t border-gray-100 mt-2"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <FaWallet className="text-sm" />
+                    Wallet (₹{walletBalance.toFixed(2)})
+                  </Link>
+                )}
 
                 {/* Social Icons for Mobile */}
                 <div className="flex items-center gap-3 py-3 border-t border-gray-100 mt-2">

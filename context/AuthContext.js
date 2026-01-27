@@ -8,6 +8,7 @@ const AuthContext = createContext(null);
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true); // New loading state
+  const [walletBalance, setWalletBalance] = useState(0);
 
   // Function to fetch current user
   const fetchUser = async () => {
@@ -49,6 +50,30 @@ export const AuthProvider = ({ children }) => {
       localStorage.removeItem('user');
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Function to fetch wallet balance
+  const fetchWalletBalance = async () => {
+    try {
+      const storedUser = localStorage.getItem('user');
+      if (!storedUser) return;
+
+      const userData = JSON.parse(storedUser);
+      if (!userData.token) return;
+
+      const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      const response = await axios.get(`${backendUrl}/api/wallet/balance`, {
+        headers: {
+          'Authorization': `Bearer ${userData.token}`,
+        },
+      });
+
+      if (response.data && typeof response.data.balance === 'number') {
+        setWalletBalance(response.data.balance);
+      }
+    } catch (error) {
+      console.error('Failed to fetch wallet balance:', error);
     }
   };
 
@@ -164,8 +189,17 @@ export const AuthProvider = ({ children }) => {
     fetchUser();
   }, []);
 
+  // Fetch wallet balance when user logs in
+  useEffect(() => {
+    if (user) {
+      fetchWalletBalance();
+    } else {
+      setWalletBalance(0);
+    }
+  }, [user]);
+
   return (
-    <AuthContext.Provider value={{ user, setUser, login, logout, signup, loading, googleLogin, clearUser, updateProfile }}>
+    <AuthContext.Provider value={{ user, setUser, login, logout, signup, loading, googleLogin, clearUser, updateProfile, walletBalance, fetchWalletBalance }}>
       {children}
     </AuthContext.Provider>
   );
