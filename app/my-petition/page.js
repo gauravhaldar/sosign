@@ -872,7 +872,7 @@ const MyPetitionsPage = () => {
                                         />
                                         {editFormData.constituencySettings.allowedConstituency && (
                                           <p className="text-blue-600 text-xs mt-2">
-                                            Only users with constituency number "{editFormData.constituencySettings.allowedConstituency}" can sign this petition.
+                                            Only users with constituency number &ldquo;{editFormData.constituencySettings.allowedConstituency}&rdquo; can sign this petition.
                                           </p>
                                         )}
                                       </div>
