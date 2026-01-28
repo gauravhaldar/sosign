@@ -5,7 +5,7 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { FaCalendarAlt, FaChevronLeft, FaChevronRight, FaSpinner, FaCopy, FaPen, FaFacebookF, FaInstagram, FaLinkedinIn, FaYoutube, FaPlay, FaUser } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
-import { PenTool, User } from "lucide-react";
+import { PenTool, User, BadgeCheck } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import ProfileEditModal from "./ProfileEditModal";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
@@ -373,8 +373,13 @@ export default function Content({ initialPetitions = [], initialPagination = {} 
                           </div>
 
                           {/* Title */}
-                          <h3 className="text-2xl font-bold text-[#002050] mb-4 leading-tight hover:text-[#F43676] transition-colors">
+                          <h3 className="text-2xl font-bold text-[#002050] mb-4 leading-tight hover:text-[#F43676] transition-colors flex items-center gap-2">
                             {petition.title}
+                            {petition.constituencySettings?.required && (
+                              <span title="Constituency verification required to sign" className="flex-shrink-0">
+                                <BadgeCheck className="w-5 h-5 text-blue-500" />
+                              </span>
+                            )}
                           </h3>
 
                           {/* Description */}

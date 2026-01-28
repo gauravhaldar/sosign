@@ -56,6 +56,10 @@ const MyPetitionsPage = () => {
     problem: "",
     solution: "",
     videoUrl: "",
+    constituencySettings: {
+      required: false,
+      allowedConstituency: "",
+    },
   });
 
   const { user, loading: authLoading } = useAuth();
@@ -303,6 +307,10 @@ const MyPetitionsPage = () => {
       problem: petition.petitionDetails?.problem || "",
       solution: petition.petitionDetails?.solution || "",
       videoUrl: petition.petitionDetails?.videoUrl || "",
+      constituencySettings: {
+        required: petition.constituencySettings?.required || false,
+        allowedConstituency: petition.constituencySettings?.allowedConstituency || "",
+      },
     });
     setShowEditModal(petition._id);
   };
@@ -347,6 +355,10 @@ const MyPetitionsPage = () => {
             solution: editFormData.solution,
             videoUrl: editFormData.videoUrl,
           },
+          constituencySettings: {
+            required: editFormData.constituencySettings.required,
+            allowedConstituency: editFormData.constituencySettings.allowedConstituency?.trim() || undefined,
+          },
         }),
       });
 
@@ -366,7 +378,11 @@ const MyPetitionsPage = () => {
                 problem: editFormData.problem,
                 solution: editFormData.solution,
                 videoUrl: editFormData.videoUrl,
-              }
+              },
+              constituencySettings: {
+                required: editFormData.constituencySettings.required,
+                allowedConstituency: editFormData.constituencySettings.allowedConstituency?.trim() || undefined,
+              },
             }
             : p
         ));
@@ -795,6 +811,72 @@ const MyPetitionsPage = () => {
                                       className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3650AD] focus:border-transparent outline-none"
                                       placeholder="https://youtube.com/..."
                                     />
+                                  </div>
+
+                                  {/* Signing Requirements */}
+                                  <div className="mt-4 p-4 bg-gray-50 rounded-xl border border-gray-200">
+                                    <label className="block text-sm font-medium text-gray-700 mb-3">
+                                      Signing Requirements
+                                    </label>
+                                    <p className="text-xs text-gray-500 mb-3">
+                                      You can require signers to provide their constituency number. This helps ensure local relevance for constituency-specific issues.
+                                    </p>
+
+                                    {/* Toggle for constituency requirement */}
+                                    <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200 mb-3">
+                                      <div>
+                                        <p className="text-sm font-medium text-gray-700">Require Constituency Number to Sign</p>
+                                        <p className="text-xs text-gray-500">Signers must enter their constituency number</p>
+                                      </div>
+                                      <button
+                                        type="button"
+                                        onClick={() => setEditFormData({
+                                          ...editFormData,
+                                          constituencySettings: {
+                                            ...editFormData.constituencySettings,
+                                            required: !editFormData.constituencySettings.required
+                                          }
+                                        })}
+                                        className={`relative w-12 h-6 rounded-full transition-colors duration-200 ${editFormData.constituencySettings.required ? 'bg-[#3650AD]' : 'bg-gray-300'
+                                          }`}
+                                      >
+                                        <span
+                                          className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow transition-transform duration-200 ${editFormData.constituencySettings.required ? 'translate-x-6' : 'translate-x-0'
+                                            }`}
+                                        />
+                                      </button>
+                                    </div>
+
+                                    {/* Allowed Constituency Input */}
+                                    {editFormData.constituencySettings.required && (
+                                      <div className="p-3 bg-white rounded-lg border border-gray-200">
+                                        <label className="block text-xs font-medium text-gray-700 mb-1">
+                                          Restrict to Specific Constituency (Optional)
+                                        </label>
+                                        <p className="text-xs text-gray-500 mb-2">
+                                          Leave blank to allow any constituency, or enter a specific number to restrict signing.
+                                        </p>
+                                        <input
+                                          type="text"
+                                          value={editFormData.constituencySettings.allowedConstituency}
+                                          onChange={(e) => setEditFormData({
+                                            ...editFormData,
+                                            constituencySettings: {
+                                              ...editFormData.constituencySettings,
+                                              allowedConstituency: e.target.value
+                                            }
+                                          })}
+                                          placeholder="e.g., 123 or leave empty"
+                                          className="w-full p-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3650AD] focus:border-transparent outline-none"
+                                          maxLength={10}
+                                        />
+                                        {editFormData.constituencySettings.allowedConstituency && (
+                                          <p className="text-blue-600 text-xs mt-2">
+                                            Only users with constituency number "{editFormData.constituencySettings.allowedConstituency}" can sign this petition.
+                                          </p>
+                                        )}
+                                      </div>
+                                    )}
                                   </div>
 
                                   {/* Action Buttons */}
