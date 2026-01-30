@@ -375,8 +375,8 @@ export default function Content({ initialPetitions = [], initialPagination = {} 
                           {/* Title */}
                           <h3 className="text-2xl font-bold text-[#002050] mb-4 leading-tight hover:text-[#F43676] transition-colors flex items-center gap-2">
                             {petition.title}
-                            {petition.constituencySettings?.required && (
-                              <span title="Constituency verification required to sign" className="flex-shrink-0">
+                            {(petition.constituencySettings?.required || petition.signingRequirements?.constituency?.required || petition.signingRequirements?.aadhar?.required) && (
+                              <span title="Verification required to sign" className="flex-shrink-0">
                                 <BadgeCheck className="w-5 h-5 text-blue-500" />
                               </span>
                             )}

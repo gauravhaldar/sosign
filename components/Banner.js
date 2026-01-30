@@ -154,7 +154,7 @@ export default function Banner({ initialPetitions = [] }) {
             date: formatDate(petition.createdAt),
             comments: `${petition.numberOfSignatures || 0} Signatures`,
             link: `/currentpetitions/${petition.slug || petition._id}`,
-            constituencyRequired: petition.constituencySettings?.required || false,
+            verificationRequired: petition.constituencySettings?.required || petition.signingRequirements?.constituency?.required || petition.signingRequirements?.aadhar?.required || false,
           }));
 
           setHeroSlides(slides);
@@ -381,8 +381,8 @@ export default function Banner({ initialPetitions = [] }) {
                   {/* Title */}
                   <h1 className="text-lg sm:text-xl lg:text-2xl xl:text-3xl font-bold text-[#002050] mb-3 sm:mb-4 leading-tight line-clamp-2 flex items-center gap-2">
                     {heroSlides[currentSlide]?.title}
-                    {heroSlides[currentSlide]?.constituencyRequired && (
-                      <span title="Constituency verification required to sign" className="flex-shrink-0">
+                    {heroSlides[currentSlide]?.verificationRequired && (
+                      <span title="Verification required to sign" className="flex-shrink-0">
                         <BadgeCheck className="w-5 h-5 sm:w-6 sm:h-6 text-blue-500" />
                       </span>
                     )}

@@ -43,6 +43,7 @@ export default function PetitionDetailClient({ initialPetition }) {
     const [signSuccess, setSignSuccess] = useState(false);
     const [referralCode, setReferralCode] = useState("");
     const [constituencyNumber, setConstituencyNumber] = useState("");
+    const [aadharNumber, setAadharNumber] = useState("");
 
     // CAPTCHA state
     const [captchaVerified, setCaptchaVerified] = useState(false);
@@ -356,6 +357,7 @@ export default function PetitionDetailClient({ initialPetition }) {
                 body: JSON.stringify({
                     referralCode: referralCode?.trim() || undefined,
                     constituencyNumber: constituencyNumber?.trim() || undefined,
+                    aadharNumber: aadharNumber?.trim() || undefined,
                 }),
             });
 
@@ -591,6 +593,58 @@ export default function PetitionDetailClient({ initialPetition }) {
                                             </p>
                                         </div>
                                     )}
+                                    
+                                    {/* Signing Requirements - Constituency or Aadhar (new structure) */}
+                                    {petition.signingRequirements?.constituency?.required && (
+                                        <div className="bg-orange-50 p-4 rounded-lg border border-orange-200">
+                                            <label className="block text-left text-sm font-medium text-gray-700 mb-1">
+                                                Constituency Number <span className="text-red-500">*</span>
+                                                {petition.signingRequirements.constituency.allowedConstituency && (
+                                                    <span className="text-orange-600 ml-2">
+                                                        (Must be: {petition.signingRequirements.constituency.allowedConstituency})
+                                                    </span>
+                                                )}
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={constituencyNumber}
+                                                onChange={(e) => setConstituencyNumber(e.target.value)}
+                                                placeholder={petition.signingRequirements.constituency.allowedConstituency
+                                                    ? `Enter: ${petition.signingRequirements.constituency.allowedConstituency}`
+                                                    : "Enter your constituency number"
+                                                }
+                                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                maxLength={10}
+                                            />
+                                            <p className="text-xs text-gray-500 mt-1">
+                                                This petition requires your constituency number to sign.
+                                            </p>
+                                        </div>
+                                    )}
+
+                                    {/* Aadhar Number (if required) */}
+                                    {petition.signingRequirements?.aadhar?.required && (
+                                        <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                                            <label className="block text-left text-sm font-medium text-gray-700 mb-1">
+                                                Aadhar Number <span className="text-red-500">*</span>
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={aadharNumber}
+                                                onChange={(e) => {
+                                                    // Allow only numbers and spaces
+                                                    const value = e.target.value.replace(/[^\d\s]/g, '');
+                                                    setAadharNumber(value);
+                                                }}
+                                                placeholder="Enter your 12-digit Aadhar number"
+                                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                maxLength={16}
+                                            />
+                                            <p className="text-xs text-gray-500 mt-1">
+                                                This petition requires your Aadhar number to sign. (12 digits)
+                                            </p>
+                                        </div>
+                                    )}
                                     {/* CAPTCHA Section */}
                                     <Captcha
                                         onVerify={(verified) => setCaptchaVerified(verified)}
@@ -598,7 +652,11 @@ export default function PetitionDetailClient({ initialPetition }) {
                                     />
                                     <button
                                         onClick={handleSignPetition}
-                                        disabled={signing || !signatureStatus.canSign || !captchaVerified || (petition.constituencySettings?.required && !constituencyNumber.trim())}
+                                        disabled={signing || !signatureStatus.canSign || !captchaVerified || 
+                                            (petition.constituencySettings?.required && !constituencyNumber.trim()) ||
+                                            (petition.signingRequirements?.constituency?.required && !constituencyNumber.trim()) ||
+                                            (petition.signingRequirements?.aadhar?.required && !aadharNumber.trim())
+                                        }
                                         className="bg-[#3650AD] text-white w-full py-3 rounded-lg font-semibold hover:bg-blue-700 transition duration-300 transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                         {signing ? "Signing..." : "Sign Petition"}

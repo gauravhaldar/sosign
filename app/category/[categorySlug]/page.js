@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { FaChevronRight, FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn, FaYoutube, FaPinterestP, FaSearch, FaCalendarAlt, FaPlay, FaPen, FaSpinner } from "react-icons/fa";
+import { BadgeCheck } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import Footer from "@/components/Footer";
 import ProfileEditModal from "@/components/ProfileEditModal";
@@ -296,12 +297,9 @@ export default function CategoryPage() {
                                                                 {/* Title */}
                                                                 <h3 className="text-xl font-bold text-[#1a1a2e] mb-3 leading-tight hover:text-[#F43676] transition-colors flex items-center gap-2">
                                                                     {petition.title}
-                                                                    {petition.constituencySettings?.required && (
-                                                                        <span title="Constituency verification required to sign" className="flex-shrink-0">
-                                                                            <svg className="w-5 h-5 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                                                <path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z" />
-                                                                                <path d="m9 12 2 2 4-4" />
-                                                                            </svg>
+                                                                    {(petition.constituencySettings?.required || petition.signingRequirements?.constituency?.required || petition.signingRequirements?.aadhar?.required) && (
+                                                                        <span title="Verification required to sign" className="flex-shrink-0">
+                                                                            <BadgeCheck className="w-5 h-5 text-blue-500" />
                                                                         </span>
                                                                     )}
                                                                 </h3>
