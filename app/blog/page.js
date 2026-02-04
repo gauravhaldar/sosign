@@ -343,13 +343,13 @@ export default function BlogPage() {
                   <p className="text-white/80 leading-relaxed mb-4">
                     Welcome to the Sosign Blog! Here we share inspiring stories, updates on successful petitions, and tips on how you can make a difference in your community.
                   </p>
-                  <Link
+                  {/* <Link
                     href="/start-petition"
                     className="inline-flex items-center gap-2 bg-[#F43676] text-white px-5 py-2.5 rounded-full font-medium hover:bg-[#e02a60] transition-colors"
                   >
                     <span>Start a Petition</span>
                     <FaArrowRight className="text-sm" />
-                  </Link>
+                  </Link> */}
                 </div>
               </div>
 

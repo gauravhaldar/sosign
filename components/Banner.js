@@ -380,7 +380,12 @@ export default function Banner({ initialPetitions = [] }) {
 
                   {/* Title */}
                   <h1 className="text-lg sm:text-xl lg:text-2xl xl:text-3xl font-bold text-[#002050] mb-3 sm:mb-4 leading-tight line-clamp-2 flex items-center gap-2">
-                    {heroSlides[currentSlide]?.title}
+                    <Link
+                      href={heroSlides[currentSlide]?.link || "/currentpetitions"}
+                      className="hover:text-[#F43676] transition-colors"
+                    >
+                      {heroSlides[currentSlide]?.title}
+                    </Link>
                     {heroSlides[currentSlide]?.verificationRequired && (
                       <span title="Verification required to sign" className="flex-shrink-0">
                         <BadgeCheck className="w-5 h-5 sm:w-6 sm:h-6 text-blue-500" />

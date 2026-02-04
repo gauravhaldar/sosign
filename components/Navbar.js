@@ -143,7 +143,7 @@ export default function Navbar() {
           </div>
 
           {/* Right side: Navigation + Actions */}
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-2 sm:gap-4 lg:gap-6">
             {/* Navigation Links - Hidden on mobile */}
             <div className="hidden lg:flex items-center gap-8">
               <Link
@@ -425,11 +425,11 @@ export default function Navbar() {
               </AnimatePresence>
             </div>
 
-            {/* Wallet Button - Only shown when logged in */}
+            {/* Wallet Button - Hidden on mobile, shown on lg+ (it's in the hamburger for mobile) */}
             {user && (
               <Link
                 href="/wallet"
-                className="relative flex items-center gap-1.5 bg-gradient-to-r from-[#F43676] to-[#e02a60] text-white px-3 py-2 rounded-full font-medium text-sm hover:shadow-lg hover:shadow-pink-300/30 transition-all duration-200"
+                className="hidden lg:flex relative items-center gap-1.5 bg-gradient-to-r from-[#F43676] to-[#e02a60] text-white px-3 py-2 rounded-full font-medium text-sm hover:shadow-lg hover:shadow-pink-300/30 transition-all duration-200"
               >
                 <FaWallet className="text-sm" />
                 <span className="hidden sm:inline">₹{walletBalance.toFixed(2)}</span>

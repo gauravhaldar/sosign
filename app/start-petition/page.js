@@ -362,6 +362,11 @@ export default function StartPetitionPage() {
       return;
     }
 
+    if (newCategoryName.trim().length > 15) {
+      setCategoryError("Category name can be up to 15 characters only");
+      return;
+    }
+
     setCreatingCategory(true);
     setCategoryError("");
 
@@ -917,9 +922,9 @@ export default function StartPetitionPage() {
                   </div>
                   <button
                     type="button"
-                    onClick={() => setSigningRequirements(prev => ({ 
-                      ...prev, 
-                      constituency: { ...prev.constituency, required: !prev.constituency.required } 
+                    onClick={() => setSigningRequirements(prev => ({
+                      ...prev,
+                      constituency: { ...prev.constituency, required: !prev.constituency.required }
                     }))}
                     className={`relative w-14 h-7 rounded-full transition-colors duration-200 ${signingRequirements.constituency.required ? 'bg-[#2D3A8C]' : 'bg-gray-300'
                       }`}
@@ -980,9 +985,9 @@ export default function StartPetitionPage() {
                   </div>
                   <button
                     type="button"
-                    onClick={() => setSigningRequirements(prev => ({ 
-                      ...prev, 
-                      aadhar: { ...prev.aadhar, required: !prev.aadhar.required } 
+                    onClick={() => setSigningRequirements(prev => ({
+                      ...prev,
+                      aadhar: { ...prev.aadhar, required: !prev.aadhar.required }
                     }))}
                     className={`relative w-14 h-7 rounded-full transition-colors duration-200 ${signingRequirements.aadhar.required ? 'bg-[#2D3A8C]' : 'bg-gray-300'
                       }`}
@@ -1024,7 +1029,7 @@ export default function StartPetitionPage() {
                       </div>
 
                       <p className="text-gray-500 text-sm mb-4">
-                        Create a custom category for your petition. This will be visible to all users.
+                        Create a custom category for your petition. This will be visible to all users. (Max 15 characters)
                       </p>
 
                       <input
@@ -1036,7 +1041,7 @@ export default function StartPetitionPage() {
                         }}
                         placeholder="Enter category name..."
                         className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-[#F43676] focus:outline-none transition-all duration-200"
-                        maxLength={50}
+                        maxLength={15}
                       />
 
                       {categoryError && (
@@ -1421,7 +1426,7 @@ export default function StartPetitionPage() {
                 </div>
                 <p className="text-xs text-gray-500 flex items-center gap-1">
                   <FaCircleInfo className="text-blue-400" />
-                  Add a powerful image that represents your cause (JPG, PNG, or GIF, max 5MB)
+                  Add a powerful image that represents your cause (JPG, PNG, or GIF, max 2MB, Dimensions: 855x350px)
                 </p>
               </div>
 

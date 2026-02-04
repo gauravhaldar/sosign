@@ -29,7 +29,8 @@ import {
     Mail,
     Calendar,
     RefreshCw,
-    ImageIcon
+    ImageIcon,
+    MapPin
 } from "lucide-react";
 
 export default function PetitionDetailClient({ initialPetition }) {
@@ -593,7 +594,7 @@ export default function PetitionDetailClient({ initialPetition }) {
                                             </p>
                                         </div>
                                     )}
-                                    
+
                                     {/* Signing Requirements - Constituency or Aadhar (new structure) */}
                                     {petition.signingRequirements?.constituency?.required && (
                                         <div className="bg-orange-50 p-4 rounded-lg border border-orange-200">
@@ -652,7 +653,7 @@ export default function PetitionDetailClient({ initialPetition }) {
                                     />
                                     <button
                                         onClick={handleSignPetition}
-                                        disabled={signing || !signatureStatus.canSign || !captchaVerified || 
+                                        disabled={signing || !signatureStatus.canSign || !captchaVerified ||
                                             (petition.constituencySettings?.required && !constituencyNumber.trim()) ||
                                             (petition.signingRequirements?.constituency?.required && !constituencyNumber.trim()) ||
                                             (petition.signingRequirements?.aadhar?.required && !aadharNumber.trim())
@@ -722,6 +723,43 @@ export default function PetitionDetailClient({ initialPetition }) {
                             <p className="text-gray-600 leading-relaxed">{petition.country}</p>
                         </div>
                     )}
+
+                    {/* Constituency Details */}
+                    {(petition.constituencySettings?.allowedConstituency ||
+                        petition.signingRequirements?.constituency?.allowedConstituency ||
+                        petition.petitionStarter?.mpConstituencyNumber ||
+                        petition.petitionStarter?.mlaConstituencyNumber) && (
+                            <div className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow duration-300">
+                                <div className="flex items-center gap-3 mb-3">
+                                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-500/10 to-indigo-500/20 flex items-center justify-center">
+                                        <MapPin className="w-5 h-5 text-indigo-500" />
+                                    </div>
+                                    <p className="font-bold text-[#1a1a2e]">Constituency Details</p>
+                                </div>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    {(petition.constituencySettings?.allowedConstituency || petition.signingRequirements?.constituency?.allowedConstituency) && (
+                                        <div>
+                                            <p className="text-sm font-medium text-gray-500">Target Constituency</p>
+                                            <p className="text-gray-900 font-bold">
+                                                {petition.constituencySettings?.allowedConstituency || petition.signingRequirements?.constituency?.allowedConstituency}
+                                            </p>
+                                        </div>
+                                    )}
+                                    {petition.petitionStarter?.mpConstituencyNumber && (
+                                        <div>
+                                            <p className="text-sm font-medium text-gray-500">Starter MP Constituency</p>
+                                            <p className="text-gray-900 font-semibold">{petition.petitionStarter.mpConstituencyNumber}</p>
+                                        </div>
+                                    )}
+                                    {petition.petitionStarter?.mlaConstituencyNumber && (
+                                        <div>
+                                            <p className="text-sm font-medium text-gray-500">Starter MLA Constituency</p>
+                                            <p className="text-gray-900 font-semibold">{petition.petitionStarter.mlaConstituencyNumber}</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
 
                     {/* Petition Starter */}
                     <div className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow duration-300">

@@ -390,7 +390,7 @@ export default function BlogDetailPage() {
                 </div>
 
                 {/* CTA */}
-                <div className="bg-gradient-to-br from-[#F43676] to-[#e02a60] rounded-3xl p-6 shadow-lg text-white relative overflow-hidden">
+                {/* <div className="bg-gradient-to-br from-[#F43676] to-[#e02a60] rounded-3xl p-6 shadow-lg text-white relative overflow-hidden">
                   <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -translate-y-12 translate-x-12"></div>
                   <div className="relative z-10">
                     <h3 className="text-xl font-bold mb-2">Have a Story?</h3>
@@ -404,7 +404,7 @@ export default function BlogDetailPage() {
                       Start a Petition
                     </Link>
                   </div>
-                </div>
+                </div> */}
               </div>
             </div>
           </div>
