@@ -432,8 +432,8 @@ export default function Navbar() {
                 className="hidden lg:flex relative items-center gap-1.5 bg-gradient-to-r from-[#F43676] to-[#e02a60] text-white px-3 py-2 rounded-full font-medium text-sm hover:shadow-lg hover:shadow-pink-300/30 transition-all duration-200"
               >
                 <FaWallet className="text-sm" />
-                <span className="hidden sm:inline">₹{walletBalance.toFixed(2)}</span>
-                <span className="sm:hidden">₹{walletBalance.toFixed(0)}</span>
+                <span className="hidden sm:inline">{walletBalance.toFixed(1)} Pts</span>
+                <span className="sm:hidden">{walletBalance.toFixed(0)} Pts</span>
               </Link>
             )}
 
@@ -581,7 +581,7 @@ export default function Navbar() {
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     <FaWallet className="text-sm" />
-                    Wallet (₹{walletBalance.toFixed(2)})
+                    Wallet ({walletBalance.toFixed(1)} Pts)
                   </Link>
                 )}
 

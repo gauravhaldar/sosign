@@ -452,6 +452,35 @@ export default function StartPetitionPage() {
     }
   }, [formData, recipients, selectedCategories, step, user, draftLoaded]);
 
+  // Autofill starter info from user profile if fields are empty
+  useEffect(() => {
+    if (user && draftLoaded) {
+      setFormData((prev) => {
+        const updatedStarter = { ...prev.starter };
+        let changed = false;
+
+        // Only fill if empty to allow users to edit/override
+        if (!updatedStarter.name && user.name) {
+          updatedStarter.name = user.name;
+          changed = true;
+        }
+        if (!updatedStarter.email && user.email) {
+          updatedStarter.email = user.email;
+          changed = true;
+        }
+        if (!updatedStarter.mobile && user.mobileNumber) {
+          updatedStarter.mobile = user.mobileNumber;
+          changed = true;
+        }
+
+        if (changed) {
+          return { ...prev, starter: updatedStarter };
+        }
+        return prev;
+      });
+    }
+  }, [user, draftLoaded]);
+
   // Function to clear draft
   const clearDraft = () => {
     try {

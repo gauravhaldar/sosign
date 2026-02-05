@@ -67,8 +67,15 @@ export default function WalletPage() {
 
     const handleAddMoney = async (e) => {
         e.preventDefault();
-        if (!addAmount || parseFloat(addAmount) <= 0) {
+        const amt = parseFloat(addAmount);
+        if (!addAmount || amt <= 0) {
             setMessage({ type: "error", text: "Please enter a valid amount" });
+            return;
+        }
+
+        // Custom amount validation (minimum ₹99,000 if not a preset)
+        if (!quickAmounts.includes(amt) && amt < 99000) {
+            setMessage({ type: "error", text: "Minimum custom amount is ₹99,000" });
             return;
         }
 
@@ -122,7 +129,7 @@ export default function WalletPage() {
         });
     };
 
-    const quickAmounts = [100, 500, 1000, 2000];
+    const quickAmounts = [999, 49000];
 
     if (!user) {
         return null;
@@ -137,8 +144,8 @@ export default function WalletPage() {
                     animate={{ opacity: 1, y: 0 }}
                     className="text-center mb-8"
                 >
-                    <h1 className="text-3xl font-bold text-[#302d55] mb-2">My Wallet</h1>
-                    <p className="text-gray-500">Manage your wallet balance</p>
+                    <h1 className="text-3xl font-bold text-[#302d55] mb-2">My Points Wallet</h1>
+                    <p className="text-gray-500">Manage your wallet balance in points (₹5 = 1 Point)</p>
                 </motion.div>
 
                 {/* Balance Card */}
@@ -155,7 +162,7 @@ export default function WalletPage() {
                         <div>
                             <p className="text-white/80 text-sm">Available Balance</p>
                             <h2 className="text-4xl font-bold text-white">
-                                ₹{walletBalance.toFixed(2)}
+                                {walletBalance.toFixed(1)} <span className="text-2xl font-normal opacity-80">Points</span>
                             </h2>
                         </div>
                     </div>
@@ -164,7 +171,7 @@ export default function WalletPage() {
                         className="w-full bg-white text-[#F43676] font-semibold py-3 rounded-xl flex items-center justify-center gap-2 hover:bg-gray-100 transition-colors"
                     >
                         <FaPlus className="text-sm" />
-                        Add Money
+                        Purchase Points
                     </button>
                 </motion.div>
 
@@ -177,14 +184,14 @@ export default function WalletPage() {
                         className="bg-white rounded-2xl p-6 mb-8 shadow-lg border border-gray-100"
                     >
                         <h3 className="text-lg font-semibold text-[#302d55] mb-4">
-                            Add Money to Wallet
+                            Purchase Points
                         </h3>
 
                         {message.text && (
                             <div
                                 className={`p-3 rounded-lg mb-4 ${message.type === "success"
-                                        ? "bg-green-100 text-green-700"
-                                        : "bg-red-100 text-red-700"
+                                    ? "bg-green-100 text-green-700"
+                                    : "bg-red-100 text-red-700"
                                     }`}
                             >
                                 {message.text}
@@ -198,11 +205,11 @@ export default function WalletPage() {
                                     key={amount}
                                     onClick={() => setAddAmount(amount.toString())}
                                     className={`px-4 py-2 rounded-lg border-2 font-medium transition-all ${addAmount === amount.toString()
-                                            ? "border-[#F43676] bg-pink-50 text-[#F43676]"
-                                            : "border-gray-200 hover:border-[#F43676] text-gray-600"
+                                        ? "border-[#F43676] bg-pink-50 text-[#F43676]"
+                                        : "border-gray-200 hover:border-[#F43676] text-gray-600"
                                         }`}
                                 >
-                                    ₹{amount}
+                                    ₹{amount.toLocaleString()}
                                 </button>
                             ))}
                         </div>
@@ -216,7 +223,7 @@ export default function WalletPage() {
                                     type="number"
                                     value={addAmount}
                                     onChange={(e) => setAddAmount(e.target.value)}
-                                    placeholder="Enter amount"
+                                    placeholder="Min ₹99,000 for custom entry"
                                     min="1"
                                     step="0.01"
                                     className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#F43676] focus:outline-none text-lg"
@@ -232,16 +239,16 @@ export default function WalletPage() {
                                 </button>
                                 <button
                                     type="submit"
-                                    disabled={isAdding}
+                                    disabled={isAdding || (!!addAmount && !quickAmounts.includes(parseFloat(addAmount)) && parseFloat(addAmount) < 99000)}
                                     className="flex-1 py-3 rounded-xl bg-gradient-to-r from-[#F43676] to-[#e02a60] text-white font-medium hover:shadow-lg hover:shadow-pink-300/30 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
                                 >
                                     {isAdding ? (
                                         <>
                                             <FaSpinner className="animate-spin" />
-                                            Adding...
+                                            Processing...
                                         </>
                                     ) : (
-                                        "Add Money"
+                                        "Confirm Purchase"
                                     )}
                                 </button>
                             </div>
@@ -289,8 +296,8 @@ export default function WalletPage() {
                                 >
                                     <div
                                         className={`w-10 h-10 rounded-full flex items-center justify-center ${transaction.type === "credit"
-                                                ? "bg-green-100"
-                                                : "bg-red-100"
+                                            ? "bg-green-100"
+                                            : "bg-red-100"
                                             }`}
                                     >
                                         {transaction.type === "credit" ? (
@@ -309,12 +316,11 @@ export default function WalletPage() {
                                     </div>
                                     <p
                                         className={`font-semibold ${transaction.type === "credit"
-                                                ? "text-green-600"
-                                                : "text-red-600"
+                                            ? "text-green-600"
+                                            : "text-red-600"
                                             }`}
                                     >
-                                        {transaction.type === "credit" ? "+" : "-"}₹
-                                        {transaction.amount.toFixed(2)}
+                                        {transaction.type === "credit" ? "+" : "-"}{transaction.amount.toFixed(1)} Pts
                                     </p>
                                 </motion.div>
                             ))}
